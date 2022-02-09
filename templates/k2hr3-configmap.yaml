@@ -1,0 +1,70 @@
+{{-
+/*
+*
+* K2HR3 Helm Chart
+*
+* Copyright 2022 Yahoo! Japan Corporation.
+*
+* K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
+* common management information for the cloud.
+* K2HR3 can dynamically manage information as "who", "what", "operate".
+* These are stored as roles, resources, policies in K2hdkc, and the
+* client system can dynamically read and modify these information.
+*
+* For the full copyright and license information, please view
+* the license file that was distributed with this source code.
+*
+* AUTHOR:   Takeshi Nakatani
+* CREATE:   Wed Jan 19 2022
+* REVISION:
+*
+*/ -}}
+
+{{-
+/*
+*---------------------------------------------------------
+* [NOTE]
+* %%K2HR3_API(APP)_EXTERNAL(INTERNAL)_PORT%% are not converted here.
+* Please note that in each pod, these NodePort is obtained from the
+* environment variable and set to json.
+*
+*/ -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+data:
+  {{- $files := .Files -}}
+  {{- $k8sNamespace := include "k2hr3.k8sNamespace" . -}}
+  {{- $clusterName := include "k2hr3.clusterName" . -}}
+  {{- $apiIntHostname := include "k2hr3.r3apiIntHostname" . -}}
+  {{- $apiExtHostname := include "k2hr3.r3apiExtHostname" . -}}
+  {{- $appExtHostname := include "k2hr3.r3appExtHostname" . -}}
+  {{- $k8sApiUrl := .Values.k8s.apiUrl -}}
+  {{- $caCert := .Values.k8s.caCert -}}
+  {{- $saToken := .Values.k8s.saToken -}}
+  {{- $clientId := .Values.oidc.clientId -}}
+  {{- $clientSecret := .Values.oidc.clientSecret -}}
+  {{- $cookieExpire := printf "%d" .Values.oidc.cookieExpire -}}
+  {{- $cookieName := .Values.oidc.cookieName -}}
+  {{- $issuerUrl := .Values.oidc.issuerUrl -}}
+  {{- $usernameKey := .Values.oidc.usernameKey -}}
+  {{- range .Values.unconvertedFiles.k2hr3 }}
+  {{ .key }}: |-
+{{- $files.Get .path | nindent 4 }}
+  {{- end }}
+  {{- range .Values.convertedFiles.k2hr3 }}
+  {{ .key }}: |-
+{{- $files.Get .path | replace "%%K2HR3_TENANT_NAME%%" $k8sNamespace | replace "%%K2HDKC_DBAAS_CLUSTER_NAME%%" $clusterName | replace "%%K2HR3_API_INTERNAL_HOST%%" $apiIntHostname | replace "%%K2HR3_API_EXTERNAL_HOST%%" $apiExtHostname | replace "%%K2HR3_APP_EXTERNAL_HOST%%" $appExtHostname | replace "%%K8S_API_URL%%" $k8sApiUrl | replace "%%K8S_CA_CERT%%" $caCert | replace "%%K8S_SA_TOKEN%%" $saToken | replace "%%OIDC_CLIENT_ID%%" $clientId | replace "%%OIDC_CLIENT_SECRET%%" $clientSecret | replace "%%OIDC_COOKIE_EXPIRE%%" $cookieExpire | replace "%%OIDC_COOKIENAME%%" $cookieName | replace "%%OIDC_ISSUER_URL%%" $issuerUrl | replace "%%OIDC_USERNAME_KEY%%" $usernameKey | nindent 4 }}
+  {{- end }}
+
+{{-
+/*
+* Local variables:
+* tab-width: 4
+* c-basic-offset: 4
+* End:
+* vim600: noexpandtab sw=4 ts=4 fdm=marker
+* vim<600: noexpandtab sw=4 ts=4
+*/ -}}

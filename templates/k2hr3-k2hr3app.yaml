@@ -1,0 +1,125 @@
+{{-
+/*
+*
+* K2HR3 Helm Chart
+*
+* Copyright 2022 Yahoo! Japan Corporation.
+*
+* K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
+* common management information for the cloud.
+* K2HR3 can dynamically manage information as "who", "what", "operate".
+* These are stored as roles, resources, policies in K2hdkc, and the
+* client system can dynamically read and modify these information.
+*
+* For the full copyright and license information, please view
+* the license file that was distributed with this source code.
+*
+* AUTHOR:   Takeshi Nakatani
+* CREATE:   Wed Jan 19 2022
+* REVISION:
+*
+*/ -}}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-{{ include "k2hr3.r3appBaseName" . }}
+spec:
+  replicas: {{ .Values.k2hr3.app.count }}
+  selector:
+    matchLabels:
+      app: {{ include "k2hr3.r3appBaseName" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "k2hr3.r3appBaseName" . }}
+    spec:
+      volumes:
+        - name: antpickax-etc-volume
+          emptyDir:
+            medium: Memory
+        - name: antpickax-var-run-volume
+          emptyDir:
+            medium: Memory
+        - name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+          configMap:
+            name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+            items:
+              - key: k2hr3-app-init.sh
+                path: k2hr3-app-init.sh
+              - key: k2hr3-app-wrap.sh
+                path: k2hr3-app-wrap.sh
+              - key: k2hr3-setup-certificate.sh
+                path: k2hr3-setup-certificate.sh
+              - key: k2hr3-app-production.json
+                path: k2hr3-app-production.json
+        - name: secret-k2hr3-ca-{{ include "k2hr3.clusterName" . }}
+          secret:
+            secretName: secret-k2hr3-ca-{{ include "k2hr3.clusterName" . }}
+      shareProcessNamespace: true
+      initContainers:
+        - name: init-{{ include "k2hr3.r3appBaseName" . }}
+          image: alpine:3.13.5
+          command: ["/bin/sh"]
+          args: ["{{ .Values.mountPoint.configMap }}/k2hr3-app-init.sh"]
+          env:
+            - name: USING_SERVICE_NAME
+              value: "np-{{ include "k2hr3.r3appBaseName" . }}"
+            - name: ANTPICKAX_ETC_DIR
+              value: "{{ .Values.antpickax.configDir }}"
+            - name: CERT_PERIOD_DAYS
+              value: "{{ include "k2hr3.certPeriodDays" . }}"
+            - name: SEC_CA_MOUNTPOINT
+              value: "{{ .Values.mountPoint.ca }}"
+            - name: CERT_EXTERNAL_HOSTNAME
+              value: "{{ include "k2hr3.r3appExtHostname" . }}"
+          volumeMounts:
+            - mountPath: {{ .Values.antpickax.configDir }}
+              name: antpickax-etc-volume
+            - mountPath: {{ .Values.mountPoint.configMap }}
+              name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+              readOnly: true
+            - mountPath: {{ .Values.mountPoint.ca }}
+              name: secret-k2hr3-ca-{{ include "k2hr3.clusterName" . }}
+              readOnly: true
+      containers:
+        - name: container-{{ include "k2hr3.r3appBaseName" . }}
+          image: antpickax/k2hr3-app:latest
+          env:
+            - name: K2HR3_MANUAL_START
+              value: "{{ .Values.k2hr3.startManual }}"
+            - name: K2HR3API_SERVICE_NAME
+              value: "np-{{ include "k2hr3.r3apiBaseName" . }}"
+            - name: K2HR3API_EXTERNAL_HOST
+              value: "{{ include "k2hr3.r3apiExtHostname" . }}"
+            - name: K2HR3API_EXTERNAL_PORT
+              value: "{{ include "k2hr3.r3apiExtPort" . }}"
+            - name: K2HR3APP_SERVICE_NAME
+              value: "np-{{ include "k2hr3.r3appBaseName" . }}"
+            - name: K2HR3APP_EXTERNAL_HOST
+              value: "{{ include "k2hr3.r3appExtHostname" . }}"
+            - name: K2HR3APP_EXTERNAL_PORT
+              value: "{{ include "k2hr3.r3appExtPort" . }}"
+            - name: K2HR3APP_RUN_ON_MINIKUBE
+              value: "{{ .Values.minikube }}"
+          volumeMounts:
+            - mountPath: {{ .Values.antpickax.configDir }}
+              name: antpickax-etc-volume
+            - mountPath: /var/run/antpickax
+              name: antpickax-var-run-volume
+            - mountPath: {{ .Values.mountPoint.configMap }}
+              name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+              readOnly: true
+          command: ["/bin/sh"]
+          args: ["{{ .Values.mountPoint.configMap }}/k2hr3-app-wrap.sh"]
+
+{{-
+/*
+* Local variables:
+* tab-width: 4
+* c-basic-offset: 4
+* End:
+* vim600: noexpandtab sw=4 ts=4 fdm=marker
+* vim<600: noexpandtab sw=4 ts=4
+*/ -}}

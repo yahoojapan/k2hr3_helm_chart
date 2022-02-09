@@ -1,0 +1,43 @@
+-----------------------------------------------------------------
+                     CONGRATULATIONS!
+
+The {{ include "k2hr3.clusterName" . }} K2HR3 Cluster for K2HDKC DBaaS has been started.
+
+Follow the steps below to complete the K2HR3 Cluster setup.
+
+{{- if .Values.minikube }}
+
+[0] You are using minikube
+    You need to use a browser to access the K2HR3 Cluster running
+    inside minikube.
+    Therefore, enable socat to forward HTTPS requests as shown
+    below.(You can also use something other than socat.)
+
+    socat TCP-LISTEN:32443,fork TCP:$(minikube ip):32443
+    socat TCP-LISTEN:31443,fork TCP:$(minikube ip):31443
+
+{{- end }}
+
+[1] Check {{ include "k2hr3.clusterName" . }} K2HR3 Cluster
+    At first, check if you have access to the K2HR3 Cluster.
+    Please access the following URL after a while after starting.
+
+    K2HR3 API:
+      https://{{ include "k2hr3.r3apiExtHostname" . }}:{{ include "k2hr3.r3apiExtPort" . }}/
+
+    K2HR3 APP:
+      https://{{ include "k2hr3.r3appExtHostname" . }}:{{ include "k2hr3.r3appExtPort" . }}/
+
+    [NOTE]
+      Since a self-signed certificate is used, a certificate
+      exception will occur, so please access accordingly.
+
+[2] Get K2HR3 Unscoped Token
+    After completing the above checks, log in to your K2HR3 Cluster.
+
+    After logging in, select the [Account] -> [About Account]
+    menu to display the [Account Information] dialog.
+    Make a copy of the [Unscoped Token] in this displayed dialog.
+    Use this value when setting up K2HDKC DBaaS.
+
+Next, use Helm to launch K2HDKC DBaaS.

@@ -1,0 +1,81 @@
+{{-
+/*
+*
+* K2HR3 Helm Chart
+*
+* Copyright 2022 Yahoo! Japan Corporation.
+*
+* K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
+* common management information for the cloud.
+* K2HR3 can dynamically manage information as "who", "what", "operate".
+* These are stored as roles, resources, policies in K2hdkc, and the
+* client system can dynamically read and modify these information.
+*
+* For the full copyright and license information, please view
+* the license file that was distributed with this source code.
+*
+* AUTHOR:   Takeshi Nakatani
+* CREATE:   Wed Jan 19 2022
+* REVISION:
+*
+*/ -}}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-r3-check-{{ include "k2hr3.clusterName" . }}
+  annotations:
+    "helm.sh/hook": test-success
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  volumes:
+    - name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+      configMap:
+        name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+        items:
+          - key: k2hr3-check.sh
+            path: k2hr3-check.sh
+  containers:
+    - name: checker
+      image: alpine:3.13.5
+      env:
+      - name: K2HR3_NAMESPACE
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.namespace
+      - name: K2HR3_BASE_DOMAIN
+        value: "{{ include "k2hr3.k2hr3BaseDomain" . }}"
+      - name: K2HR3API_COUNT
+        value: "{{ .Values.k2hr3.api.count }}"
+      - name: K2HR3API_LOCAL_BASE_HOSTNAME
+        value: "pod-{{ include "k2hr3.r3apiBaseName" . }}-"
+      - name: K2HR3API_LOCAL_SVC_NAME
+        value: "svc-{{ include "k2hr3.r3apiBaseName" . }}"
+      - name: K2HR3API_LOCAL_PORT
+        value: "443"
+      - name: K2HR3API_NP_BASE_HOSTNAME
+        value: "np-{{ include "k2hr3.r3apiBaseName" . }}"
+      - name: K2HR3API_NP_PORT
+        value: "8443"
+      - name: K2HR3APP_NP_BASE_HOSTNAME
+        value: "np-{{ include "k2hr3.r3appBaseName" . }}"
+      - name: K2HR3APP_NP_PORT
+        value: "8443"
+      volumeMounts:
+        - mountPath: {{ .Values.mountPoint.configMap }}
+          name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+          readOnly: true
+      command: ["/bin/sh"]
+      args: ["{{ .Values.mountPoint.configMap }}/k2hr3-check.sh"]
+  restartPolicy: Never
+
+{{-
+/*
+* Local variables:
+* tab-width: 4
+* c-basic-offset: 4
+* End:
+* vim600: noexpandtab sw=4 ts=4 fdm=marker
+* vim<600: noexpandtab sw=4 ts=4
+*/ -}}

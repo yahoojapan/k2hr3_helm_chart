@@ -1,0 +1,180 @@
+{{-
+/*
+*
+* K2HR3 Helm Chart
+*
+* Copyright 2022 Yahoo! Japan Corporation.
+*
+* K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
+* common management information for the cloud.
+* K2HR3 can dynamically manage information as "who", "what", "operate".
+* These are stored as roles, resources, policies in K2hdkc, and the
+* client system can dynamically read and modify these information.
+*
+* For the full copyright and license information, please view
+* the license file that was distributed with this source code.
+*
+* AUTHOR:   Takeshi Nakatani
+* CREATE:   Wed Jan 19 2022
+* REVISION:
+*
+*/ -}}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-{{ include "k2hr3.r3apiBaseName" . }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: "chmpx-slave-control-port"
+      protocol: "TCP"
+      port: 8022
+      targetPort: 8022
+  selector:
+    app: {{ include "k2hr3.r3apiBaseName" . }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pod-{{ include "k2hr3.r3apiBaseName" . }}
+spec:
+  podManagementPolicy: OrderedReady
+  serviceName: svc-{{ include "k2hr3.r3apiBaseName" . }}
+  replicas: {{ .Values.k2hr3.api.count }}
+  selector:
+    matchLabels:
+      app: {{ include "k2hr3.r3apiBaseName" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "k2hr3.r3apiBaseName" . }}
+    spec:
+      serviceAccountName: sa-{{ include "k2hr3.r3apiBaseName" . }}
+      volumes:
+        - name: antpickax-etc-volume
+          emptyDir:
+            medium: Memory
+        - name: antpickax-var-lib-volume
+          emptyDir:
+            medium: Memory
+        - name: antpickax-var-run-volume
+          emptyDir:
+            medium: Memory
+        - name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+          configMap:
+            name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+            items:
+              - key: k2hr3-k2hdkc-chmpxproc-wrap.sh
+                path: k2hr3-k2hdkc-chmpxproc-wrap.sh
+              - key: k2hr3-k2hdkc-ini-update.sh
+                path: k2hr3-k2hdkc-ini-update.sh
+              - key: k2hr3-k2hdkc.ini.templ
+                path: k2hr3-k2hdkc.ini.templ
+              - key: k2hr3-api-wrap.sh
+                path: k2hr3-api-wrap.sh
+              - key: k2hr3-setup-certificate.sh
+                path: k2hr3-setup-certificate.sh
+              - key: k2hr3-api-production.json
+                path: k2hr3-api-production.json
+        - name: secret-k2hr3-ca-{{ include "k2hr3.clusterName" . }}
+          secret:
+            secretName: secret-k2hr3-ca-{{ include "k2hr3.clusterName" . }}
+      shareProcessNamespace: true
+      initContainers:
+        - name: init-{{ include "k2hr3.r3apiBaseName" . }}
+          image: alpine:3.13.5
+          command: ["/bin/sh"]
+          args: ["{{ .Values.mountPoint.configMap }}/k2hr3-k2hdkc-ini-update.sh"]
+          env:
+            - name: USING_SERVICE_NAME
+              value: "np-{{ include "k2hr3.r3apiBaseName" . }}"
+            - name: CHMPX_INI_TEMPLATE_FILE
+              value: "{{ .Values.mountPoint.configMap }}/k2hr3-k2hdkc.ini.templ"
+            - name: CHMPX_INI_DIR
+              value: "{{ .Values.antpickax.configDir }}"
+            - name: CHMPX_MODE
+              value: "SLAVE"
+            - name: CHMPX_SERVER_PORT
+              value: "8020"
+            - name: CHMPX_SERVER_CTLPORT
+              value: "8021"
+            - name: CHMPX_SLAVE_CTLPORT
+              value: "8022"
+            - name: CHMPX_DEFAULT_DOMAIN
+              value: "{{ include "k2hr3.k2hr3BaseDomain" . }}"
+            - name: CHMPX_SERVER_COUNT
+              value: "{{ .Values.k2hr3.dkc.count }}"
+            - name: CHMPX_SERVER_NAMEBASE
+              value: "{{ include "k2hr3.r3dkcBaseName" . }}"
+            - name: CHMPX_SLAVE_COUNT
+              value: "{{ .Values.k2hr3.api.count }}"
+            - name: CHMPX_SLAVE_NAMEBASE
+              value: "{{ include "k2hr3.r3apiBaseName" . }}"
+            - name: CHMPX_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: CHMPX_SELF_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CERT_PERIOD_DAYS
+              value: "{{ include "k2hr3.certPeriodDays" . }}"
+            - name: SEC_CA_MOUNTPOINT
+              value: "{{ .Values.mountPoint.ca }}"
+            - name: CERT_EXTERNAL_HOSTNAME
+              value: "{{ include "k2hr3.r3apiExtHostname" . }}"
+          volumeMounts:
+            - mountPath: {{ .Values.antpickax.configDir }}
+              name: antpickax-etc-volume
+            - mountPath: {{ .Values.mountPoint.configMap }}
+              name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+              readOnly: true
+            - mountPath: {{ .Values.mountPoint.ca }}
+              name: secret-k2hr3-ca-{{ include "k2hr3.clusterName" . }}
+              readOnly: true
+      containers:
+        - name: container-{{ include "k2hr3.r3apiBaseName" . }}
+          image: antpickax/k2hr3-api:latest
+          env:
+            - name: K2HR3_MANUAL_START
+              value: "{{ .Values.k2hr3.startManual }}"
+          volumeMounts:
+            - mountPath: {{ .Values.antpickax.configDir }}
+              name: antpickax-etc-volume
+            - mountPath: /var/lib/antpickax
+              name: antpickax-var-lib-volume
+            - mountPath: /var/run/antpickax
+              name: antpickax-var-run-volume
+            - mountPath: {{ .Values.mountPoint.configMap }}
+              name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+              readOnly: true
+          command: ["/bin/sh"]
+          args: ["{{ .Values.mountPoint.configMap }}/k2hr3-api-wrap.sh"]
+        - name: sidecar-{{ include "k2hr3.r3apiBaseName" . }}
+          image: antpickax/chmpx:latest
+          volumeMounts:
+            - mountPath: {{ .Values.antpickax.configDir }}
+              name: antpickax-etc-volume
+            - mountPath: /var/lib/antpickax
+              name: antpickax-var-lib-volume
+            - mountPath: /var/run/antpickax
+              name: antpickax-var-run-volume
+            - mountPath: {{ .Values.mountPoint.configMap }}
+              name: configmap-k2hr3-{{ include "k2hr3.clusterName" . }}
+          command: ["/bin/sh"]
+          args: ["{{ .Values.mountPoint.configMap }}/k2hr3-k2hdkc-chmpxproc-wrap.sh", "slave"]
+
+{{-
+/*
+* Local variables:
+* tab-width: 4
+* c-basic-offset: 4
+* End:
+* vim600: noexpandtab sw=4 ts=4 fdm=marker
+* vim<600: noexpandtab sw=4 ts=4
+*/ -}}

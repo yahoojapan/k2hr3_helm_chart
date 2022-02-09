@@ -1,0 +1,123 @@
+#
+# K2HR3 Helm Chart
+#
+# Utility helper tools for Github Actions by AntPickax
+#
+# Copyright 2022 Yahoo! Japan Corporation.
+#
+# K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
+# common management information for the cloud.
+# K2HR3 can dynamically manage information as "who", "what", "operate".
+# These are stored as roles, resources, policies in K2hdkc, and the
+# client system can dynamically read and modify these information.
+# 
+# For the full copyright and license information, please view
+# the license file that was distributed with this source code.
+#
+# AUTHOR:   Takeshi Nakatani
+# CREATE:   Wed Jan 19 2022
+# REVISION:
+#
+
+#----------------------------------------------------------
+# Github Actions
+#----------------------------------------------------------
+name: Helm AntPickax CI
+
+#
+# Events
+#
+on:
+  push:
+  pull_request:
+  #
+  # CRON event is fire on every sunday(UTC).
+  #
+  schedule:
+    - cron: '0 15 * * 0'
+
+#
+# Jobs
+#
+jobs:
+  Helm_Template_Lint:
+    runs-on: ubuntu-latest
+    steps:
+      #
+      # Checks-out your repository under ${GITHUB_WORKSPACE}, so your job can access it
+      #
+      # [NOTE]
+      # When using helm/chart-releaser-action, "fetch-depth: 0" is required.
+      #
+      - name: Checkout sources
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
+
+      #
+      # Install latest Helm version
+      #
+      - uses: azure/setup-helm@v1
+        id: install
+
+      #
+      # Check scripts by shellcheck
+      #
+      - name: ShellCheck
+        run: |
+          LC_ALL=C.UTF-8 shellcheck --shell=sh --exclude=SC1091,SC2181 $(grep '^#!/bin/sh' $(find . -type f -name \*.sh) | sed -e 's|^\(.*\):#\!.*$|\1|g')
+
+      #
+      # Check by helm template
+      #
+      - name: Helm template
+        run: |
+          REPONAME=$(echo "${GITHUB_REPOSITORY}" | sed -e 's#^.*/##g')
+          cd "${GITHUB_WORKSPACE}"/..
+          helm template dummy "${REPONAME}" --set k2hr3.api.extHostname=localhost --set k2hr3.app.extHostname=localhost --set oidc.clientId=dummy-oidc-clientid --set oidc.clientSecret=dummy-oidc-secret --set oidc.cookieExpire=60 --set oidc.cookieName=id_token --set oidc.issuerUrl=https://localhost/dex --set oidc.usernameKey=dummy:username --set minikube=true | sed -e 's/^  default\.svc\.cluster\.local_CA\..*:.*$//g' -e 's/^# Source:.*$//g' > /tmp/test_template.result
+          diff /tmp/test_template.result "${GITHUB_WORKSPACE}"/.github/workflows/helm_template.result
+
+      #
+      # Check by helm lint
+      #
+      - name: Helm lint
+        run: |
+          REPONAME=$(echo "${GITHUB_REPOSITORY}" | sed -e 's#^.*/##g')
+          cd "${GITHUB_WORKSPACE}"/..
+          helm lint "${REPONAME}" --set oidc.clientId=dummy-oidc-clientid --set oidc.clientSecret=dummy-oidc-secret --set oidc.issuerUrl=https://localhost/dex | tail -1 > /tmp/test_lint.result
+          diff /tmp/test_lint.result "${GITHUB_WORKSPACE}"/.github/workflows/helm_lint.result
+
+      #
+      # Set git config
+      #
+      - name: Configure Git
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      #
+      # Release Helm Chart
+      #
+      # [NOTE]
+      # Release tags, asset files, and index.yaml in gh-pages will not be
+      # updated or created in repositories other than the "yahoojapan"
+      # organization.
+      # It means that forked repositories do not run these processes.
+      # But, you can force to execute these by setting
+      # "FORCE_PKG_ORG=<your organization name>" to Secret.
+      #
+      - name: Check/Publish Helm Chart package
+        env:
+          GH_TOKEN:        "${{ secrets.GITHUB_TOKEN }}"
+          RUN_TAGGING_ORG: "${{ secrets.RUN_TAGGING_ORG }}"
+        run: |
+          /bin/sh -c "${GITHUB_WORKSPACE}/.github/workflows/helm_packager.sh ${GITHUB_WORKSPACE}/Chart.yaml ${GITHUB_WORKSPACE}/CHANGELOG.md"
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim600: expandtab sw=4 ts=4 fdm=marker
+# vim<600: expandtab sw=4 ts=4
+#

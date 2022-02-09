@@ -1,0 +1,88 @@
+/*
+*
+* K2HR3 Helm Chart
+*
+* Copyright 2022 Yahoo! Japan Corporation.
+*
+* K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
+* common management information for the cloud.
+* K2HR3 can dynamically manage information as "who", "what", "operate".
+* These are stored as roles, resources, policies in K2hdkc, and the
+* client system can dynamically read and modify these information.
+*
+* For the full copyright and license information, please view
+* the license file that was distributed with this source code.
+*
+* AUTHOR:   Takeshi Nakatani
+* CREATE:   Wed Jan 19 2022
+* REVISION:
+*
+*/
+
+//--------------------------------------------------------------
+// Variable to be replaced( %%...%% )
+// 
+//	K2HR3_API_INTERNAL_HOST		ex) 192.168.0.1, svc-r3api.default.svc.cluster.local
+//	OIDC_ISSUER_URL				ex) https://..../dex
+//	OIDC_CLIENT_ID				ex) xxxxxxxxxxxxxxxxxxxx
+//	OIDC_USERNAME_KEY			ex) allow empty value
+//	K8S_API_URL					ex) https://kubernetes.default.svc
+//	K8S_CA_CERT					ex) /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+//	K8S_SA_TOKEN				ex) /var/run/secrets/kubernetes.io/serviceaccount/token
+//
+//--------------------------------------------------------------
+{
+	'keystone': {
+		'type':			'k8soidc'
+	},
+
+	'k2hdkc': {
+		'config':			'/etc/antpickax/slave.ini',
+		'port':				8022
+	},
+
+	'corsips': [
+		'*'
+	],
+
+	'multiproc':			true,
+	'scheme':				'https',
+	'runuser':				'root',
+	'privatekey':			'/etc/antpickax/server.key',
+	'cert':					'/etc/antpickax/server.crt',
+	'ca':					'/etc/antpickax/ca.crt',
+
+	'userdata': {
+		'baseuri':			'https://%%K2HR3_API_INTERNAL_HOST%%:443',
+		'cc_templ':			'config/k2hr3-cloud-config.txt.templ',
+		'script_templ':		'config/k2hr3-init.sh.templ',
+		'errscript_templ':	'config/k2hr3-init-error.sh.templ',
+		'algorithm':		'aes-256-cbc',
+		'passphrase':		'k2hr3_regpass'
+	},
+
+	'chkipconfig': {
+		'type':			'NoCheck',
+		'pendingsec':	864000,
+		'intervalms':	4320000,
+		'timeoutms':	5000
+	},
+
+	'k8soidc': {
+		'audience':		'%%OIDC_CLIENT_ID%%',
+		'issuer':		'%%OIDC_ISSUER_URL%%',
+		'usernamekey':	'%%OIDC_USERNAME_KEY%%',
+		'k8sapi_url':	'%%K8S_API_URL%%',
+		'k8s_ca_path':	'%%K8S_CA_CERT%%',
+		'k8s_sa_token':	'%%K8S_SA_TOKEN%%'
+	}
+}
+
+/*
+* Local variables:
+* tab-width: 4
+* c-basic-offset: 4
+* End:
+* vim600: noexpandtab sw=4 ts=4 fdm=marker
+* vim<600: noexpandtab sw=4 ts=4
+*/

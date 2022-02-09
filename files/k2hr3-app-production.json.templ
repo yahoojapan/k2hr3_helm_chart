@@ -1,0 +1,85 @@
+/*
+*
+* K2HR3 Helm Chart
+*
+* Copyright 2022 Yahoo! Japan Corporation.
+*
+* K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
+* common management information for the cloud.
+* K2HR3 can dynamically manage information as "who", "what", "operate".
+* These are stored as roles, resources, policies in K2hdkc, and the
+* client system can dynamically read and modify these information.
+*
+* For the full copyright and license information, please view
+* the license file that was distributed with this source code.
+*
+* AUTHOR:   Takeshi Nakatani
+* CREATE:   Wed Jan 19 2022
+* REVISION:
+* 
+*/
+
+//--------------------------------------------------------------
+// Variable to be replaced( %%...%% )
+// 
+//	K2HR3_APP_EXTERNAL_HOST		ex) 192.168.0.1, r3app.example.com
+//	K2HR3_APP_EXTERNAL_PORT		ex) 32443
+//	K2HR3_API_EXTERNAL_HOST		ex) 192.168.0.1, r3api.example.com
+//	K2HR3_API_EXTERNAL_PORT		ex) 32043
+//	OIDC_ISSUER_URL				ex) https://..../dex
+//	OIDC_CLIENT_SECRET			ex) xxxxxxxxxxxxxxxxxxxx
+//	OIDC_CLIENT_ID				ex) xxxxxxxxxxxxxxxxxxxx
+//	OIDC_USERNAME_KEY			ex) allow empty value
+//	OIDC_COOKIENAME				ex) cookie name(if empty, use id_token as default)
+//	OIDC_COOKIE_EXPIRE			ex) cookie expire(if empty, use 60 as default)
+//
+//--------------------------------------------------------------
+{
+	'scheme':		'https',
+	'port':			443,
+	'multiproc':	true,
+	'runuser':		'root',
+	'privatekey':	'/etc/antpickax/server.key',
+	'cert':			'/etc/antpickax/server.crt',
+	'ca':			'/etc/antpickax/ca.crt',
+	'lang':			'ja',
+
+	'validator':	'userValidateOidc',
+	'validobj':		null,
+	'rejectUnauthorized':	true,
+	'lang':			'en',
+	'extrouter': {
+		'oidc': {
+			'name':						'oidc',
+			'path':						'/oidc',
+			'config': {
+				'debug':				true,
+				'logoutUrl':			'https://%%K2HR3_APP_EXTERNAL_HOST%%:%%K2HR3_APP_EXTERNAL_PORT%%/oidc/logout',
+				'mainUrl':				'https://%%K2HR3_APP_EXTERNAL_HOST%%:%%K2HR3_APP_EXTERNAL_PORT%%/',
+				'oidcDiscoveryUrl':		'%%OIDC_ISSUER_URL%%',
+				'params': {
+					'client_secret':	'%%OIDC_CLIENT_SECRET%%',
+					'client_id':		'%%OIDC_CLIENT_ID%%',
+					'redirectUrl':		'https://%%K2HR3_APP_EXTERNAL_HOST%%:%%K2HR3_APP_EXTERNAL_PORT%%/oidc/login/cb',
+					'usernamekey':		'%%OIDC_USERNAME_KEY%%',
+					'cookiename':		'%%OIDC_COOKIENAME%%',
+					'cookieexpire':		'%%OIDC_COOKIE_EXPIRE%%'
+				},
+				'scope':				'openid profile email'
+			}
+		}
+	},
+
+	'apischeme':	'https',
+	'apihost':		'%%K2HR3_API_EXTERNAL_HOST%%',
+	'apiport':		%%K2HR3_API_EXTERNAL_PORT%%
+}
+
+/*
+* Local variables:
+* tab-width: 4
+* c-basic-offset: 4
+* End:
+* vim600: noexpandtab sw=4 ts=4 fdm=marker
+* vim<600: noexpandtab sw=4 ts=4
+*/

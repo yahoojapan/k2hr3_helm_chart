@@ -1,0 +1,367 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Values",
+  "description": "Values for K2HR3 Helm",
+  "type": "object",
+
+  "properties": {
+    "nameOverride": {
+      "description": "[optional] Override release part of fully name, if not specified fullnameOverride value.",
+      "type": "string"
+    },
+    "fullnameOverride": {
+      "description": "[optional] Override fully chart/release name.",
+      "type": "string"
+    },
+
+    "serviceAccount": {
+      "description": "[optional] Service account setting.",
+      "type": "object",
+      "properties": {
+        "create": {
+          "description": "[optional] Specifies whether to create a service account, default is true.",
+          "type": "boolean"
+        },
+        "annotations": {
+          "description": "[optional] Annotations to add to the service account, default is empty.",
+          "type": "object"
+        },
+        "name": {
+          "description": "[optional] Specifies Service account name, default is empty. If not set and create is true, a name is generated using the fullname template.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "create",
+        "annotations",
+        "name"
+      ]
+    },
+
+    "antpickax": {
+      "description": "[optional] Common application settings for AntPickax products.",
+      "type": "object",
+      "properties": {
+        "configDir": {
+          "description": "[optional] Configration directory path for AntPickax products, default is /etc/antpickax.",
+          "type": "string"
+        },
+        "certPeriodYear": {
+          "description": "[optional] Period years for self signed certificates using in pods, default is 5(year).",
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "configDir",
+        "certPeriodYear"
+      ]
+    },
+
+    "minikube": {
+      "description": "[optional] Specify whether or not it is a minikube environment, default is false.",
+      "type": "boolean"
+    },
+
+    "k2hr3": {
+      "description": "[optional] K2HR3 system settings.",
+      "type": "object",
+      "properties": {
+        "clusterName": {
+          "description": "[optional] Specify a cluster name for K2HR3 system, default is empty. If not set, a name is Release name(.Release.Name).",
+          "type": "string"
+        },
+        "startManual": {
+          "description": "[optional] Specifies whether to boot the k2hr3 system manually. This is a flag for debugging.",
+          "type": "boolean"
+        },
+        "baseDomain": {
+          "description": "[optional] Specifies the base domain name for the k2hr3 system. The default is empty, if empty k8s.domain is used.",
+          "type": "string"
+        },
+
+        "dkc": {
+          "description": "[optional] The setting for the backend K2HDKC cluster used by the K2HR3 system.",
+          "type": "object",
+          "properties": {
+            "baseName": {
+              "description": "[optional] Specify the base name for K2HDKC cluster, default is empty in which case r3dkc will be used.",
+              "type": "string"
+            },
+            "count": {
+              "description": "[optional] Specify the server count in K2HKDC cluster, default is 2.",
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "baseName",
+            "count"
+          ]
+        },
+
+        "api": {
+          "description": "[optional] The setting for the K2HR3 REST API in K2HR3 system.",
+          "type": "object",
+          "properties": {
+            "baseName": {
+              "description": "[optional] Specify the base name for K2HR3 REST API, default is empty in which case r3api will be used.",
+              "type": "string"
+            },
+            "count": {
+              "description": "[optional] Specify the server count of K2HR3 REST API, default is 2.",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "extHostname": {
+              "description": "[optional] Specify the external hostname(FQDN) for K2HR3 REST API system, default is empty in which case internal hostanme will be used.",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "hostname"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 0
+                }
+              ]
+            },
+            "extPort": {
+              "description": "[optional] Specify the external port number for K2HR3 REST API system, default is 0 in which case 31443 will be used.",
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "baseName",
+            "count",
+            "extHostname",
+            "extPort"
+          ]
+        },
+
+        "app": {
+          "description": "[optional] The setting for the K2HR3 Web Application in K2HR3 system.",
+          "type": "object",
+          "properties": {
+            "baseName": {
+              "description": "[optional] Specify the base name for K2HR3 Web Application, default is empty in which case r3app will be used.",
+              "type": "string"
+            },
+            "count": {
+              "description": "[optional] Specify the server count of K2HR3 Web Application, default is 2.",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "extHostname": {
+              "description": "[optional] Specify the external hostname(FQDN) for K2HR3 Web Application system, default is empty in which case internal hostanme will be used.",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "hostname"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 0
+                }
+              ]
+            },
+            "extPort": {
+              "description": "[optional] Specify the external port number for K2HR3 Web Application system, default is 0 in which case 32443 will be used.",
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "baseName",
+            "count",
+            "extHostname",
+            "extPort"
+          ]
+        }
+      },
+      "required": [
+        "clusterName",
+        "startManual",
+        "baseDomain",
+        "dkc",
+        "api",
+        "app"
+      ]
+    },
+
+    "mountPoint": {
+      "description": "[optional] Specify the directory path in each pods to mount the configmap and secret.",
+      "type": "object",
+      "properties": {
+        "configMap": {
+          "description": "[optional] Specify the directory path in each pods to mount the configmap, default is /configmap.",
+          "type": "string"
+        },
+        "ca": {
+          "description": "[optional] Specify the directory path in each pods to mount the secret which has CA self signed certificates, default is /secret-ca.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "configMap",
+        "ca"
+      ]
+    },
+
+    "k8s": {
+      "description": "[optional] Set the information for the kubernetes cluster in which will be deployed the K2HR3 system.",
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "description": "[optional] Specify the kubernetes namespace to deploy K2HR3 system, default is empty. If not set, use Release.Namespace.",
+          "type": "string"
+        },
+        "domain": {
+          "description": "[optional] Specify the domain name of the kubernetes cluster to deploy K2HR3 system, default is svc.cluster.local.",
+          "type": "string"
+        },
+        "caCert": {
+          "description": "[optional] Specify the CA certificate file path for the kubernetes API, default is /var/run/secrets/kubernetes.io/serviceaccount/ca.crt.",
+          "type": "string"
+        },
+        "saToken": {
+          "description": "[optional] Specify the token file path for the Service account, default is /var/run/secrets/kubernetes.io/serviceaccount/token.",
+          "type": "string"
+        },
+        "apiUrl": {
+          "description": "[optional] Specify the kubernetes API URL, default is https://kubernetes.default.svc.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "namespace",
+        "domain",
+        "caCert",
+        "saToken",
+        "apiUrl"
+      ]
+    },
+
+    "oidc": {
+      "description": "[optional] Set the information of the OpenID Connect(OIDC) authentication system used by the K2HR3 system.",
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "description": "[required] Specify the OpenID Connect Client ID.",
+          "type": "string",
+          "minLength": 1
+        },
+        "clientSecret": {
+          "description": "[required] Specify the OpenID Connect Secret.",
+          "type": "string",
+          "minLength": 1
+        },
+        "cookieExpire": {
+          "description": "[required] Specify the OpenID Connect Cookie Expire.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "cookieName": {
+          "description": "[required] Specify the OpenID Connect Cookie Name.",
+          "type": "string",
+          "minLength": 1
+        },
+        "issuerUrl": {
+          "description": "[required] Specify the OpenID Connect Issuer URL.",
+          "type": "string",
+          "format": "uri"
+        },
+        "usernameKey": {
+          "description": "[optional] Specify the OpenID Connect user key name, default is empty.",
+          "type": "string",
+          "minLength": 0
+        }
+      },
+      "required": [
+        "clientId",
+        "clientSecret",
+        "cookieExpire",
+        "cookieName",
+        "issuerUrl"
+      ]
+    },
+
+    "unconvertedFiles": {
+      "description": "[optional] Specify the files(unconverted) to be placed in configmap.",
+      "type": "object",
+      "properties": {
+        "k2hr3": {
+          "description": "[optional] Specify an array of files(unconverted) for K2HR3 system.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "[optional] Specify the filename.",
+                "type": "string",
+                "minLength": 1
+              },
+              "path": {
+                "description": "[optional] Specify the path of the file to upload.",
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "key",
+              "path"
+            ]
+          }
+        }
+      },
+      "required": [
+        "k2hr3"
+      ]
+    },
+
+    "convertedFiles": {
+      "description": "[optional] Specify the files(converted) to be placed in configmap.",
+      "type": "object",
+      "properties": {
+        "k2hr3": {
+          "description": "[optional] Specify an array of files(converted) for K2HR3 system.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "[required] Specify the filename.",
+                "type": "string",
+                "minLength": 1
+              },
+              "path": {
+                "description": "[required] Specify the path of the file to upload.",
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "key",
+              "path"
+            ]
+          }
+        }
+      },
+      "required": [
+        "k2hr3"
+      ]
+    }
+  },
+  "required": [
+    "antpickax",
+    "minikube",
+    "k2hr3",
+    "mountPoint",
+    "k8s",
+    "oidc",
+    "unconvertedFiles",
+    "convertedFiles"
+  ]
+}

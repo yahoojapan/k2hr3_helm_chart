@@ -1,0 +1,206 @@
+#
+# K2HR3 Helm Chart
+#
+# Copyright 2022 Yahoo! Japan Corporation.
+#
+# K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
+# common management information for the cloud.
+# K2HR3 can dynamically manage information as "who", "what", "operate".
+# These are stored as roles, resources, policies in K2hdkc, and the
+# client system can dynamically read and modify these information.
+#
+# For the full copyright and license information, please view
+# the license file that was distributed with this source code.
+#
+# AUTHOR:   Takeshi Nakatani
+# CREATE:   Wed Jan 19 2022
+# REVISION:
+#
+
+#---------------------------------------------------------
+# Default values for k2hr3 helm chart.
+#---------------------------------------------------------
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using
+  # the fullname template
+  name: ""
+
+#---------------------------------------------------------
+# Common Variables
+#
+#	antpickax
+#		configDir		Specifies Antpickax common configuration
+#						directory(ex. /etc/antpickax)
+#		certPeriodYear	Specify years for expire certificate
+#
+#	minikube			Specify true if run on minikube
+#
+antpickax:
+  configDir: /etc/antpickax
+  certPeriodYear: 5
+
+minikube: false
+
+#---------------------------------------------------------
+# Variables for K2HR3 Cluster
+#
+#	clusterName		Specifies the cluster name for k2hr3 system
+#					for dbaas. This is used as the base name that
+#					affects each setting name.
+#					This value allows empty. If empty, the release
+#					name on the helm command line is used.
+#					( ".Release.Name" )
+#	startManual		Specify a flag for debugging. Setting this
+#					flag to true allows the k2hr3 system to be
+#					started manually.
+#	baseDomain		Specifies the base domain name for the k2hr3
+#					system. Normally, leave this value empty. If
+#					empty, k8s.domain will be used.
+#	dkc.baseName	Specifies the base name for k2hdkc in k2hr3
+#					system. Normally, leave this value empty.
+#					If empty, "r3dkc-<k2hr3.clusterName>" will
+#					be used.
+#	dkc.count		Specifies the k2hdkc server count in k2hr3
+#					system.
+#	api.baseName	Specifies the base name for k2hr3 api in k2hr3
+#					system. Normally, leave this value empty. If
+#					empty, "r3api-<k2hr3.clusterName>" will be
+#					used.
+#	api.count		Specifies the k2hr3 api server count in k2hr3
+#					system.
+#	api.extHostname	Specifies the k2hr3 api external host name.
+#					If this value empty, internal hostname will be
+#					used.
+#	app.extPort		Specifies the k2hr3 api external port and
+#					NodePort. If this value is empty, it will be
+#					set 31443.
+#	app.baseName	Specifies the base name for k2hr3 app in k2hr3
+#					system. Normally, leave this value empty. If
+#					empty, "r3app-<k2hr3.clusterName>" will be
+#					used.
+#	app.count		Specifies the k2hr3 app server count in k2hr3
+#					system.
+#	app.extHostname	Specifies the k2hr3 api external host name.
+#					If this value empty, internal hostname will be
+#					used.
+#	app.extPort		Specifies the k2hr3 app external port and
+#					NodePort. If this value is empty, it will be
+#					set 32443.
+#
+k2hr3:
+  clusterName: ""
+  startManual: false
+  baseDomain: ""
+  dkc:
+    baseName: ""
+    count: 2
+  api:
+    baseName: ""
+    count: 2
+    extHostname: ""
+    extPort: 0
+  app:
+    baseName: ""
+    count: 2
+    extHostname: ""
+    extPort: 0
+
+#---------------------------------------------------------
+# Mount Points
+#
+#	configMap		Specifies mount point for configmap.
+#					(ex. /configmap)
+#	ca				Specifies mount point for CA certification
+#					file directory(ex. /secret-ca)
+#
+mountPoint:
+  configMap: /configmap
+  ca: /secret-ca
+
+#---------------------------------------------------------
+# Kubernetes
+#
+#	namespace		Specifies the namespace to start k2hdkc dbaas.
+#					If this is not specified, use Release.Namespace.
+#	domain			Specifies the domain fqdn for kubernetes.
+#					default is "svc.cluster.local".
+#	apiUrl			Specifies API URL for kubernetes.
+#	caCert			Specifies kubernetes CA certification path.
+#	saToken			Specifies kubernetes Service Account token.
+#
+k8s:
+  namespace: ""
+  domain: svc.cluster.local
+  caCert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  saToken: /var/run/secrets/kubernetes.io/serviceaccount/token
+  apiUrl: https://kubernetes.default.svc
+
+#---------------------------------------------------------
+# OpenID Connect
+#
+#	clientId		Specifies OpenID Connect Client ID
+#	clientSecret	Specifies OpenID Connect Secret
+#	cookieExpire	Specifies OpenID Connect Cookie expire
+#	cookieName		Specifies OpenID Connect Cookie name
+#	issuerUrl		Specifies OpenID Connect Issuer URL.
+#					(ex. "https://localhost/dex")
+#	usernameKey		Specifies OpenID Connect Username key name
+#
+oidc:
+  clientId: ""
+  clientSecret: ""
+  cookieExpire: 60
+  cookieName: id_token
+  issuerUrl: ""
+  usernameKey: ""
+
+#---------------------------------------------------------
+# Files ( without modifying )
+#
+unconvertedFiles:
+  k2hr3:
+    - key: k2hr3-k2hdkc-serverproc-wrap.sh
+      path: files/k2hr3-k2hdkc-serverproc-wrap.sh
+    - key: k2hr3-k2hdkc-chmpxproc-wrap.sh
+      path: files/k2hr3-k2hdkc-chmpxproc-wrap.sh
+    - key: k2hr3-k2hdkc-ini-update.sh
+      path: files/k2hr3-k2hdkc-ini-update.sh
+    - key: k2hr3-api-wrap.sh
+      path: files/k2hr3-api-wrap.sh
+    - key: k2hr3-app-wrap.sh
+      path: files/k2hr3-app-wrap.sh
+    - key: k2hr3-app-init.sh
+      path: files/k2hr3-app-init.sh
+    - key: k2hr3-setup-certificate.sh
+      path: files/k2hr3-setup-certificate.sh
+    - key: k2hr3-check.sh
+      path: files/k2hr3-check.sh
+    - key: k2hr3-k2hdkc.ini.templ
+      path: files/k2hr3-k2hdkc.ini.templ
+
+#---------------------------------------------------------
+# Files ( with modifying )
+#
+convertedFiles:
+  k2hr3:
+    - key: k2hr3-api-production.json
+      path: files/k2hr3-api-production.json.templ
+    - key: k2hr3-app-production.json
+      path: files/k2hr3-app-production.json.templ
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim600: noexpandtab sw=4 ts=4 fdm=marker
+# vim<600: noexpandtab sw=4 ts=4
+#
