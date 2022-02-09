@@ -1,0 +1,39 @@
+apiVersion: v1
+entries:
+  k2hr3:
+  - annotations:
+      artifacthub.io/changes: |
+        - Initial Commit and publishing
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-02-09T04:53:13.831002779Z"
+    description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
+      Rules) is one of extended RBAC(Role Based Access Control) system.
+    digest: b135439c222d58c97a8e179417aacadd15dc072a55ad72520b72db2daf8052f7
+    home: https://k2hr3.antpick.ax/
+    icon: https://antpick.ax/images/antpickax_circle_512x512.png
+    keywords:
+    - K2HR3
+    - RBAC
+    - K2HDKC DBaaS
+    - AntPickax
+    - Helm
+    - kubernetes
+    - K2HASH
+    - NOSQL
+    - KVS
+    - CHMPX
+    kubeVersion: '>=v1.20'
+    maintainers:
+    - email: ggtakec@gmail.com
+      name: Takeshi Nakatani
+    - email: hiwakaba@yahoo-corp.jp
+      name: Hirotaka Wakabayashi
+    name: k2hr3
+    sources:
+    - https://github.com/yahoojapan/k2hr3_helm_chart
+    type: application
+    urls:
+    - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.0/k2hr3-1.0.0.tgz
+    version: 1.0.0
+generated: "2022-02-09T04:53:13.828256152Z"
