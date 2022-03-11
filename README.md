@@ -13,7 +13,7 @@ The code in this repository is packaged as Helm Chart and distributed from [Arti
 
 You can download the Helm Chart for K2HR3 from Artifact Hub and use it right away.
 
-![K2HR3 system overview](https://k2hr3.antpick.ax/images/top_k2hr3_helm.png)
+<img src="https://k2hr3.antpick.ax/images/top_k2hr3_helm.png" width="60%" height="60%">
 
 K2HR3 is built [k2hdkc](https://github.com/yahoojapan/k2hdkc), [k2hash](https://github.com/yahoojapan/k2hash), [chmpx](https://github.com/yahoojapan/chmpx) and [k2hash transaction plugin](https://github.com/yahoojapan/k2htp_dtor) components by [AntPickax](https://antpick.ax/).
 
