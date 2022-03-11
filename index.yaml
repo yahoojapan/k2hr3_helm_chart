@@ -3,11 +3,47 @@ entries:
   k2hr3:
   - annotations:
       artifacthub.io/changes: |
+        - Fixed a bug(helm_package.sh) and Updated some files
+      catalog.cattle.io/display-name: K2HR3 - RBAC System
+    apiVersion: v2
+    appVersion: 1.0.2
+    created: "2022-03-11T05:21:31.86933061Z"
+    description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
+      Rules) is one of extended RBAC(Role Based Access Control) system.
+    digest: bbae5d89f94d4473a92377f96dee3c9018c0f67ac615e26d22489584da7b1c7b
+    home: https://k2hr3.antpick.ax/
+    icon: https://antpick.ax/images/antpickax_circle_512x512.png
+    keywords:
+    - K2HR3
+    - RBAC
+    - K2HDKC DBaaS
+    - AntPickax
+    - Helm
+    - kubernetes
+    - K2HASH
+    - NOSQL
+    - KVS
+    - CHMPX
+    kubeVersion: '>=v1.20'
+    maintainers:
+    - email: ggtakec@gmail.com
+      name: Takeshi Nakatani
+    - email: hiwakaba@yahoo-corp.jp
+      name: Hirotaka Wakabayashi
+    name: k2hr3
+    sources:
+    - https://github.com/yahoojapan/k2hr3_helm_chart
+    type: application
+    urls:
+    - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.2/k2hr3-1.0.2.tgz
+    version: 1.0.2
+  - annotations:
+      artifacthub.io/changes: |
         - Supported RANCHER as RANCHER Helm Chart
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2022-03-11T01:04:55.642106963Z"
+    created: "2022-03-11T05:21:31.867393906Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 7ceca5fccb49be14784216538006a80d570700dd7a87a53c9c9285c1e47b0121
@@ -42,7 +78,7 @@ entries:
         - Initial Commit and publishing
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-03-11T01:04:55.640129158Z"
+    created: "2022-03-11T05:21:31.864212099Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: b135439c222d58c97a8e179417aacadd15dc072a55ad72520b72db2daf8052f7
@@ -72,4 +108,4 @@ entries:
     urls:
     - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.0/k2hr3-1.0.0.tgz
     version: 1.0.0
-generated: "2022-03-11T01:04:55.637463051Z"
+generated: "2022-03-11T05:21:31.85955219Z"
