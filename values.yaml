@@ -114,6 +114,27 @@ k2hr3:
     extPort: 0
 
 #---------------------------------------------------------
+# Images
+#
+#	app/api/dkc/chmpx	image type(k2hr3-api/k2hr3-app/k2hdkc/chmpx)
+#		organization	Specify organaization name for images(default is "antpickax")
+#		version			Specify image version(default is set automatically)
+#
+images:
+  app:
+    organization: ""
+    version: ""
+  api:
+    organization: ""
+    version: ""
+  dkc:
+    organization: ""
+    version: ""
+  chmpx:
+    organization: ""
+    version: ""
+
+#---------------------------------------------------------
 # Mount Points
 #
 #	configMap		Specifies mount point for configmap.

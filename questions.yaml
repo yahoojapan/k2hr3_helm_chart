@@ -1,0 +1,218 @@
+#
+# K2HR3 Helm Chart
+#
+# Utility helper tools for Github Actions by AntPickax
+#
+# Copyright 2022 Yahoo! Japan Corporation.
+#
+# K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
+# common management information for the cloud.
+# K2HR3 can dynamically manage information as "who", "what", "operate".
+# These are stored as roles, resources, policies in K2hdkc, and the
+# client system can dynamically read and modify these information.
+# 
+# For the full copyright and license information, please view
+# the license file that was distributed with this source code.
+#
+# AUTHOR:   Takeshi Nakatani
+# CREATE:   Tue Mar 9 2022
+# REVISION:
+#
+
+#
+# questinos.yaml for RANCHER
+#
+categories:
+- RBAC
+
+questions:
+
+#
+# K2HR3 Authentication
+#
+- variable: oidc.clientId
+  default: ""
+  label: "OpenID Connect Client ID"
+  description: "Specify the OpenID Connect Client ID to be used for K2HR3 authentication."
+  type: string
+  required: true
+  group: "K2HR3 Authentication"
+  min_length: 0
+  max_length: 255
+
+- variable: oidc.clientSecret
+  default: ""
+  label: "OpenID Connect Secret"
+  description: "Specify the OpenID Connect Secret to be used for K2HR3 Authentication."
+  type: string
+  required: true
+  group: "K2HR3 Authentication"
+  min_length: 0
+  max_length: 255
+
+- variable: oidc.issuerUrl
+  default: ""
+  label: "OpenID Connect Issuer URL"
+  description: "Specify the OpenID Connect Issuer URL to be used for K2HR3 Authentication."
+  type: string
+  required: true
+  group: "K2HR3 Authentication"
+  min_length: 0
+  max_length: 255
+
+- variable: oidc.cookieExpire
+  default: 60
+  label: "OpenID Connect Cookie Expire"
+  description: "Specify the OpenID Connect Cookie Expire to be used for K2HR3 Authentication."
+  type: int
+  required: false
+  group: "K2HR3 Authentication"
+  min: 1
+
+- variable: oidc.usernameKey
+  default: ""
+  label: "OpenID Connect user key name"
+  description: "Specify the OpenID Connect user key name if your specified OIDC supports, default is empty string."
+  type: string
+  required: false
+  group: "K2HR3 Authentication"
+  min_length: 0
+  max_length: 255
+
+#
+# K2HR3 Web Application
+#
+- variable: k2hr3.app.extHostname
+  default: ""
+  label: "External hostname or IP address"
+  description: "Specify the external hostname(FQDN) for K2HR3 Web Application system, default is empty string in which case internal hostname will be used."
+  type: hostname
+  required: true
+  group: "K2HR3 Web Application"
+  min_length: 0
+  max_length: 63
+
+- variable: k2hr3.app.extPort
+  default: 0
+  label: "External port number"
+  description: "Specify the external port number for K2HR3 REST API system, default is \"0\" in which case \"32443\" will be used."
+  type: string
+  required: false
+  group: "K2HR3 Web Application"
+  min: 0
+  max: 32767
+
+- variable: images.app.organization
+  default: ""
+  label: "Image Organaization name for K2HR3 Web Application"
+  description: "Specify the organaization for K2HR3 Web Application, default is empty string in which case \"antpickax\" will be used."
+  type: string
+  required: false
+  group: "K2HR3 Web Application"
+  min_length: 0
+  max_length: 63
+
+- variable: images.app.version
+  default: ""
+  label: "Image version for K2HR3 Web Application"
+  description: "Specify the version for K2HR3 Web Application, default is empty string in which case one of version number will be used."
+  type: string
+  required: false
+  group: "K2HR3 Web Application"
+  min_length: 0
+  max_length: 31
+
+#
+# K2HR3 REST API
+#
+- variable: k2hr3.api.extHostname
+  default: ""
+  label: "External hostname or IP address"
+  description: "Specify the external hostname(FQDN) for K2HR3 REST API system, default is empty string in which case internal hostname will be used."
+  type: hostname
+  required: true
+  group: "K2HR3 REST API"
+  min_length: 0
+  max_length: 63
+
+- variable: k2hr3.api.extPort
+  default: 0
+  label: "External port number"
+  description: "Specify the external port number for K2HR3 REST API system, default is \"0\" in which case \"31443\" will be used."
+  type: string
+  required: false
+  group: "K2HR3 REST API"
+  min: 0
+  max: 32767
+
+- variable: images.api.organization
+  default: ""
+  label: "Image Organaization name for K2HR3 REST API"
+  description: "Specify the organaization for K2HR3 REST API, default is empty string in which case \"antpickax\" will be used."
+  type: string
+  required: false
+  group: "K2HR3 REST API"
+  min_length: 0
+  max_length: 63
+
+- variable: images.api.version
+  default: ""
+  label: "Image version for K2HR3 REST API"
+  description: "Specify the version for K2HR3 REST API, default is empty string in which case one of version number will be used."
+  type: string
+  required: false
+  group: "K2HR3 REST API"
+  min_length: 0
+  max_length: 31
+
+#
+# Backend K2HDKC Cluster
+#
+- variable: images.dkc.organization
+  default: ""
+  label: "Image Organaization name for K2HDKC"
+  description: "Specify the organaization for K2HDKC image, default string is empty in which case \"antpickax\" will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 63
+
+- variable: images.dkc.version
+  default: ""
+  label: "Image version for K2HDKC"
+  description: "Specify the version for K2HDKC image, default is empty string in which case one of version number will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 31
+
+- variable: images.chmpx.organization
+  default: ""
+  label: "Image Organaization name for CHMPX"
+  description: "Specify the organaization for CHMPX image, default is empty string in which case \"antpickax\" will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 63
+
+- variable: images.chmpx.version
+  default: ""
+  label: "Image version for CHMPX"
+  description: "Specify the version for CHMPX image, default is empty in which case one of version number will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 31
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim600: noexpandtab sw=4 ts=4 fdm=marker
+# vim<600: noexpandtab sw=4 ts=4
+#

@@ -136,7 +136,7 @@ spec:
               readOnly: true
       containers:
         - name: container-{{ include "k2hr3.r3dkcBaseName" . }}
-          image: antpickax/k2hdkc:latest
+          image: {{ include "images.k2hdkcOrg" . }}/k2hdkc:{{ include "images.k2hdkcVer" . }}
           volumeMounts:
             - mountPath: {{ .Values.antpickax.configDir }}
               name: antpickax-etc-volume
@@ -150,7 +150,7 @@ spec:
           command: ["/bin/sh"]
           args: ["{{ .Values.mountPoint.configMap }}/k2hr3-k2hdkc-serverproc-wrap.sh", "server"]
         - name: sidecar-{{ include "k2hr3.r3dkcBaseName" . }}
-          image: antpickax/chmpx:latest
+          image: {{ include "images.chmpxOrg" . }}/chmpx:{{ include "images.chmpxVer" . }}
           volumeMounts:
             - mountPath: {{ .Values.antpickax.configDir }}
               name: antpickax-etc-volume

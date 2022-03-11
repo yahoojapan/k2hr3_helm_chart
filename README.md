@@ -13,7 +13,7 @@ The code in this repository is packaged as Helm Chart and distributed from [Arti
 
 You can download the Helm Chart for K2HR3 from Artifact Hub and use it right away.
 
-![K2HR3 system overview](https://k2hr3.antpick.ax/images/overview_abstract.png)
+![K2HR3 system overview](https://k2hr3.antpick.ax/images/top_k2hr3_helm.png)
 
 K2HR3 is built [k2hdkc](https://github.com/yahoojapan/k2hdkc), [k2hash](https://github.com/yahoojapan/k2hash), [chmpx](https://github.com/yahoojapan/chmpx) and [k2hash transaction plugin](https://github.com/yahoojapan/k2htp_dtor) components by [AntPickax](https://antpick.ax/).
 
@@ -98,6 +98,11 @@ $ helm uninstall <release name>
 ### Other operation
 Other operations can be performed using the Helm command.  
 See `helm --help` for more information.
+
+## Use with RANCHER
+K2HR3 Helm Chart can be used by registering the repository in [RANCHER](https://rancher.com/).  
+[RANCHER](https://rancher.com/) allows you to use K2HR3 Helm Chart with more intuitive and simpler operations than using the `helm` command.  
+See the [K2HR3 Helm Chart documentation](https://github.com/yahoojapan/k2hr3_helm_chart) for more details.  
 
 ## Documents
 [K2HR3 Document](https://k2hr3.antpick.ax/index.html)  

@@ -85,7 +85,7 @@ spec:
               readOnly: true
       containers:
         - name: container-{{ include "k2hr3.r3appBaseName" . }}
-          image: antpickax/k2hr3-app:latest
+          image: {{ include "images.k2hr3appOrg" . }}/k2hr3-app:{{ include "images.k2hr3appVer" . }}
           env:
             - name: K2HR3_MANUAL_START
               value: "{{ .Values.k2hr3.startManual }}"

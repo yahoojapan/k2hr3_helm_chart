@@ -139,7 +139,7 @@ spec:
               readOnly: true
       containers:
         - name: container-{{ include "k2hr3.r3apiBaseName" . }}
-          image: antpickax/k2hr3-api:latest
+          image: {{ include "images.k2hr3apiOrg" . }}/k2hr3-api:{{ include "images.k2hr3apiVer" . }}
           env:
             - name: K2HR3_MANUAL_START
               value: "{{ .Values.k2hr3.startManual }}"
@@ -156,7 +156,7 @@ spec:
           command: ["/bin/sh"]
           args: ["{{ .Values.mountPoint.configMap }}/k2hr3-api-wrap.sh"]
         - name: sidecar-{{ include "k2hr3.r3apiBaseName" . }}
-          image: antpickax/chmpx:latest
+          image: {{ include "images.chmpxOrg" . }}/chmpx:{{ include "images.chmpxVer" . }}
           volumeMounts:
             - mountPath: {{ .Values.antpickax.configDir }}
               name: antpickax-etc-volume

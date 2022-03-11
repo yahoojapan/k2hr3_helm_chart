@@ -53,7 +53,7 @@
 #----------------------------------------------------------
 PRGNAME=$(basename "$0")
 SCRIPTDIR=$(dirname "$0")
-SCRIPTDIR=$(cd "${SCRIPTDIR}" || exit 1; pwd)
+SCRIPTDIR=$(cd "${SCRIPTDIR}"/../.. || exit 1; pwd)
 
 SCRIPT_CURRENT_DIR=$(pwd)
 WGET_BIN=$(command -v wget | tr -d '\n')
@@ -73,8 +73,15 @@ echo ""
 CHART_YAML_FILE="$1"
 CHANGELOG_MD_FILE="$2"
 
+if [ -z "${CHART_YAML_FILE}" ]; then
+	CHART_YAML_FILE="${SCRIPTDIR}"/Chart.yaml
+fi
+if [ -z "${CHANGELOG_MD_FILE}" ]; then
+	CHANGELOG_MD_FILE="${SCRIPTDIR}"/CHANGELOG.md
+fi
+
 if [ ! -f "${CHART_YAML_FILE}" ]; then
-	echo "[Error] Not found Cahrt yaml file(${CHART_YAML_FILE})."
+	echo "[Error] Not found Chart yaml file(${CHART_YAML_FILE})."
 	exit 1
 fi
 CHART_DIR=$(dirname "${CHART_YAML_FILE}")
@@ -85,47 +92,75 @@ if [ ! -f "${CHANGELOG_MD_FILE}" ]; then
 fi
 
 #----------------------------------------------------------
-# Gethub Actions Environment
+# Repository information
 #----------------------------------------------------------
-ORG_NAME=$(echo "${GITHUB_REPOSITORY}" | awk -F / '{print $1}')
-REPO_NAME=$(echo "${GITHUB_REPOSITORY}" | awk -F / '{print $2}')
-if [ -z "${ORG_NAME}" ]; then
-	echo "[Error] Organaization name is empty."
-	exit 1
-fi
-if [ -z "${REPO_NAME}" ]; then
-	echo "[Error] Repository name is empty."
-	exit 1
-fi
+if [ -z "${GITHUB_REPOSITORY}" ]; then
+	#
+	# Call from not github actions
+	#
+	if command -v git >/dev/null 2>&1; then
+		if [ -d "${SCRIPTDIR}/.git" ]; then
+			GITHUB_DOMAIN=$(git remote -v | grep fetch | awk '{print $2}' | sed -e 's/git@//g' -e 's#http[s]*://##g' -e 's/\.git//g' -e 's#[:|/]# #g' | awk '{print $1}' | tr -d '\n')
+			ORG_NAME=$(git remote -v | grep fetch | awk '{print $2}' | sed -e 's/git@//g' -e 's#http[s]*://##g' -e 's/\.git//g' -e 's#[:|/]# #g' | awk '{print $2}' | tr -d '\n')
+			REPO_NAME=$(git remote -v | grep fetch | awk '{print $2}' | sed -e 's/git@//g' -e 's#http[s]*://##g' -e 's/\.git//g' -e 's#[:|/]# #g' | awk '{print $3}' | tr -d '\n')
+			CURRENT_BRANCH=$(git branch | grep '\*' | awk '{print $2}' | tr -d '\n')
+		fi
+	fi
+	if [ -z "${GITHUB_DOMAIN}" ] || [ -z "${ORG_NAME}" ] || [ -z "${REPO_NAME}" ]; then
+		echo "[Warning] Could not get repository path(organaization /repository name, etc)."
+	fi
 
-if [ "${ORG_NAME}" = "yahoojapan" ] || [ "X${ORG_NAME}" = "X${RUN_TAGGING_ORG}" ]; then
-	IS_RELEASE_TAG_PROCESS=1
-else
 	IS_RELEASE_TAG_PROCESS=0
-fi
-
-CURRENT_BRANCH="${GITHUB_REF##*/}"
-if [ -n "${CURRENT_BRANCH}" ] && [ "${CURRENT_BRANCH}" = "master" ]; then
-	IS_MASTER_BRANCH=1
-else
-	IS_MASTER_BRANCH=0
-fi
-
-if [ "X${GITHUB_EVENT_NAME}" = "Xpush" ]; then
-	IN_PUSH_PROCESS=1
-else
 	IN_PUSH_PROCESS=0
+	if [ -n "${CURRENT_BRANCH}" ] && [ "${CURRENT_BRANCH}" = "master" ]; then
+		IS_MASTER_BRANCH=1
+	else
+		IS_MASTER_BRANCH=0
+	fi
+else
+	#
+	# Call from not github actions
+	#
+	GITHUB_DOMAIN="github.com"
+	ORG_NAME=$(echo "${GITHUB_REPOSITORY}" | awk -F / '{print $1}')
+	REPO_NAME=$(echo "${GITHUB_REPOSITORY}" | awk -F / '{print $2}')
+
+	if [ -z "${GITHUB_DOMAIN}" ] || [ -z "${ORG_NAME}" ] || [ -z "${REPO_NAME}" ]; then
+		echo "[Warning] Could not get repository path(organaization /repository name, etc)."
+	fi
+
+	if [ "${ORG_NAME}" = "yahoojapan" ] || [ "X${ORG_NAME}" = "X${RUN_TAGGING_ORG}" ]; then
+		IS_RELEASE_TAG_PROCESS=1
+	else
+		IS_RELEASE_TAG_PROCESS=0
+	fi
+
+	CURRENT_BRANCH="${GITHUB_REF##*/}"
+	if [ -n "${CURRENT_BRANCH}" ] && [ "${CURRENT_BRANCH}" = "master" ]; then
+		IS_MASTER_BRANCH=1
+	else
+		IS_MASTER_BRANCH=0
+	fi
+
+	if [ "X${GITHUB_EVENT_NAME}" = "Xpush" ]; then
+		IN_PUSH_PROCESS=1
+	else
+		IN_PUSH_PROCESS=0
+	fi
 fi
 
 #----------------------------------------------------------
 # Create temporary directory / temporary file
 #----------------------------------------------------------
 TMP_GHPAGES_DIR="/tmp/${PRGNAME}.dir.$$"
+rm -rf "${TMP_GHPAGES_DIR}"
 mkdir -p "${TMP_GHPAGES_DIR}"
-rm -rf "${TMP_GHPAGES_DIR:?}/"*
 
 TMP_CHANGELOG_CONTENT_FILE="/tmp/${PRGNAME}.content.$$"
 rm -rf "${TMP_CHANGELOG_CONTENT_FILE}"
+
+BACKUP_CHART_YAML_FILE="/tmp/${PRGNAME}_BACKUP_Chart.yaml.$$"
+rm -rf "${BACKUP_CHART_YAML_FILE}"
 
 #----------------------------------------------------------
 # Utilities
@@ -399,7 +434,7 @@ replace_keyword_file()
 #
 # Chart name
 #
-CHART_NAME=$(grep '^[n|N]ame:' Chart.yaml | sed -e 's/[n|N]ame:[[:space:]]*//g' | tr -d '\n')
+CHART_NAME=$(grep '^[n|N]ame:' "${CHART_YAML_FILE}" | sed -e 's/[n|N]ame:[[:space:]]*//g' | tr -d '\n')
 if [ $? -ne 0 ]; then
 	echo "[Error] Not found \"name:\" keyword in Chart yaml file(${CHART_YAML_FILE})."
 	exit 1
@@ -416,6 +451,7 @@ echo "       WGET_BIN                   = ${WGET_BIN}"
 echo "       CHART_YAML_FILE            = ${CHART_YAML_FILE}"
 echo "       CHANGELOG_MD_FILE          = ${CHANGELOG_MD_FILE}"
 echo "       CHART_DIR                  = ${CHART_DIR}"
+echo "       GIT DOMAIN                 = ${GITHUB_DOMAIN}"
 echo "       ORG_NAME                   = ${ORG_NAME}"
 echo "       REPO_NAME                  = ${REPO_NAME}"
 echo "       CURRENT_BRANCH             = ${CURRENT_BRANCH}"
@@ -424,6 +460,7 @@ echo "       IN_PUSH_PROCESS            = ${IN_PUSH_PROCESS}"
 echo "       CHART_NAME                 = ${CHART_NAME}"
 echo "       TMP_GHPAGES_DIR            = ${TMP_GHPAGES_DIR}"
 echo "       TMP_CHANGELOG_CONTENT_FILE = ${TMP_CHANGELOG_CONTENT_FILE}"
+echo "       BACKUP_CHART_YAML_FILE     = ${BACKUP_CHART_YAML_FILE}"
 echo ""
 
 #----------------------------------------------------------
@@ -494,8 +531,13 @@ echo "       => Succeed"
 # Replace "artifacthub.io/changes" content from CHANGELOG.md
 #
 echo "[Info] Reflect this change in artifacthub.io/changes(Chart.yaml)"
+if ! cp -p "${CHART_YAML_FILE}" "${BACKUP_CHART_YAML_FILE}"; then
+	echo "[Error] Could not make backup file for Chart.yaml."
+	exit 1
+fi
 if ! replace_keyword_file "FROM_CHANGELOGMD_CONTENT" "${TMP_CHANGELOG_CONTENT_FILE}" "${CHART_YAML_FILE}"; then
 	echo "[Error] Something error occurred in replacing Chart.yaml contents from CHANGELOG.md."
+	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
 fi
 echo "       => Succeed"
@@ -506,6 +548,7 @@ echo "       => Succeed"
 echo "[Info] Set version/appVersion in Chart.yaml"
 if ! sed -i -e "s/version:.*$/version: ${CHART_VERSION}/g" -e "s/appVersion:.*$/appVersion: \"${CHART_VERSION}\"/g" "${CHART_YAML_FILE}"; then
 	echo "[Error] Something error occurred in replacing version in Chart.yaml"
+	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
 fi
 echo "       => Succeed"
@@ -532,8 +575,9 @@ if [ $? -eq 0 ] && [ -n "${RELEASED_TAG_LIST}" ]; then
 		mkdir -p "${TMP_GHPAGES_DIR}/${VERSION_TAG}"
 		cd "${TMP_GHPAGES_DIR}/${VERSION_TAG}" || exit 1
 
-		if ! "${WGET_BIN}" --quiet "https://github.com/${ORG_NAME}/${REPO_NAME}/releases/download/${VERSION_TAG}/${CHART_NAME}-${VERSION_NUMBER}.tgz"; then
-			echo "[Error] Could not get Asset file(https://github.com/${ORG_NAME}/${REPO_NAME}/releases/download/${VERSION_TAG}/${CHART_NAME}-${VERSION_NUMBER}.tgz) for ${VERSION_TAG} tag."
+		if ! "${WGET_BIN}" --quiet "https://${GITHUB_DOMAIN}/${ORG_NAME}/${REPO_NAME}/releases/download/${VERSION_TAG}/${CHART_NAME}-${VERSION_NUMBER}.tgz"; then
+			echo "[Error] Could not get Asset file(https://${GITHUB_DOMAIN}/${ORG_NAME}/${REPO_NAME}/releases/download/${VERSION_TAG}/${CHART_NAME}-${VERSION_NUMBER}.tgz) for ${VERSION_TAG} tag."
+			cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 			exit 1
 		fi
 	done
@@ -555,6 +599,7 @@ echo "[Info] Create Helm Chart package"
 HELM_COMMAND_MSG=$(helm package "${CHART_DIR}" 2>&1)
 if [ $? -ne 0 ]; then
 	echo "[Error] Could not create helm package file(${CHART_NAME}-${CHART_VERSION}.tgz) : \"${HELM_COMMAND_MSG}\""
+	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
 fi
 
@@ -563,6 +608,7 @@ fi
 #
 if [ ! -f "${CHART_NAME}-${CHART_VERSION}.tgz" ]; then
 	echo "[Error] Not found created helm package file(${CHART_NAME}-${CHART_VERSION}.tgz)."
+	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
 fi
 
@@ -578,6 +624,7 @@ fi
 mkdir -p "${TMP_GHPAGES_DIR}/v${CHART_VERSION}"
 if ! cp -p "${CHART_NAME}-${CHART_VERSION}.tgz" "${TMP_GHPAGES_DIR}/v${CHART_VERSION}"; then
 	echo "[Error] Failed to copy created helm package file(${CHART_NAME}-${CHART_VERSION}.tgz) to temporary directory(${TMP_GHPAGES_DIR})."
+	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
 fi
 
@@ -591,19 +638,65 @@ echo "[Info] Create index.yaml"
 #
 # Create index.yaml
 #
-if ! helm repo index "${TMP_GHPAGES_DIR}" --url "https://github.com/${ORG_NAME}/${REPO_NAME}/releases/download/"; then
+if ! helm repo index "${TMP_GHPAGES_DIR}" --url "https://${GITHUB_DOMAIN}/${ORG_NAME}/${REPO_NAME}/releases/download/"; then
 	echo "[Error] Failed to create index.yaml in temporary directory(${TMP_GHPAGES_DIR})."
+	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
 fi
 if [ ! -f "${TMP_GHPAGES_DIR}/index.yaml" ]; then
 	echo "[Error] Not found created index.yaml in temporary directory(${TMP_GHPAGES_DIR})."
+	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
 fi
-echo "       => Succeed"
+echo "       => Succeed : ${TMP_GHPAGES_DIR}/index.yaml"
 
 echo "[Info] Created index.yaml"
 sed -e 's/^/       /g' "${TMP_GHPAGES_DIR}/index.yaml"
 echo ""
+
+#----------------------------------------------------------
+# Create git tag name, Asset file
+#----------------------------------------------------------
+echo "[Info] Create git tag name and Asset file"
+echo "       => Start"
+
+#
+# tag name
+#
+echo "[Info] Git tag name"
+echo "       => Tag name : v${CHART_VERSION}"
+
+#
+# Create release notes file
+#
+echo "[Info] Create release notes"
+_RELEASE_NOTES_TMP_FILE="/tmp/${PRGNAME}.notes.$$"
+{
+	echo "## Release Version ${CHART_VERSION}"
+	echo ""
+
+	if [ "${IS_INITIAL_VERSION}" -eq 1 ]; then
+		echo "### First release version"
+	else
+		echo "### Updates from ${LATEST_TAG_VERSION} to ${CHART_VERSION}"
+	fi
+
+	cat "${TMP_CHANGELOG_CONTENT_FILE}"
+} > "${_RELEASE_NOTES_TMP_FILE}"
+echo "       => Created : ${_RELEASE_NOTES_TMP_FILE}"
+
+echo "[Info] Created release notes"
+sed -e 's/^/       /g' "${_RELEASE_NOTES_TMP_FILE}"
+echo ""
+
+#
+# Restore Chart.yaml from backup
+#
+if ! cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"; then
+	echo "[Error] Could not restore Chart.yaml from backup."
+	exit 1
+fi
+rm -f "${BACKUP_CHART_YAML_FILE}"
 
 #----------------------------------------------------------
 # Create git tag with Asset and Update gh-pages branch
@@ -623,27 +716,12 @@ if [ "${IS_RELEASE_TAG_PROCESS}" -eq 1 ]; then
 		fi
 
 		#
-		# Create release notes file
+		# Check release notes file
 		#
-		echo "[Info] Create release notes"
-		_RELEASE_NOTES_TMP_FILE="/tmp/${PRGNAME}.notes.$$"
-		{
-			echo "## Release Version ${CHART_VERSION}"
-			echo ""
-
-			if [ "${IS_INITIAL_VERSION}" -eq 1 ]; then
-				echo "### First release version"
-			else
-				echo "### Updates from ${LATEST_TAG_VERSION} to ${CHART_VERSION}"
-			fi
-
-			cat "${TMP_CHANGELOG_CONTENT_FILE}"
-		} > "${_RELEASE_NOTES_TMP_FILE}"
-		echo "       => Succeed"
-
-		echo "[Info] Created release notes"
-		sed -e 's/^/       /g' "${_RELEASE_NOTES_TMP_FILE}"
-		echo ""
+		if [ ! -f "${_RELEASE_NOTES_TMP_FILE}" ]; then
+			echo "[Error] Not found release note file : ${_RELEASE_NOTES_TMP_FILE}"
+			exit 1
+		fi
 
 		#
 		# Set release tag with asset file
@@ -696,10 +774,10 @@ if [ "${IS_RELEASE_TAG_PROCESS}" -eq 1 ]; then
 		fi
 		echo "       => Succeed"
 	else
-		echo "       => Skipped(this process is not for release)"
+		echo "       => Skipped(this process is not for release or local building)"
 	fi
 else
-	echo "       => Skipped(this repository does not set a release tag)"
+	echo "       => Skipped(this repository does not set a release tag or local building)"
 fi
 
 #----------------------------------------------------------
