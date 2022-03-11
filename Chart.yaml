@@ -47,6 +47,7 @@ icon: https://antpick.ax/images/antpickax_circle_512x512.png
 deprecated: false
 version: 1.0.0
 annotations:
+  catalog.cattle.io/display-name: "K2HR3 - RBAC System"
   artifacthub.io/changes: |
     - FROM_CHANGELOGMD_CONTENT
 

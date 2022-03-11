@@ -2098,7 +2098,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3app-dummy
-          image: antpickax/k2hr3-app:latest
+          image: antpickax/k2hr3-app:1.0.4
           env:
             - name: K2HR3_MANUAL_START
               value: "false"
@@ -2223,7 +2223,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3dkc-dummy
-          image: antpickax/k2hdkc:latest
+          image: antpickax/k2hdkc:1.0.3
           volumeMounts:
             - mountPath: /etc/antpickax
               name: antpickax-etc-volume
@@ -2237,7 +2237,7 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-serverproc-wrap.sh", "server"]
         - name: sidecar-r3dkc-dummy
-          image: antpickax/chmpx:latest
+          image: antpickax/chmpx:1.0.96
           volumeMounts:
             - mountPath: /etc/antpickax
               name: antpickax-etc-volume
@@ -2353,7 +2353,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3api-dummy
-          image: antpickax/k2hr3-api:latest
+          image: antpickax/k2hr3-api:1.0.7
           env:
             - name: K2HR3_MANUAL_START
               value: "false"
@@ -2370,7 +2370,7 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-api-wrap.sh"]
         - name: sidecar-r3api-dummy
-          image: antpickax/chmpx:latest
+          image: antpickax/chmpx:1.0.96
           volumeMounts:
             - mountPath: /etc/antpickax
               name: antpickax-etc-volume

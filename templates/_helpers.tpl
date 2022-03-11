@@ -224,6 +224,40 @@ Cert: {{ b64enc $ca.Cert }}
 Key: {{ b64enc $ca.Key }}
 {{- end }}
 
+
+{{-
+/*---------------------------------------------------------
+* Set organization and version fo images
+*
+*/}}
+{{- define "images.k2hr3appOrg" -}}
+{{- default "antpickax" .Values.images.app.organization }}
+{{- end }}
+{{- define "images.k2hr3appVer" -}}
+{{- default "1.0.4" .Values.images.app.version }}
+{{- end }}
+
+{{- define "images.k2hr3apiOrg" -}}
+{{- default "antpickax" .Values.images.api.organization }}
+{{- end }}
+{{- define "images.k2hr3apiVer" -}}
+{{- default "1.0.7" .Values.images.api.version }}
+{{- end }}
+
+{{- define "images.k2hdkcOrg" -}}
+{{- default "antpickax" .Values.images.dkc.organization }}
+{{- end }}
+{{- define "images.k2hdkcVer" -}}
+{{- default "1.0.3" .Values.images.dkc.version }}
+{{- end }}
+
+{{- define "images.chmpxOrg" -}}
+{{- default "antpickax" .Values.images.chmpx.organization }}
+{{- end }}
+{{- define "images.chmpxVer" -}}
+{{- default "1.0.96" .Values.images.chmpx.version }}
+{{- end }}
+
 {{-
 /*
 * Local variables:

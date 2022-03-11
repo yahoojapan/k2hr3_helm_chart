@@ -114,7 +114,7 @@
               "exclusiveMinimum": 0
             },
             "extHostname": {
-              "description": "[optional] Specify the external hostname(FQDN) for K2HR3 REST API system, default is empty in which case internal hostanme will be used.",
+              "description": "[optional] Specify the external hostname(FQDN) for K2HR3 REST API system, default is empty in which case internal hostname will be used.",
               "anyOf": [
                 {
                   "type": "string",
@@ -154,7 +154,7 @@
               "exclusiveMinimum": 0
             },
             "extHostname": {
-              "description": "[optional] Specify the external hostname(FQDN) for K2HR3 Web Application system, default is empty in which case internal hostanme will be used.",
+              "description": "[optional] Specify the external hostname(FQDN) for K2HR3 Web Application system, default is empty in which case internal hostname will be used.",
               "anyOf": [
                 {
                   "type": "string",
@@ -187,6 +187,94 @@
         "dkc",
         "api",
         "app"
+      ]
+    },
+
+    "images": {
+      "description": "[optional] Specify the organization and version of the image used by the pods deployed.",
+      "type": "object",
+      "properties": {
+        "app": {
+          "description": "[optional] Specify the K2HR3 Web Application(k2hr3-app) image organization and version.",
+          "type": "object",
+          "properties": {
+            "organization": {
+              "description": "[optional] Specify the organaization for K2HR3 Web Application, default is empty in which case antpickax will be used.",
+              "type": "string"
+            },
+            "version": {
+              "description": "[optional] Specify the version for K2HR3 Web Application, default is empty in which case one of version number will be used.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "organization",
+            "version"
+          ]
+        },
+
+        "api": {
+          "description": "[optional] Specify the K2HR3 REST API(k2hr3-api) image organization and version.",
+          "type": "object",
+          "properties": {
+            "organization": {
+              "description": "[optional] Specify the organaization for K2HR3 REST API, default is empty in which case antpickax will be used.",
+              "type": "string"
+            },
+            "version": {
+              "description": "[optional] Specify the version for K2HR3 REST API, default is empty in which case one of version number will be used.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "organization",
+            "version"
+          ]
+        },
+
+        "dkc": {
+          "description": "[optional] Specify the backend K2HDKC image organization and version.",
+          "type": "object",
+          "properties": {
+            "organization": {
+              "description": "[optional] Specify the organaization for the backend K2HDKC image, default is empty in which case antpickax will be used.",
+              "type": "string"
+            },
+            "version": {
+              "description": "[optional] Specify the version for the backend K2HDKC image, default is empty in which case one of version number will be used.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "organization",
+            "version"
+          ]
+        },
+
+        "chmpx": {
+          "description": "[optional] Specify the backend CHMPX image organization and version.",
+          "type": "object",
+          "properties": {
+            "organization": {
+              "description": "[optional] Specify the organaization for the backend CHMPX image, default is empty in which case antpickax will be used.",
+              "type": "string"
+            },
+            "version": {
+              "description": "[optional] Specify the version for the backend CHMPX image, default is empty in which case one of version number will be used.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "organization",
+            "version"
+          ]
+        }
+      },
+      "required": [
+        "app",
+        "api",
+        "dkc",
+        "chmpx"
       ]
     },
 
