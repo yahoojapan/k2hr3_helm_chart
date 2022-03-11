@@ -46,6 +46,10 @@ file ready.
 -->
 # Change Log for K2HR3 Helm Chart
 
+## [1.0.2] - 2022-03-11
+### Changed
+- Fixed a bug(helm_package.sh) and Updated some files
+
 ## [1.0.1] - 2022-03-11
 ### Changed
 - Supported RANCHER as RANCHER Helm Chart
@@ -54,5 +58,6 @@ file ready.
 ### Changed
 - Initial Commit and publishing
 
+[1.0.2]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/58ea5df...v1.0.0
