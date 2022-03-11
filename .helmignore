@@ -21,6 +21,7 @@
 
 # Git files/directories
 .git/
+.github/
 .gitignore
 
 # For helm command
@@ -33,6 +34,7 @@
 *.tmp
 *.orig
 *.org
+*.tgz
 *~
 
 # Project files

@@ -405,7 +405,7 @@ replace_keyword_file()
 		return 1
 	fi
 
-
+	BACKUP_IFS="${IFS}"
 	while IFS="";read -r LINE; do
 		_FOUND_KEYWORD_LINE=$(echo "${LINE}" | grep "^[[:space:]]*[-]*[[:space:]]*${_REPLACE_KEYWORD}[[:space:]]*$")
 		if [ -n "${_FOUND_KEYWORD_LINE}" ]; then
@@ -418,6 +418,7 @@ replace_keyword_file()
 			echo "${LINE}"
 		fi
 	done < "${_TARGET_REPLACED_FILE}" > "${_REPLACE_TMP_FILE}"
+	IFS="${BACKUP_IFS}"
 
 	if ! cp "${_REPLACE_TMP_FILE}" "${_TARGET_REPLACED_FILE}"; then
 		echo "[Error] Could not override target file(${_TARGET_REPLACED_FILE})."
