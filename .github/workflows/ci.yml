@@ -37,6 +37,12 @@ on:
     - cron: '0 15 * * 0'
 
 #
+# Environments for azure/setup-helm@v3
+#
+env:
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+#
 # Jobs
 #
 jobs:
@@ -57,7 +63,7 @@ jobs:
       #
       # Install latest Helm version
       #
-      - uses: azure/setup-helm@v1
+      - uses: azure/setup-helm@v3
         id: install
 
       #
