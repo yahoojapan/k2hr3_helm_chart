@@ -81,7 +81,7 @@ data:
     #----------------------------------------------------------
     # Main processing
     #----------------------------------------------------------
-    if [ "X$1" = "X${WATCHER_OPT}" ]; then
+    if [ -n "$1" ] && [ "$1" = "${WATCHER_OPT}" ]; then
     	#
     	# Run watcher
     	#
@@ -109,16 +109,13 @@ data:
     
     	LOOP_BREAK=0
     	while [ "${LOOP_BREAK}" -eq 0 ]; do
-    		chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring servicein -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1
-    		if [ $? -eq 0 ]; then
-    			chmpxstatus -conf "${INI_FILE_PATH}" -self | grep 'status[[:space:]]*=' | grep '\[ADD\]' | grep '\[Pending\]' >/dev/null 2>&1
-    			if [ $? -eq 0 ]; then
+    		if chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring servicein -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1; then
+    			if chmpxstatus -conf "${INI_FILE_PATH}" -self | grep 'status[[:space:]]*=' | grep '\[ADD\]' | grep '\[Pending\]' >/dev/null 2>&1; then
     				# 
     				# When the status is "ADD:Pending", type a new ServiceIn command after short sleep.
     				#
     				sleep ${SLEEP_MIDDLE}
-    				chmpxstatus -conf "${INI_FILE_PATH}" -self | grep 'status[[:space:]]*=' | grep '\[ADD\]' | grep '\[Pending\]' >/dev/null 2>&1
-    				if [ $? -eq 0 ]; then
+    				if chmpxstatus -conf "${INI_FILE_PATH}" -self | grep 'status[[:space:]]*=' | grep '\[ADD\]' | grep '\[Pending\]' >/dev/null 2>&1; then
     					#
     					# To Service Out
     					#
@@ -130,14 +127,12 @@ data:
     				chmpxlinetool -conf "${INI_FILE_PATH}" -run "${WATCHER_STSUPDATE_FILE_PATH}" >/dev/null 2>&1
     			fi
     		else
-    			chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring serviceout -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1
-    			if [ $? -eq 0 ]; then
+    			if chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring serviceout -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1; then
     				# 
     				# When the status is "ServiceOut:NoSuspend", type a new ServiceIn command after short sleep.
     				#
     				sleep "${SLEEP_MIDDLE}"
-    				chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring serviceout -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1
-    				if [ $? -eq 0 ]; then
+    				if chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring serviceout -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1; then
     					#
     					# To Service In
     					#
@@ -161,10 +156,8 @@ data:
     		#
     		STATUS_KEEP_TIME="${SLEEP_LONG}"
     		while [ "${STATUS_KEEP_TIME}" -gt 0 ]; do
-    			chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring serviceout -suspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1
-    			if [ $? -ne 0 ]; then
-    				chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring servicein -suspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1
-    				if [ $? -ne 0 ]; then
+    			if ! chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring serviceout -suspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1; then
+    				if ! chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring servicein -suspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1; then
     					break;
     				fi
     			fi
@@ -247,10 +240,13 @@ data:
     #----------------------------------------------------------
     # Make configuration file path
     #----------------------------------------------------------
-    if [ "X$1" = "XSERVER" ] || [ "X$1" = "Xserver" ]; then
+    if [ -z "$1" ]; then
     	CHMPX_MODE="server"
     	SLEEP_GAP=10
-    elif [ "X$1" = "XSLAVE" ] || [ "X$1" = "Xslave" ]; then
+    elif [ "$1" = "SERVER" ] || [ "$1" = "server" ]; then
+    	CHMPX_MODE="server"
+    	SLEEP_GAP=10
+    elif [ "$1" = "SLAVE" ] || [ "$1" = "slave" ]; then
     	CHMPX_MODE="slave"
     	SLEEP_GAP=30
     else
@@ -288,8 +284,10 @@ data:
     while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
     	REST_NAMES=""
     	for _ONE_NAME in ${ALL_HOST_NAMES}; do
-    		nslookup "${_ONE_NAME}" >/dev/null 2>&1
-    		if [ $? -ne 0 ]; then
+    		if [ -z "${_ONE_NAME}" ]; then
+    			continue
+    		fi
+    		if ! nslookup "${_ONE_NAME}" >/dev/null 2>&1; then
     			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
     			continue
     		fi
@@ -298,8 +296,7 @@ data:
     		#
     		_ONE_IP=$(nslookup "${_ONE_NAME}" | grep '[A|a]ddress:' | tail -1 | sed -e 's/^[[:space:]]*[A|a]ddress:[[:space:]]*//g')
     
-    		nslookup "${_ONE_IP}" >/dev/null 2>&1
-    		if [ $? -ne 0 ]; then
+    		if ! nslookup "${_ONE_IP}" >/dev/null 2>&1; then
     			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
     			continue
     		fi
@@ -307,7 +304,7 @@ data:
     
     		_FIND_NAME_IN_LIST=0
     		for _GET_NAME in ${_GET_NAMES}; do
-    			if [ "X${_GET_NAME}" = "X${_ONE_NAME}" ]; then
+    			if [ -n "${_GET_NAME}" ] && [ "${_GET_NAME}" = "${_ONE_NAME}" ]; then
     				_FIND_NAME_IN_LIST=1
     				break;
     			fi
@@ -432,47 +429,47 @@ data:
     #----------------------------------------------------------
     # Check enviroment values
     #----------------------------------------------------------
-    if [ "X${CHMPX_INI_TEMPLATE_FILE}" = "X" ]; then
+    if [ -z "${CHMPX_INI_TEMPLATE_FILE}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_INI_DIR}" = "X" ]; then
+    if [ -z "${CHMPX_INI_DIR}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_SERVER_PORT}" = "X" ]; then
+    if [ -z "${CHMPX_SERVER_PORT}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_SERVER_CTLPORT}" = "X" ]; then
+    if [ -z "${CHMPX_SERVER_CTLPORT}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_SLAVE_CTLPORT}" = "X" ]; then
+    if [ -z "${CHMPX_SLAVE_CTLPORT}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_SERVER_COUNT}" = "X" ]; then
+    if [ -z "${CHMPX_SERVER_COUNT}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_SERVER_NAMEBASE}" = "X" ]; then
+    if [ -z "${CHMPX_SERVER_NAMEBASE}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_SLAVE_COUNT}" = "X" ]; then
+    if [ -z "${CHMPX_SLAVE_COUNT}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_SLAVE_NAMEBASE}" = "X" ]; then
+    if [ -z "${CHMPX_SLAVE_NAMEBASE}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_POD_NAMESPACE}" = "X" ]; then
+    if [ -z "${CHMPX_POD_NAMESPACE}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_DEFAULT_DOMAIN}" = "X" ]; then
+    if [ -z "${CHMPX_DEFAULT_DOMAIN}" ]; then
     	exit 1
     fi
-    if [ "X${CHMPX_SELF_HOSTNAME}" = "X" ]; then
+    if [ -z "${CHMPX_SELF_HOSTNAME}" ]; then
     	exit 1
     fi
     
     #
     # Allow empty value
     #
-    if [ "X${SEC_CA_MOUNTPOINT}" != "X" ] && [ ! -d "${SEC_CA_MOUNTPOINT}" ]; then
+    if [ -n "${SEC_CA_MOUNTPOINT}" ] && [ ! -d "${SEC_CA_MOUNTPOINT}" ]; then
     	exit 1
     fi
     
@@ -491,11 +488,13 @@ data:
     #----------------------------------------------------------
     # Set chmpx mode and set common values
     #----------------------------------------------------------
-    if [ "X${CHMPX_MODE}" = "XSERVER" ] || [ "X${CHMPX_MODE}" = "Xserver" ]; then
+    if [ -z "${CHMPX_MODE}" ]; then
+    	exit 1
+    elif [ "${CHMPX_MODE}" = "SERVER" ] || [ "${CHMPX_MODE}" = "server" ]; then
     	CHMPX_MODE="SERVER"
     	CHMPX_SELFPORT=${CHMPX_SERVER_CTLPORT}
     	CHMPX_INI_FILENAME="server.ini"
-    elif [ "X${CHMPX_MODE}" = "XSLAVE" ] || [ "X${CHMPX_MODE}" = "Xslave" ]; then
+    elif [ "${CHMPX_MODE}" = "SLAVE" ] || [ "${CHMPX_MODE}" = "slave" ]; then
     	CHMPX_MODE="SLAVE"
     	CHMPX_SELFPORT=${CHMPX_SLAVE_CTLPORT}
     	CHMPX_INI_FILENAME="slave.ini"
@@ -514,7 +513,7 @@ data:
     GLOBAL_PART_SLAVE_CERT=""
     GLOBAL_PART_SLAVE_PRIKEY=""
     
-    if [ "X${SEC_CA_MOUNTPOINT}" != "X" ]; then
+    if [ -n "${SEC_CA_MOUNTPOINT}" ]; then
     	#
     	# Create certificate for me
     	#
@@ -607,9 +606,8 @@ data:
     WAIT_SEC=5
     POD_NUMBER=$(echo "${CHMPX_SELF_HOSTNAME}" | sed 's/-/ /g' | awk '{print $NF}')
     
-    # shellcheck disable=SC2003
-    expr "${POD_NUMBER}" + 1 >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
+    # shellcheck disable=SC2003,SC2181
+    if expr "${POD_NUMBER}" + 1 >/dev/null 2>&1; then
     	WAIT_SEC=$((WAIT_SEC * POD_NUMBER))
     fi
     
@@ -674,8 +672,7 @@ data:
     	exit 1
     fi
     
-    cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"
-    if [ $? -ne 0 ]; then
+    if ! cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"; then
     	exit 1
     fi
     
@@ -691,8 +688,10 @@ data:
     while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
     	REST_NAMES=""
     	for _ONE_NAME in ${ALL_HOST_NAMES}; do
-    		nslookup "${_ONE_NAME}" >/dev/null 2>&1
-    		if [ $? -ne 0 ]; then
+    		if [ -z "${_ONE_NAME}" ]; then
+    			continue
+    		fi
+    		if ! nslookup "${_ONE_NAME}" >/dev/null 2>&1; then
     			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
     			continue
     		fi
@@ -701,8 +700,7 @@ data:
     		#
     		_ONE_IP=$(nslookup "${_ONE_NAME}" | grep '[A|a]ddress:' | tail -1 | sed -e 's/^[[:space:]]*[A|a]ddress:[[:space:]]*//g')
     
-    		nslookup "${_ONE_IP}" >/dev/null 2>&1
-    		if [ $? -ne 0 ]; then
+    		if ! nslookup "${_ONE_IP}" >/dev/null 2>&1; then
     			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
     			continue
     		fi
@@ -710,7 +708,7 @@ data:
     
     		_FIND_NAME_IN_LIST=0
     		for _GET_NAME in ${_GET_NAMES}; do
-    			if [ "X${_GET_NAME}" = "X${_ONE_NAME}" ]; then
+    			if [ -n "${_GET_NAME}" ] && [ "${_GET_NAME}" = "${_ONE_NAME}" ]; then
     				_FIND_NAME_IN_LIST=1
     				break;
     			fi
@@ -741,8 +739,7 @@ data:
     #
     CHMPX_UP=0
     while [ "${CHMPX_UP}" -eq 0 ]; do
-    	chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring slave -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1
-    	if [ $? -eq 0 ]; then
+    	if chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring slave -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1; then
     		CHMPX_UP=1
     	else
     		sleep "${SLEEP_SHORT}"
@@ -762,7 +759,7 @@ data:
     #
     set -e
     
-    if [ "X${K2HR3_MANUAL_START}" = "Xtrue" ]; then
+    if [ -n "${K2HR3_MANUAL_START}" ] && [ "${K2HR3_MANUAL_START}" = "true" ]; then
     	while true; do
     		sleep "${SLEEP_LONG_MANUAL}"
     	done
@@ -834,7 +831,7 @@ data:
     #	%%K2HR3_API_EXTERNAL_HOST%%	-> Environment value(usually not effect, it already set.)
     #	%%K2HR3_API_EXTERNAL_PORT%%	-> Environment value or NodePort
     #
-    if [ -z "${K2HR3APP_EXTERNAL_PORT}" ] || [ "X${K2HR3APP_EXTERNAL_PORT}" = "X0" ] ; then
+    if [ -z "${K2HR3APP_EXTERNAL_PORT}" ] || [ "${K2HR3APP_EXTERNAL_PORT}" = "0" ] ; then
     	if [ -z "${K2HR3APP_SERVICE_NAME}" ]; then
     		exit 1
     	fi
@@ -844,7 +841,7 @@ data:
     	K2HR3APP_EXTERNAL_PORT=$(env | grep "${TMP_APP_NP_NAME}" | sed -e "s/${TMP_APP_NP_NAME}//g" | tr -d '\n')
     fi
     
-    if [ -z "${K2HR3API_EXTERNAL_PORT}" ] || [ "X${K2HR3API_EXTERNAL_PORT}" = "X0" ] ; then
+    if [ -z "${K2HR3API_EXTERNAL_PORT}" ] || [ "${K2HR3API_EXTERNAL_PORT}" = "0" ] ; then
     	if [ -z "${K2HR3API_SERVICE_NAME}" ]; then
     		exit 1
     	fi
@@ -855,14 +852,13 @@ data:
     fi
     
     # shellcheck disable=SC2153
-    sed	-e "s#%%K2HR3_APP_EXTERNAL_HOST%%#${K2HR3APP_EXTERNAL_HOST}#g"	\
-    	-e "s#%%K2HR3_APP_EXTERNAL_PORT%%#${K2HR3APP_EXTERNAL_PORT}#g"	\
-    	-e "s#%%K2HR3_API_EXTERNAL_HOST%%#${K2HR3API_EXTERNAL_HOST}#g"	\
-    	-e "s#%%K2HR3_API_EXTERNAL_PORT%%#${K2HR3API_EXTERNAL_PORT}#g"	\
-    	< "${CONFIGMAP_PRODUCTION_FILE}" \
-    	> "${PRODUCTION_FILE}"
+    if ! sed -e "s#%%K2HR3_APP_EXTERNAL_HOST%%#${K2HR3APP_EXTERNAL_HOST}#g"	\
+    		-e "s#%%K2HR3_APP_EXTERNAL_PORT%%#${K2HR3APP_EXTERNAL_PORT}#g"	\
+    		-e "s#%%K2HR3_API_EXTERNAL_HOST%%#${K2HR3API_EXTERNAL_HOST}#g"	\
+    		-e "s#%%K2HR3_API_EXTERNAL_PORT%%#${K2HR3API_EXTERNAL_PORT}#g"	\
+    		< "${CONFIGMAP_PRODUCTION_FILE}"								\
+    		> "${PRODUCTION_FILE}"; then
     
-    if [ $? -ne 0 ]; then
     	exit 1
     fi
     
@@ -877,13 +873,10 @@ data:
     SYSTEM_CA_CERT_K2HR3_FILE_PATH="${SYSTEM_CA_CERT_DIR}/${SYSTEM_CA_CERT_K2HR3_FILE}"
     
     if [ -f "${K2HR3_CA_CERT_ORG_FILE_PATH}" ]; then
-    	cp "${K2HR3_CA_CERT_ORG_FILE_PATH}" "${SYSTEM_CA_CERT_K2HR3_FILE_PATH}"
-    	if [ $? -ne 0 ]; then
+    	if ! cp "${K2HR3_CA_CERT_ORG_FILE_PATH}" "${SYSTEM_CA_CERT_K2HR3_FILE_PATH}"; then
     		exit 1
     	fi
-    
-    	update-ca-certificates
-    	if [ $? -ne 0 ]; then
+    	if ! update-ca-certificates; then
     		exit 1
     	fi
     fi
@@ -891,15 +884,13 @@ data:
     #----------------------------------------------------------
     # Check curl command and install
     #----------------------------------------------------------
-    CURL_COMMAND=$(command -v curl | tr -d '\n')
-    if [ $? -ne 0 ] || [ -z "${CURL_COMMAND}" ]; then
-    	APK_COMMAND=$(command -v apk | tr -d '\n')
-    	if [ $? -ne 0 ] || [ -z "${APK_COMMAND}" ]; then
+    # shellcheck disable=SC2034
+    if ! CURL_COMMAND=$(command -v curl | tr -d '\n'); then
+    	if ! APK_COMMAND=$(command -v apk | tr -d '\n'); then
     		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
     		exit 1
     	fi
-    	${APK_COMMAND} add -q --no-progress --no-cache curl
-    	if [ $? -ne 0 ]; then
+    	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
     		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
     		exit 1
     	fi
@@ -915,10 +906,12 @@ data:
     	API_SCHEMA=$(grep 'apischeme' "${PRODUCTION_FILE}" 2>/dev/null | sed -e "s/['|,]//g" -e 's/^[[:space:]]*apischeme:[[:space:]]*//g' 2>/dev/null | tr -d '\n')
     	API_UP=0
     	while [ "${API_UP}" -eq 0 ]; do
-    		HTTP_CODE=$(curl -s -S -w '%{http_code}\n' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1)
-    		if [ $? -eq 0 ] && [ "${HTTP_CODE}" -eq 200 ]; then
-    			API_UP=1
-    		else
+    		if HTTP_CODE=$(curl -s -S -w '%{http_code}\n' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1); then
+    			if [ -n "${HTTP_CODE}" ] && [ "${HTTP_CODE}" -eq 200 ]; then
+    				API_UP=1
+    			fi
+    		fi
+    		if [ "${API_UP}" -ne 1 ]; then
     			sleep "${SLEEP_SHORT}"
     			RETRYCOUNT=$((RETRYCOUNT - 1))
     			if [ "${RETRYCOUNT}" -le 0 ]; then
@@ -937,7 +930,7 @@ data:
     #
     set -e
     
-    if [ "X${K2HR3_MANUAL_START}" = "Xtrue" ]; then
+    if [ -n "${K2HR3_MANUAL_START}" ] && [ "${K2HR3_MANUAL_START}" = "true" ]; then
     	while true; do
     		sleep ${SLEEP_LONG_MANUAL}
     	done
@@ -996,21 +989,21 @@ data:
     #----------------------------------------------------------
     # Check enviroment values
     #----------------------------------------------------------
-    if [ "X${ANTPICKAX_ETC_DIR}" = "X" ]; then
+    if [ -z "${ANTPICKAX_ETC_DIR}" ]; then
     	exit 1
     fi
     
     #
     # Allow empty value
     #
-    if [ "X${SEC_CA_MOUNTPOINT}" != "X" ] && [ ! -d "${SEC_CA_MOUNTPOINT}" ]; then
+    if [ -n "${SEC_CA_MOUNTPOINT}" ] && [ ! -d "${SEC_CA_MOUNTPOINT}" ]; then
     	exit 1
     fi
     
     #----------------------------------------------------------
     # Certificates
     #----------------------------------------------------------
-    if [ "X${SEC_CA_MOUNTPOINT}" != "X" ]; then
+    if [ -n "${SEC_CA_MOUNTPOINT}" ]; then
     	#
     	# Create certificate for me
     	#
@@ -1102,9 +1095,7 @@ data:
     	echo "[ERROR] Third paranmeter for period days is not specified."
     	exit 1
     fi
-    # shellcheck disable=SC2003
-    expr "$1" + 1 >/dev/null 2>&1
-    if [ $? -ne 0 ]; then
+    if echo "$1" | grep -q '[^0-9]'; then
     	echo "[ERROR] Third paranmeter for period days is not number."
     	exit 1
     fi
@@ -1120,13 +1111,11 @@ data:
     fi
     SAN_EXTHOSTNAME=""
     TMP_EXTHOSTNAME=$(echo "$1" | sed -e 's/EXTHOSTNAME=//g')
-    if [ "X${TMP_EXTHOSTNAME}" != "X" ]; then
-    	echo "${TMP_EXTHOSTNAME}" | grep -q -E -o '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$' 2>/dev/null
-    	if [ $? -eq 0 ]; then
+    if [ -n "${TMP_EXTHOSTNAME}" ]; then
+    	if echo "${TMP_EXTHOSTNAME}" | grep -q -E -o '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$' 2>/dev/null; then
     		SAN_EXTHOSTNAME="IP:${TMP_EXTHOSTNAME}"
     	else
-    		echo "${TMP_EXTHOSTNAME}" | grep -q -E -o '^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$'
-    		if [ $? -eq 0 ]; then
+    		if echo "${TMP_EXTHOSTNAME}" | grep -q -E -o '^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$'; then
     			SAN_EXTHOSTNAME="IP:${TMP_EXTHOSTNAME}"
     		else
     			SAN_EXTHOSTNAME="DNS:${TMP_EXTHOSTNAME}"
@@ -1139,7 +1128,7 @@ data:
     #
     SERVICE_IP_SANS=""
     while [ $# -ne 0 ]; do
-    	if [ "X$1" != "X" ]; then
+    	if [ -n "$1" ]; then
     		#
     		# Parameter is service name(ex. "np-r3app").
     		# Then convert it to environment name(ex. NP_R3APP_SERVICE_HOST) for IP address
@@ -1184,33 +1173,27 @@ data:
     CERT_WORK_DIR="${OUTPUT_DIR}/certwork"
     
     if [ ! -d "${CERT_WORK_DIR}" ]; then
-    	mkdir -p "${CERT_WORK_DIR}"
-    	if [ $? -ne 0 ]; then
+    	if ! mkdir -p "${CERT_WORK_DIR}"; then
     		echo "[ERROR] Could not create directory ${CERT_WORK_DIR}"
     		exit 1
     	fi
-    	mkdir -p "${CERT_WORK_DIR}/private"
-    	if [ $? -ne 0 ]; then
+    	if ! mkdir -p "${CERT_WORK_DIR}/private"; then
     		echo "[ERROR] Could not create directory ${CERT_WORK_DIR}/private"
     		exit 1
     	fi
-    	mkdir -p "${CERT_WORK_DIR}/newcerts"
-    	if [ $? -ne 0 ]; then
+    	if ! mkdir -p "${CERT_WORK_DIR}/newcerts"; then
     		echo "[ERROR] Could not create directory ${CERT_WORK_DIR}/newcerts"
     		exit 1
     	fi
-    	mkdir -p "${CERT_WORK_DIR}/oldcerts"
-    	if [ $? -ne 0 ]; then
+    	if ! mkdir -p "${CERT_WORK_DIR}/oldcerts"; then
     		echo "[ERROR] Could not create directory ${CERT_WORK_DIR}/oldcerts"
     		exit 1
     	fi
-    	date +%s > "${CERT_WORK_DIR}/serial"
-    	if [ $? -ne 0 ]; then
+    	if ! date +%s > "${CERT_WORK_DIR}/serial"; then
     		echo "[ERROR] Could not create file ${CERT_WORK_DIR}/serial"
     		exit 1
     	fi
-    	touch "${CERT_WORK_DIR}/index.txt"
-    	if [ $? -ne 0 ]; then
+    	if ! touch "${CERT_WORK_DIR}/index.txt"; then
     		echo "[ERROR] Could not create file ${CERT_WORK_DIR}/index.txt"
     		exit 1
     	fi
@@ -1234,7 +1217,7 @@ data:
     #
     ORG_CA_CERT_FILE=$(find "${CA_CERT_DIR}/" -name '*_CA.crt' | head -1)
     ORG_CA_KEY_FILE=$(find "${CA_CERT_DIR}/" -name '*_CA.key' | head -1)
-    if [ "X${ORG_CA_CERT_FILE}" = "X" ] || [ "X${ORG_CA_KEY_FILE}" = "X" ]; then
+    if [ -z "${ORG_CA_CERT_FILE}" ] || [ -z "${ORG_CA_KEY_FILE}" ]; then
     	echo "[ERROR] CA certificate file or private key file are not existed."
     	exit 1
     fi
@@ -1263,15 +1246,13 @@ data:
     #----------------------------------------------------------
     # Check openssl command
     #----------------------------------------------------------
-    OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
-    if [ $? -ne 0 ] || [ -z "${OPENSSL_COMMAND}" ]; then
-    	APK_COMMAND=$(command -v apk | tr -d '\n')
-    	if [ $? -ne 0 ] || [ -z "${APK_COMMAND}" ]; then
+    # shellcheck disable=SC2034
+    if ! OPENSSL_COMMAND=$(command -v openssl | tr -d '\n'); then
+    	if ! APK_COMMAND=$(command -v apk | tr -d '\n'); then
     		echo "[ERROR] This container it not ALPINE, It does not support installations other than ALPINE, so exit."
     		exit 1
     	fi
-    	${APK_COMMAND} add -q --no-progress --no-cache openssl
-    	if [ $? -ne 0 ]; then
+    	if ! "${APK_COMMAND}" add -q --no-progress --no-cache openssl; then
     		echo "[ERROR] Failed to install openssl by apk(ALPINE)."
     		exit 1
     	fi
@@ -1298,16 +1279,15 @@ data:
     #	stateOrProvinceName = optional					in [ policy_match ] section
     #	organizationName	= optional					in [ policy_match ] section
     #
-    sed -e 's/\[[[:space:]]*CA_default[[:space:]]*\]/\[ CA_default ]\nunique_subject = no\nemail_in_dn = no\nrand_serial = no/g' \
-    	-e 's/\[[[:space:]]*v3_ca[[:space:]]*\]/\[ v3_ca ]\nkeyUsage = cRLSign, keyCertSign/g'						\
-    	-e "s#^dir[[:space:]]*=[[:space:]]*.*CA.*#dir = ${CERT_WORK_DIR}#g"											\
-    	-e 's/^[[:space:]]*countryName[[:space:]]*=[[:space:]]*match.*$/countryName = optional/g'					\
-    	-e 's/^[[:space:]]*stateOrProvinceName[[:space:]]*=[[:space:]]*match.*$/stateOrProvinceName = optional/g'	\
-    	-e 's/^[[:space:]]*organizationName[[:space:]]*=[[:space:]]*match.*$/organizationName = optional/g'			\
-    	"${ORG_OPENSSL_CNF}"																						\
-    	> "${CUSTOM_OPENSSL_CNF}"
+    if ! sed -e 's/\[[[:space:]]*CA_default[[:space:]]*\]/\[ CA_default ]\nunique_subject = no\nemail_in_dn = no\nrand_serial = no/g' \
+    		-e 's/\[[[:space:]]*v3_ca[[:space:]]*\]/\[ v3_ca ]\nkeyUsage = cRLSign, keyCertSign/g'						\
+    		-e "s#^dir[[:space:]]*=[[:space:]]*.*CA.*#dir = ${CERT_WORK_DIR}#g"											\
+    		-e 's/^[[:space:]]*countryName[[:space:]]*=[[:space:]]*match.*$/countryName = optional/g'					\
+    		-e 's/^[[:space:]]*stateOrProvinceName[[:space:]]*=[[:space:]]*match.*$/stateOrProvinceName = optional/g'	\
+    		-e 's/^[[:space:]]*organizationName[[:space:]]*=[[:space:]]*match.*$/organizationName = optional/g'			\
+    		"${ORG_OPENSSL_CNF}"																						\
+    		> "${CUSTOM_OPENSSL_CNF}"; then
     
-    if [ $? -ne 0 ]; then
     	echo "[ERROR] Could not create file ${CUSTOM_OPENSSL_CNF}"
     	exit 1
     fi
@@ -1376,6 +1356,7 @@ data:
     	fi
     } >> "${CUSTOM_OPENSSL_CNF}"
     
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ]; then
     	echo "[ERROR] Could not modify file ${CUSTOM_OPENSSL_CNF}"
     	exit 1
@@ -1387,18 +1368,16 @@ data:
     #
     # Create private key(2048 bit) without passphrase
     #
-    openssl genrsa				\
-    	-out "${RAW_KEY_FILE}"	\
-    	2048					\
-    	>> "${LOG_FILE}" 2>&1
+    if ! openssl genrsa				\
+    		-out "${RAW_KEY_FILE}"	\
+    		2048					\
+    		>> "${LOG_FILE}" 2>&1; then
     
-    if [ $? -ne 0 ]; then
     	echo "[ERROR] Failed to create ${RAW_KEY_FILE} private key."
     	exit 1
     fi
     
-    chmod 0400 "${RAW_KEY_FILE}"
-    if [ $? -ne 0 ]; then
+    if ! chmod 0400 "${RAW_KEY_FILE}"; then
     	echo "[ERROR] Failed to set permission(0400) to ${RAW_KEY_FILE} private key."
     	exit 1
     fi
@@ -1406,14 +1385,13 @@ data:
     #
     # Create CSR file
     #
-    openssl req						\
-    	-new						\
-    	-key  "${RAW_KEY_FILE}"	\
-    	-out  "${RAW_CSR_FILE}"	\
-    	-subj "/C=${SUBJ_CSR_C}/ST=${SUBJ_CSR_S}/O=${SUBJ_CSR_O}/CN=${NODOMAIN_HOST_NAME}"	\
-    	>> "${LOG_FILE}" 2>&1
+    if ! openssl req				\
+    		-new					\
+    		-key  "${RAW_KEY_FILE}"	\
+    		-out  "${RAW_CSR_FILE}"	\
+    		-subj "/C=${SUBJ_CSR_C}/ST=${SUBJ_CSR_S}/O=${SUBJ_CSR_O}/CN=${NODOMAIN_HOST_NAME}"	\
+    		>> "${LOG_FILE}" 2>&1; then
     
-    if [ $? -ne 0 ]; then
     	echo "[ERROR] Failed to create ${RAW_CSR_FILE} CSR file."
     	exit 1
     fi
@@ -1421,17 +1399,16 @@ data:
     #
     # Create certificate file
     #
-    openssl ca								\
-    	-batch								\
-    	-extensions	v3_svr_clt				\
-    	-out		"${RAW_CERT_FILE}"		\
-    	-days		"${CERT_PERIOD_DAYS}"	\
-    	-passin		"pass:"					\
-    	-config		"${CUSTOM_OPENSSL_CNF}" \
-    	-infiles	"${RAW_CSR_FILE}"		\
-    	>> "${LOG_FILE}" 2>&1
+    if ! openssl ca								\
+    		-batch								\
+    		-extensions	v3_svr_clt				\
+    		-out		"${RAW_CERT_FILE}"		\
+    		-days		"${CERT_PERIOD_DAYS}"	\
+    		-passin		"pass:"					\
+    		-config		"${CUSTOM_OPENSSL_CNF}" \
+    		-infiles	"${RAW_CSR_FILE}"		\
+    		>> "${LOG_FILE}" 2>&1; then
     
-    if [ $? -ne 0 ]; then
     	echo "[ERROR] Failed to create ${RAW_CERT_FILE} certificate file."
     	exit 1
     fi
@@ -1459,8 +1436,7 @@ data:
     #
     # Cleanup files
     #
-    rm -rf "${CERT_WORK_DIR}"
-    if [ $? -ne 0 ]; then
+    if ! rm -rf "${CERT_WORK_DIR}"; then
     	echo "[ERROR] Could not remove directory ${CERT_WORK_DIR}"
     	exit 1
     fi
@@ -1526,43 +1502,43 @@ data:
     #----------------------------------------------------------
     # Check enviroment values
     #----------------------------------------------------------
-    if [ "X${K2HR3_NAMESPACE}" = "X" ]; then
+    if [ -z "${K2HR3_NAMESPACE}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3_NAMESPACE environment is not specified."
     	exit 1
     fi
-    if [ "X${K2HR3_BASE_DOMAIN}" = "X" ]; then
+    if [ -z "${K2HR3_BASE_DOMAIN}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3_BASE_DOMAIN environment is not specified."
     	exit 1
     fi
-    if [ "X${K2HR3API_COUNT}" = "X" ]; then
+    if [ -z "${K2HR3API_COUNT}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3API_COUNT environment is not specified."
     	exit 1
     fi
-    if [ "X${K2HR3API_LOCAL_BASE_HOSTNAME}" = "X" ]; then
+    if [ -z "${K2HR3API_LOCAL_BASE_HOSTNAME}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3API_LOCAL_BASE_HOSTNAME environment is not specified."
     	exit 1
     fi
-    if [ "X${K2HR3API_LOCAL_SVC_NAME}" = "X" ]; then
+    if [ -z "${K2HR3API_LOCAL_SVC_NAME}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3API_LOCAL_SVC_NAME environment is not specified."
     	exit 1
     fi
-    if [ "X${K2HR3API_LOCAL_PORT}" = "X" ]; then
+    if [ -z "${K2HR3API_LOCAL_PORT}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3API_LOCAL_PORT environment is not specified."
     	exit 1
     fi
-    if [ "X${K2HR3API_NP_BASE_HOSTNAME}" = "X" ]; then
+    if [ -z "${K2HR3API_NP_BASE_HOSTNAME}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3API_NP_BASE_HOSTNAME environment is not specified."
     	exit 1
     fi
-    if [ "X${K2HR3API_NP_PORT}" = "X" ]; then
+    if [ -z "${K2HR3API_NP_PORT}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3API_NP_PORT environment is not specified."
     	exit 1
     fi
-    if [ "X${K2HR3APP_NP_BASE_HOSTNAME}" = "X" ]; then
+    if [ -z "${K2HR3APP_NP_BASE_HOSTNAME}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3APP_NP_BASE_HOSTNAME environment is not specified."
     	exit 1
     fi
-    if [ "X${K2HR3APP_NP_PORT}" = "X" ]; then
+    if [ -z "${K2HR3APP_NP_PORT}" ]; then
     	echo "[ERROR] ${PRGNAME} : K2HR3APP_NP_PORT environment is not specified."
     	exit 1
     fi
@@ -1570,15 +1546,13 @@ data:
     #----------------------------------------------------------
     # Check curl command and install
     #----------------------------------------------------------
-    CURL_COMMAND=$(command -v curl | tr -d '\n')
-    if [ $? -ne 0 ] || [ -z "${CURL_COMMAND}" ]; then
-    	APK_COMMAND=$(command -v apk | tr -d '\n')
-    	if [ $? -ne 0 ] || [ -z "${APK_COMMAND}" ]; then
+    # shellcheck disable=SC2034
+    if ! CURL_COMMAND=$(command -v curl | tr -d '\n'); then
+    	if ! APK_COMMAND=$(command -v apk | tr -d '\n'); then
     		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
     		exit 1
     	fi
-    	${APK_COMMAND} add -q --no-progress --no-cache curl
-    	if [ $? -ne 0 ]; then
+    	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
     		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
     		exit 1
     	fi
@@ -1595,8 +1569,7 @@ data:
     	K2HR3API_COUNT=$((K2HR3API_COUNT - 1))
     	rm -f "${RESULT_CONTENTS_FILE}"
     
-    	RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure)
-    	if [ $? -ne 0 ]; then
+    	if ! RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure); then
     		echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_LOCAL_BASE_HOSTNAME}${K2HR3API_COUNT}.${K2HR3API_LOCAL_SVC_NAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_LOCAL_PORT}"
     		exit 1
     	fi
@@ -1606,7 +1579,7 @@ data:
     	fi
     
     	RESULT_RESPONSE=$(cat "${RESULT_CONTENTS_FILE}")
-    	if [ "X${RESULT_RESPONSE}" != "X{\"version\":[\"v1\"]}" ]; then
+    	if [ -z "${RESULT_RESPONSE}" ] || [ "${RESULT_RESPONSE}" != "{\"version\":[\"v1\"]}" ]; then
     		echo "[ERROR] ${PRGNAME} : Got wrong contents( ${RESULT_RESPONSE} ) from ${K2HR3API_LOCAL_BASE_HOSTNAME}${K2HR3API_COUNT}.${K2HR3API_LOCAL_SVC_NAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_LOCAL_PORT}"
     		exit 1
     	fi
@@ -1617,8 +1590,7 @@ data:
     # access to NodePort
     # ex. https://np-r3api-dbaask2hr3.default.svc.cluster.local:8443/
     #
-    RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure)
-    if [ $? -ne 0 ]; then
+    if ! RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure); then
     	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_NP_PORT}"
     	exit 1
     fi
@@ -1628,7 +1600,7 @@ data:
     fi
     
     RESULT_RESPONSE=$(cat "${RESULT_CONTENTS_FILE}")
-    if [ "X${RESULT_RESPONSE}" != "X{\"version\":[\"v1\"]}" ]; then
+    if [ -z "${RESULT_RESPONSE}" ] || [ "${RESULT_RESPONSE}" != "{\"version\":[\"v1\"]}" ]; then
     	echo "[ERROR] ${PRGNAME} : Got wrong contents( ${RESULT_RESPONSE} ) from ${K2HR3API_NP_BASE_HOSTNAME}:${K2HR3API_NP_PORT}"
     	exit 1
     fi
@@ -1641,8 +1613,7 @@ data:
     # access to NodePort
     # ex. https://np-r3app-dbaask2hr3.default.svc.cluster.local:8443/
     #
-    RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure)
-    if [ $? -ne 0 ]; then
+    if ! RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure); then
     	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3APP_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3APP_NP_PORT}"
     	exit 1
     fi
@@ -1652,7 +1623,7 @@ data:
     fi
     
     RESULT_RESPONSE=$(cat "${RESULT_CONTENTS_FILE}")
-    if [ "X${RESULT_RESPONSE}" = "X" ]; then
+    if [ -z "${RESULT_RESPONSE}" ]; then
     	echo "[ERROR] ${PRGNAME} : Got empty contents from ${K2HR3APP_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3APP_NP_PORT}"
     	exit 1
     fi

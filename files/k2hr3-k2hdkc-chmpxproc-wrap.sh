@@ -29,10 +29,13 @@ SLEEP_SHORT=10
 #----------------------------------------------------------
 # Make configuration file path
 #----------------------------------------------------------
-if [ "X$1" = "XSERVER" ] || [ "X$1" = "Xserver" ]; then
+if [ -z "$1" ]; then
 	CHMPX_MODE="server"
 	SLEEP_GAP=10
-elif [ "X$1" = "XSLAVE" ] || [ "X$1" = "Xslave" ]; then
+elif [ "$1" = "SERVER" ] || [ "$1" = "server" ]; then
+	CHMPX_MODE="server"
+	SLEEP_GAP=10
+elif [ "$1" = "SLAVE" ] || [ "$1" = "slave" ]; then
 	CHMPX_MODE="slave"
 	SLEEP_GAP=30
 else
@@ -70,8 +73,10 @@ DONE_ALL_LOOKUP=0
 while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 	REST_NAMES=""
 	for _ONE_NAME in ${ALL_HOST_NAMES}; do
-		nslookup "${_ONE_NAME}" >/dev/null 2>&1
-		if [ $? -ne 0 ]; then
+		if [ -z "${_ONE_NAME}" ]; then
+			continue
+		fi
+		if ! nslookup "${_ONE_NAME}" >/dev/null 2>&1; then
 			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
 			continue
 		fi
@@ -80,8 +85,7 @@ while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 		#
 		_ONE_IP=$(nslookup "${_ONE_NAME}" | grep '[A|a]ddress:' | tail -1 | sed -e 's/^[[:space:]]*[A|a]ddress:[[:space:]]*//g')
 
-		nslookup "${_ONE_IP}" >/dev/null 2>&1
-		if [ $? -ne 0 ]; then
+		if ! nslookup "${_ONE_IP}" >/dev/null 2>&1; then
 			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
 			continue
 		fi
@@ -89,7 +93,7 @@ while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 
 		_FIND_NAME_IN_LIST=0
 		for _GET_NAME in ${_GET_NAMES}; do
-			if [ "X${_GET_NAME}" = "X${_ONE_NAME}" ]; then
+			if [ -n "${_GET_NAME}" ] && [ "${_GET_NAME}" = "${_ONE_NAME}" ]; then
 				_FIND_NAME_IN_LIST=1
 				break;
 			fi

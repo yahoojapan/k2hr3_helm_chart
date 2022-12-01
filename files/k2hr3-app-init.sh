@@ -37,21 +37,21 @@ SCRIPTDIR=$(cd "${SCRIPTDIR}" || exit 1; pwd)
 #----------------------------------------------------------
 # Check enviroment values
 #----------------------------------------------------------
-if [ "X${ANTPICKAX_ETC_DIR}" = "X" ]; then
+if [ -z "${ANTPICKAX_ETC_DIR}" ]; then
 	exit 1
 fi
 
 #
 # Allow empty value
 #
-if [ "X${SEC_CA_MOUNTPOINT}" != "X" ] && [ ! -d "${SEC_CA_MOUNTPOINT}" ]; then
+if [ -n "${SEC_CA_MOUNTPOINT}" ] && [ ! -d "${SEC_CA_MOUNTPOINT}" ]; then
 	exit 1
 fi
 
 #----------------------------------------------------------
 # Certificates
 #----------------------------------------------------------
-if [ "X${SEC_CA_MOUNTPOINT}" != "X" ]; then
+if [ -n "${SEC_CA_MOUNTPOINT}" ]; then
 	#
 	# Create certificate for me
 	#

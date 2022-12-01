@@ -45,8 +45,7 @@ if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
 	exit 1
 fi
 
-cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"
-if [ $? -ne 0 ]; then
+if ! cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"; then
 	exit 1
 fi
 
@@ -62,8 +61,10 @@ DONE_ALL_LOOKUP=0
 while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 	REST_NAMES=""
 	for _ONE_NAME in ${ALL_HOST_NAMES}; do
-		nslookup "${_ONE_NAME}" >/dev/null 2>&1
-		if [ $? -ne 0 ]; then
+		if [ -z "${_ONE_NAME}" ]; then
+			continue
+		fi
+		if ! nslookup "${_ONE_NAME}" >/dev/null 2>&1; then
 			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
 			continue
 		fi
@@ -72,8 +73,7 @@ while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 		#
 		_ONE_IP=$(nslookup "${_ONE_NAME}" | grep '[A|a]ddress:' | tail -1 | sed -e 's/^[[:space:]]*[A|a]ddress:[[:space:]]*//g')
 
-		nslookup "${_ONE_IP}" >/dev/null 2>&1
-		if [ $? -ne 0 ]; then
+		if ! nslookup "${_ONE_IP}" >/dev/null 2>&1; then
 			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
 			continue
 		fi
@@ -81,7 +81,7 @@ while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 
 		_FIND_NAME_IN_LIST=0
 		for _GET_NAME in ${_GET_NAMES}; do
-			if [ "X${_GET_NAME}" = "X${_ONE_NAME}" ]; then
+			if [ -n "${_GET_NAME}" ] && [ "${_GET_NAME}" = "${_ONE_NAME}" ]; then
 				_FIND_NAME_IN_LIST=1
 				break;
 			fi
@@ -112,8 +112,7 @@ done
 #
 CHMPX_UP=0
 while [ "${CHMPX_UP}" -eq 0 ]; do
-	chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring slave -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
+	if chmpxstatus -conf "${INI_FILE_PATH}" -self -wait -live up -ring slave -nosuspend -timeout "${SLEEP_SHORT}" >/dev/null 2>&1; then
 		CHMPX_UP=1
 	else
 		sleep "${SLEEP_SHORT}"
@@ -133,7 +132,7 @@ sleep "${SLEEP_SHORT}"
 #
 set -e
 
-if [ "X${K2HR3_MANUAL_START}" = "Xtrue" ]; then
+if [ -n "${K2HR3_MANUAL_START}" ] && [ "${K2HR3_MANUAL_START}" = "true" ]; then
 	while true; do
 		sleep "${SLEEP_LONG_MANUAL}"
 	done
