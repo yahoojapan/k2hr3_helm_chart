@@ -50,7 +50,7 @@ fi
 #	%%K2HR3_API_EXTERNAL_HOST%%	-> Environment value(usually not effect, it already set.)
 #	%%K2HR3_API_EXTERNAL_PORT%%	-> Environment value or NodePort
 #
-if [ -z "${K2HR3APP_EXTERNAL_PORT}" ] || [ "X${K2HR3APP_EXTERNAL_PORT}" = "X0" ] ; then
+if [ -z "${K2HR3APP_EXTERNAL_PORT}" ] || [ "${K2HR3APP_EXTERNAL_PORT}" = "0" ] ; then
 	if [ -z "${K2HR3APP_SERVICE_NAME}" ]; then
 		exit 1
 	fi
@@ -60,7 +60,7 @@ if [ -z "${K2HR3APP_EXTERNAL_PORT}" ] || [ "X${K2HR3APP_EXTERNAL_PORT}" = "X0" ]
 	K2HR3APP_EXTERNAL_PORT=$(env | grep "${TMP_APP_NP_NAME}" | sed -e "s/${TMP_APP_NP_NAME}//g" | tr -d '\n')
 fi
 
-if [ -z "${K2HR3API_EXTERNAL_PORT}" ] || [ "X${K2HR3API_EXTERNAL_PORT}" = "X0" ] ; then
+if [ -z "${K2HR3API_EXTERNAL_PORT}" ] || [ "${K2HR3API_EXTERNAL_PORT}" = "0" ] ; then
 	if [ -z "${K2HR3API_SERVICE_NAME}" ]; then
 		exit 1
 	fi
@@ -71,14 +71,13 @@ if [ -z "${K2HR3API_EXTERNAL_PORT}" ] || [ "X${K2HR3API_EXTERNAL_PORT}" = "X0" ]
 fi
 
 # shellcheck disable=SC2153
-sed	-e "s#%%K2HR3_APP_EXTERNAL_HOST%%#${K2HR3APP_EXTERNAL_HOST}#g"	\
-	-e "s#%%K2HR3_APP_EXTERNAL_PORT%%#${K2HR3APP_EXTERNAL_PORT}#g"	\
-	-e "s#%%K2HR3_API_EXTERNAL_HOST%%#${K2HR3API_EXTERNAL_HOST}#g"	\
-	-e "s#%%K2HR3_API_EXTERNAL_PORT%%#${K2HR3API_EXTERNAL_PORT}#g"	\
-	< "${CONFIGMAP_PRODUCTION_FILE}" \
-	> "${PRODUCTION_FILE}"
+if ! sed -e "s#%%K2HR3_APP_EXTERNAL_HOST%%#${K2HR3APP_EXTERNAL_HOST}#g"	\
+		-e "s#%%K2HR3_APP_EXTERNAL_PORT%%#${K2HR3APP_EXTERNAL_PORT}#g"	\
+		-e "s#%%K2HR3_API_EXTERNAL_HOST%%#${K2HR3API_EXTERNAL_HOST}#g"	\
+		-e "s#%%K2HR3_API_EXTERNAL_PORT%%#${K2HR3API_EXTERNAL_PORT}#g"	\
+		< "${CONFIGMAP_PRODUCTION_FILE}"								\
+		> "${PRODUCTION_FILE}"; then
 
-if [ $? -ne 0 ]; then
 	exit 1
 fi
 
@@ -93,13 +92,10 @@ SYSTEM_CA_CERT_K2HR3_FILE="k2hr3-system-ca.crt"
 SYSTEM_CA_CERT_K2HR3_FILE_PATH="${SYSTEM_CA_CERT_DIR}/${SYSTEM_CA_CERT_K2HR3_FILE}"
 
 if [ -f "${K2HR3_CA_CERT_ORG_FILE_PATH}" ]; then
-	cp "${K2HR3_CA_CERT_ORG_FILE_PATH}" "${SYSTEM_CA_CERT_K2HR3_FILE_PATH}"
-	if [ $? -ne 0 ]; then
+	if ! cp "${K2HR3_CA_CERT_ORG_FILE_PATH}" "${SYSTEM_CA_CERT_K2HR3_FILE_PATH}"; then
 		exit 1
 	fi
-
-	update-ca-certificates
-	if [ $? -ne 0 ]; then
+	if ! update-ca-certificates; then
 		exit 1
 	fi
 fi
@@ -107,15 +103,13 @@ fi
 #----------------------------------------------------------
 # Check curl command and install
 #----------------------------------------------------------
-CURL_COMMAND=$(command -v curl | tr -d '\n')
-if [ $? -ne 0 ] || [ -z "${CURL_COMMAND}" ]; then
-	APK_COMMAND=$(command -v apk | tr -d '\n')
-	if [ $? -ne 0 ] || [ -z "${APK_COMMAND}" ]; then
+# shellcheck disable=SC2034
+if ! CURL_COMMAND=$(command -v curl | tr -d '\n'); then
+	if ! APK_COMMAND=$(command -v apk | tr -d '\n'); then
 		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
 		exit 1
 	fi
-	${APK_COMMAND} add -q --no-progress --no-cache curl
-	if [ $? -ne 0 ]; then
+	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
 		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
 		exit 1
 	fi
@@ -131,10 +125,12 @@ if [ -z "${K2HR3APP_RUN_ON_MINIKUBE}" ] || [ "${K2HR3APP_RUN_ON_MINIKUBE}" != "t
 	API_SCHEMA=$(grep 'apischeme' "${PRODUCTION_FILE}" 2>/dev/null | sed -e "s/['|,]//g" -e 's/^[[:space:]]*apischeme:[[:space:]]*//g' 2>/dev/null | tr -d '\n')
 	API_UP=0
 	while [ "${API_UP}" -eq 0 ]; do
-		HTTP_CODE=$(curl -s -S -w '%{http_code}\n' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1)
-		if [ $? -eq 0 ] && [ "${HTTP_CODE}" -eq 200 ]; then
-			API_UP=1
-		else
+		if HTTP_CODE=$(curl -s -S -w '%{http_code}\n' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1); then
+			if [ -n "${HTTP_CODE}" ] && [ "${HTTP_CODE}" -eq 200 ]; then
+				API_UP=1
+			fi
+		fi
+		if [ "${API_UP}" -ne 1 ]; then
 			sleep "${SLEEP_SHORT}"
 			RETRYCOUNT=$((RETRYCOUNT - 1))
 			if [ "${RETRYCOUNT}" -le 0 ]; then
@@ -153,7 +149,7 @@ sleep "${SLEEP_SHORT}"
 #
 set -e
 
-if [ "X${K2HR3_MANUAL_START}" = "Xtrue" ]; then
+if [ -n "${K2HR3_MANUAL_START}" ] && [ "${K2HR3_MANUAL_START}" = "true" ]; then
 	while true; do
 		sleep ${SLEEP_LONG_MANUAL}
 	done

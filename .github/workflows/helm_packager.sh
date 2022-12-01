@@ -1,17 +1,12 @@
 #!/bin/sh
 #
-# K2HR3 Helm Chart
-#
 # Utility helper tools for Github Actions by AntPickax
 #
-# Copyright 2022 Yahoo! Japan Corporation.
+# Copyright 2022 Yahoo Japan Corporation.
 #
-# K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
-# common management information for the cloud.
-# K2HR3 can dynamically manage information as "who", "what", "operate".
-# These are stored as roles, resources, policies in K2hdkc, and the
-# client system can dynamically read and modify these information.
-# 
+# This common file is supposed to be called from Github Actions,
+# which is a Helm Chart packaging process for AntPickax products.
+#
 # For the full copyright and license information, please view
 # the license file that was distributed with this source code.
 #
@@ -129,7 +124,7 @@ else
 		echo "[Warning] Could not get repository path(organaization /repository name, etc)."
 	fi
 
-	if [ "${ORG_NAME}" = "yahoojapan" ] || [ "X${ORG_NAME}" = "X${RUN_TAGGING_ORG}" ]; then
+	if [ "${ORG_NAME}" = "yahoojapan" ] || { [ -n "${RUN_TAGGING_ORG}" ] && [ "${ORG_NAME}" = "${RUN_TAGGING_ORG}" ]; }; then
 		IS_RELEASE_TAG_PROCESS=1
 	else
 		IS_RELEASE_TAG_PROCESS=0
@@ -142,7 +137,7 @@ else
 		IS_MASTER_BRANCH=0
 	fi
 
-	if [ "X${GITHUB_EVENT_NAME}" = "Xpush" ]; then
+	if [ -n "${GITHUB_EVENT_NAME}" ] && [ "${GITHUB_EVENT_NAME}" = "push" ]; then
 		IN_PUSH_PROCESS=1
 	else
 		IN_PUSH_PROCESS=0
@@ -248,6 +243,7 @@ get_latest_version_in_changelog()
 		#
 		if [ "${_IN_COMMENT}" -eq 0 ]; then
 			_FOUND_VERSION_STR=$(echo "${LINE}" | grep "^## \[[0-9]\+\.[0-9]\+\.[0-9]\+\].*$" | sed -e 's/^## \[//g' -e 's/\].*$//g')
+			# shellcheck disable=SC2181
 			if [ $? -eq 0 ] && [ -n "${_FOUND_VERSION_STR}" ]; then
 				if [ -z "${LASTEST_CHANGELOG_VERSION}" ]; then
 					LASTEST_CHANGELOG_VERSION="${_FOUND_VERSION_STR}"
@@ -435,8 +431,7 @@ replace_keyword_file()
 #
 # Chart name
 #
-CHART_NAME=$(grep '^[n|N]ame:' "${CHART_YAML_FILE}" | sed -e 's/[n|N]ame:[[:space:]]*//g' | tr -d '\n')
-if [ $? -ne 0 ]; then
+if ! CHART_NAME=$(grep '^[n|N]ame:' "${CHART_YAML_FILE}" | sed -e 's/[n|N]ame:[[:space:]]*//g' | tr -d '\n'); then
 	echo "[Error] Not found \"name:\" keyword in Chart yaml file(${CHART_YAML_FILE})."
 	exit 1
 fi
@@ -476,8 +471,7 @@ echo ""
 #
 # Get latest version number from Git tag
 #
-LATEST_TAG_VERSION=$(git tag | grep '^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}'| sed 's/^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}//' | grep -o '[0-9]\+\([\.]\([0-9]\)\+\)\+\(.\)*$' | sed 's/-\(.\)*$//' | sort -t . -n -k 1,1 -k 2,2 -k 3,3 -k 4,4 | uniq | tail -1 | tr -d '\n')
-if [ $? -ne 0 ]; then
+if ! LATEST_TAG_VERSION=$(git tag | grep '^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}'| sed 's/^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}//' | grep -o '[0-9]\+\([\.]\([0-9]\)\+\)\+\(.\)*$' | sed 's/-\(.\)*$//' | sort -t . -n -k 1,1 -k 2,2 -k 3,3 -k 4,4 | uniq | tail -1 | tr -d '\n'); then
 	echo "[Warning] Not found git tag for version(ex. \"v1.0.0\")."
 	LATEST_TAG_VERSION="0.0.0"
 fi
@@ -566,8 +560,7 @@ echo ""
 #
 echo "[Info] Get all asset files(pakages)"
 
-RELEASED_TAG_LIST=$(git tag -l | grep '^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}')
-if [ $? -eq 0 ] && [ -n "${RELEASED_TAG_LIST}" ]; then
+if RELEASED_TAG_LIST=$(git tag -l | grep '^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}'); then
 	cd "${TMP_GHPAGES_DIR}" || exit 1
 
 	for VERSION_TAG in ${RELEASED_TAG_LIST}; do
@@ -586,7 +579,7 @@ if [ $? -eq 0 ] && [ -n "${RELEASED_TAG_LIST}" ]; then
 
 	echo "       => Succeed"
 else
-	echo "       => Succeed : git tag -l command result => \"${GIT_COMMAND_MSG}\""
+	echo "       => Succeed : There is no tag list."
 fi
 
 #----------------------------------------------------------
@@ -597,8 +590,7 @@ echo "[Info] Create Helm Chart package"
 #
 # Create package
 #
-HELM_COMMAND_MSG=$(helm package "${CHART_DIR}" 2>&1)
-if [ $? -ne 0 ]; then
+if ! HELM_COMMAND_MSG=$(helm package "${CHART_DIR}" 2>&1); then
 	echo "[Error] Could not create helm package file(${CHART_NAME}-${CHART_VERSION}.tgz) : \"${HELM_COMMAND_MSG}\""
 	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
@@ -728,8 +720,7 @@ if [ "${IS_RELEASE_TAG_PROCESS}" -eq 1 ]; then
 		# Set release tag with asset file
 		#
 		echo "[Info] Create git tag with Asset"
-		GH_COMMAND_MSG=$(gh release create "v${CHART_VERSION}" --notes-file "${_RELEASE_NOTES_TMP_FILE}" --target master --title "Release Version ${CHART_VERSION}" "${TMP_GHPAGES_DIR}/v${CHART_VERSION}/${CHART_NAME}-${CHART_VERSION}.tgz" 2>&1)
-		if [ $? -ne 0 ]; then
+		if ! GH_COMMAND_MSG=$(gh release create "v${CHART_VERSION}" --notes-file "${_RELEASE_NOTES_TMP_FILE}" --target master --title "Release Version ${CHART_VERSION}" "${TMP_GHPAGES_DIR}/v${CHART_VERSION}/${CHART_NAME}-${CHART_VERSION}.tgz" 2>&1); then
 			echo "[Error] Failed to create release tag with asset : \"${GH_COMMAND_MSG}\""
 			exit 1
 		fi
@@ -739,8 +730,7 @@ if [ "${IS_RELEASE_TAG_PROCESS}" -eq 1 ]; then
 		# Discard the modification of the current branch
 		#
 		echo "[Info] Discard the modification of the current branch(master) before switch branch to gh-pages"
-		GIT_COMMAND_MSG=$(git checkout . 2>&1)
-		if [ $? -ne 0 ]; then
+		if ! GIT_COMMAND_MSG=$(git checkout . 2>&1); then
 			echo "[Error] Failed to reset current branch(master) : \"${GIT_COMMAND_MSG}\""
 		fi
 		if [ -n "${GIT_COMMAND_MSG}" ]; then

@@ -71,7 +71,29 @@ jobs:
       #
       - name: ShellCheck
         run: |
-          LC_ALL=C.UTF-8 shellcheck --shell=sh --exclude=SC1091,SC2181 $(grep '^#!/bin/sh' $(find . -type f -name \*.sh) | sed -e 's|^\(.*\):#\!.*$|\1|g')
+          if command -v shellcheck >/dev/null 2>&1; then
+              SHELLCHECK_TARGET_DIRS="."
+              SHELLCHECK_BASE_OPT="--shell=sh"
+              SHELLCHECK_IGN_OPT="--exclude=SC1117,SC1090,SC1091"
+              SHELLCHECK_INCLUDE_IGN_OPT="${SHELLCHECK_IGN_OPT},SC2034,SC2148"
+              SHELLCHECK_EXCEPT_PATHS_CMD="| grep -v '\.sh\.' | grep -v '\.log' | grep -v '/\.git/'"
+              :
+              SHELLCHECK_FILES_NO_SH=$(/bin/sh -c      "grep -ril '^\#!/bin/sh' ${SHELLCHECK_TARGET_DIRS} | grep -v '\.sh' ${SHELLCHECK_EXCEPT_PATHS_CMD} | tr '\n' ' '")
+              SHELLCHECK_FILES_SH=$(/bin/sh -c         "grep -ril '^\#!/bin/sh' ${SHELLCHECK_TARGET_DIRS} | grep '\.sh'    ${SHELLCHECK_EXCEPT_PATHS_CMD} | tr '\n' ' '")
+              SHELLCHECK_FILES_INCLUDE_SH=$(/bin/sh -c "grep -Lir '^\#!/bin/sh' ${SHELLCHECK_TARGET_DIRS} | grep '\.sh'    ${SHELLCHECK_EXCEPT_PATHS_CMD} | tr '\n' ' '")
+              :
+              if [ -n "${SHELLCHECK_FILES_NO_SH}" ]; then
+                  LC_ALL=C.UTF-8 shellcheck ${SHELLCHECK_BASE_OPT} ${SHELLCHECK_IGN_OPT} ${SHELLCHECK_FILES_NO_SH}
+              fi
+              if [ -n "${SHELLCHECK_FILES_SH}" ]; then
+                  LC_ALL=C.UTF-8 shellcheck ${SHELLCHECK_BASE_OPT} ${SHELLCHECK_IGN_OPT} ${SHELLCHECK_FILES_SH}
+              fi
+              if [ -n "${SHELLCHECK_FILES_INCLUDE_SH}" ]; then
+                  LC_ALL=C.UTF-8 shellcheck ${SHELLCHECK_BASE_OPT} ${SHELLCHECK_INCLUDE_IGN_OPT} ${SHELLCHECK_FILES_INCLUDE_SH}
+              fi
+          else
+              echo "ShellCheck is not installed, skip checking by ShellCheck."
+          fi
 
       #
       # Check by helm template

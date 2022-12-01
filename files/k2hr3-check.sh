@@ -47,43 +47,43 @@ RESULT_CONTENTS_FILE="/tmp/result-${TIMESTAMP}.log"
 #----------------------------------------------------------
 # Check enviroment values
 #----------------------------------------------------------
-if [ "X${K2HR3_NAMESPACE}" = "X" ]; then
+if [ -z "${K2HR3_NAMESPACE}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3_NAMESPACE environment is not specified."
 	exit 1
 fi
-if [ "X${K2HR3_BASE_DOMAIN}" = "X" ]; then
+if [ -z "${K2HR3_BASE_DOMAIN}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3_BASE_DOMAIN environment is not specified."
 	exit 1
 fi
-if [ "X${K2HR3API_COUNT}" = "X" ]; then
+if [ -z "${K2HR3API_COUNT}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3API_COUNT environment is not specified."
 	exit 1
 fi
-if [ "X${K2HR3API_LOCAL_BASE_HOSTNAME}" = "X" ]; then
+if [ -z "${K2HR3API_LOCAL_BASE_HOSTNAME}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3API_LOCAL_BASE_HOSTNAME environment is not specified."
 	exit 1
 fi
-if [ "X${K2HR3API_LOCAL_SVC_NAME}" = "X" ]; then
+if [ -z "${K2HR3API_LOCAL_SVC_NAME}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3API_LOCAL_SVC_NAME environment is not specified."
 	exit 1
 fi
-if [ "X${K2HR3API_LOCAL_PORT}" = "X" ]; then
+if [ -z "${K2HR3API_LOCAL_PORT}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3API_LOCAL_PORT environment is not specified."
 	exit 1
 fi
-if [ "X${K2HR3API_NP_BASE_HOSTNAME}" = "X" ]; then
+if [ -z "${K2HR3API_NP_BASE_HOSTNAME}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3API_NP_BASE_HOSTNAME environment is not specified."
 	exit 1
 fi
-if [ "X${K2HR3API_NP_PORT}" = "X" ]; then
+if [ -z "${K2HR3API_NP_PORT}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3API_NP_PORT environment is not specified."
 	exit 1
 fi
-if [ "X${K2HR3APP_NP_BASE_HOSTNAME}" = "X" ]; then
+if [ -z "${K2HR3APP_NP_BASE_HOSTNAME}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3APP_NP_BASE_HOSTNAME environment is not specified."
 	exit 1
 fi
-if [ "X${K2HR3APP_NP_PORT}" = "X" ]; then
+if [ -z "${K2HR3APP_NP_PORT}" ]; then
 	echo "[ERROR] ${PRGNAME} : K2HR3APP_NP_PORT environment is not specified."
 	exit 1
 fi
@@ -91,15 +91,13 @@ fi
 #----------------------------------------------------------
 # Check curl command and install
 #----------------------------------------------------------
-CURL_COMMAND=$(command -v curl | tr -d '\n')
-if [ $? -ne 0 ] || [ -z "${CURL_COMMAND}" ]; then
-	APK_COMMAND=$(command -v apk | tr -d '\n')
-	if [ $? -ne 0 ] || [ -z "${APK_COMMAND}" ]; then
+# shellcheck disable=SC2034
+if ! CURL_COMMAND=$(command -v curl | tr -d '\n'); then
+	if ! APK_COMMAND=$(command -v apk | tr -d '\n'); then
 		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
 		exit 1
 	fi
-	${APK_COMMAND} add -q --no-progress --no-cache curl
-	if [ $? -ne 0 ]; then
+	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
 		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
 		exit 1
 	fi
@@ -116,8 +114,7 @@ while [ "${K2HR3API_COUNT}" -gt 0 ]; do
 	K2HR3API_COUNT=$((K2HR3API_COUNT - 1))
 	rm -f "${RESULT_CONTENTS_FILE}"
 
-	RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure)
-	if [ $? -ne 0 ]; then
+	if ! RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure); then
 		echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_LOCAL_BASE_HOSTNAME}${K2HR3API_COUNT}.${K2HR3API_LOCAL_SVC_NAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_LOCAL_PORT}"
 		exit 1
 	fi
@@ -127,7 +124,7 @@ while [ "${K2HR3API_COUNT}" -gt 0 ]; do
 	fi
 
 	RESULT_RESPONSE=$(cat "${RESULT_CONTENTS_FILE}")
-	if [ "X${RESULT_RESPONSE}" != "X{\"version\":[\"v1\"]}" ]; then
+	if [ -z "${RESULT_RESPONSE}" ] || [ "${RESULT_RESPONSE}" != "{\"version\":[\"v1\"]}" ]; then
 		echo "[ERROR] ${PRGNAME} : Got wrong contents( ${RESULT_RESPONSE} ) from ${K2HR3API_LOCAL_BASE_HOSTNAME}${K2HR3API_COUNT}.${K2HR3API_LOCAL_SVC_NAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_LOCAL_PORT}"
 		exit 1
 	fi
@@ -138,8 +135,7 @@ rm -f "${RESULT_CONTENTS_FILE}"
 # access to NodePort
 # ex. https://np-r3api-dbaask2hr3.default.svc.cluster.local:8443/
 #
-RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure)
-if [ $? -ne 0 ]; then
+if ! RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure); then
 	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_NP_PORT}"
 	exit 1
 fi
@@ -149,7 +145,7 @@ if [ -z "${RESULT_CODE}" ] || [ "${RESULT_CODE}" -ne 200 ]; then
 fi
 
 RESULT_RESPONSE=$(cat "${RESULT_CONTENTS_FILE}")
-if [ "X${RESULT_RESPONSE}" != "X{\"version\":[\"v1\"]}" ]; then
+if [ -z "${RESULT_RESPONSE}" ] || [ "${RESULT_RESPONSE}" != "{\"version\":[\"v1\"]}" ]; then
 	echo "[ERROR] ${PRGNAME} : Got wrong contents( ${RESULT_RESPONSE} ) from ${K2HR3API_NP_BASE_HOSTNAME}:${K2HR3API_NP_PORT}"
 	exit 1
 fi
@@ -162,8 +158,7 @@ rm -f "${RESULT_CONTENTS_FILE}"
 # access to NodePort
 # ex. https://np-r3app-dbaask2hr3.default.svc.cluster.local:8443/
 #
-RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure)
-if [ $? -ne 0 ]; then
+if ! RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure); then
 	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3APP_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3APP_NP_PORT}"
 	exit 1
 fi
@@ -173,7 +168,7 @@ if [ -z "${RESULT_CODE}" ] || [ "${RESULT_CODE}" -ne 200 ]; then
 fi
 
 RESULT_RESPONSE=$(cat "${RESULT_CONTENTS_FILE}")
-if [ "X${RESULT_RESPONSE}" = "X" ]; then
+if [ -z "${RESULT_RESPONSE}" ]; then
 	echo "[ERROR] ${PRGNAME} : Got empty contents from ${K2HR3APP_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3APP_NP_PORT}"
 	exit 1
 fi
