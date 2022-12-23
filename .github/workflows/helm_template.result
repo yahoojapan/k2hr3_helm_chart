@@ -29,7 +29,7 @@ data:
     #
     # K2HR3 Helm Chart
     #
-    # Copyright 2022 Yahoo! Japan Corporation.
+    # Copyright 2022 Yahoo Japan Corporation.
     #
     # K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     # common management information for the cloud.
@@ -213,7 +213,7 @@ data:
     #
     # K2HR3 Helm Chart
     #
-    # Copyright 2022 Yahoo! Japan Corporation.
+    # Copyright 2022 Yahoo Japan Corporation.
     #
     # K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     # common management information for the cloud.
@@ -357,7 +357,7 @@ data:
     #
     # K2HR3 Helm Chart
     #
-    # Copyright 2022 Yahoo! Japan Corporation.
+    # Copyright 2022 Yahoo Japan Corporation.
     #
     # K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     # common management information for the cloud.
@@ -629,7 +629,7 @@ data:
     #
     # K2HR3 Helm Chart
     #
-    # Copyright 2022 Yahoo! Japan Corporation.
+    # Copyright 2022 Yahoo Japan Corporation.
     #
     # K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     # common management information for the cloud.
@@ -783,7 +783,7 @@ data:
     #
     # K2HR3 Helm Chart
     #
-    # Copyright 2022 Yahoo! Japan Corporation.
+    # Copyright 2022 Yahoo Japan Corporation.
     #
     # K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     # common management information for the cloud.
@@ -954,7 +954,7 @@ data:
     #
     # K2HR3 Helm Chart
     #
-    # Copyright 2022 Yahoo! Japan Corporation.
+    # Copyright 2022 Yahoo Japan Corporation.
     #
     # K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     # common management information for the cloud.
@@ -1026,7 +1026,7 @@ data:
     #
     # K2HR3 Helm Chart
     #
-    # Copyright 2022 Yahoo! Japan Corporation.
+    # Copyright 2022 Yahoo Japan Corporation.
     #
     # K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     # common management information for the cloud.
@@ -1457,7 +1457,7 @@ data:
     #
     # K2HR3 Helm Chart
     #
-    # Copyright 2022 Yahoo! Japan Corporation.
+    # Copyright 2022 Yahoo Japan Corporation.
     #
     # K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     # common management information for the cloud.
@@ -1649,7 +1649,7 @@ data:
     #
     # K2HR3 Helm Chart
     #
-    # Copyright 2022 Yahoo! Japan Corporation.
+    # Copyright 2022 Yahoo Japan Corporation.
     #
     # K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     # common management information for the cloud.
@@ -1740,7 +1740,7 @@ data:
     *
     * K2HR3 Helm Chart
     *
-    * Copyright 2022 Yahoo! Japan Corporation.
+    * Copyright 2022 Yahoo Japan Corporation.
     *
     * K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     * common management information for the cloud.
@@ -1830,7 +1830,7 @@ data:
     *
     * K2HR3 Helm Chart
     *
-    * Copyright 2022 Yahoo! Japan Corporation.
+    * Copyright 2022 Yahoo Japan Corporation.
     *
     * K2HR3 is K2hdkc based Resource and Roles and policy Rules, gathers 
     * common management information for the cloud.
