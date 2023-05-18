@@ -222,16 +222,23 @@ LOG_FILE="${CERT_WORK_DIR}/${PRGNAME}.log"
 #----------------------------------------------------------
 # Check openssl command
 #----------------------------------------------------------
-# shellcheck disable=SC2034
-if ! OPENSSL_COMMAND=$(command -v openssl | tr -d '\n'); then
-	if ! APK_COMMAND=$(command -v apk | tr -d '\n'); then
+if command -v openssl >/dev/null 2>&1; then
+	OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
+else
+	if ! command -v apk >/dev/null 2>&1; then
 		echo "[ERROR] This container it not ALPINE, It does not support installations other than ALPINE, so exit."
 		exit 1
 	fi
+	APK_COMMAND=$(command -v apk | tr -d '\n')
 	if ! "${APK_COMMAND}" add -q --no-progress --no-cache openssl; then
 		echo "[ERROR] Failed to install openssl by apk(ALPINE)."
 		exit 1
 	fi
+	if ! command -v openssl >/dev/null 2>&1; then
+		echo "[ERROR] Could not install openssl by apk(ALPINE)."
+		exit 1
+	fi
+	OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
 fi
 
 #----------------------------------------------------------
@@ -344,9 +351,9 @@ fi
 #
 # Create private key(2048 bit) without passphrase
 #
-if ! openssl genrsa				\
-		-out "${RAW_KEY_FILE}"	\
-		2048					\
+if ! "${OPENSSL_COMMAND}" genrsa	\
+		-out "${RAW_KEY_FILE}"		\
+		2048						\
 		>> "${LOG_FILE}" 2>&1; then
 
 	echo "[ERROR] Failed to create ${RAW_KEY_FILE} private key."
@@ -361,7 +368,7 @@ fi
 #
 # Create CSR file
 #
-if ! openssl req				\
+if ! "${OPENSSL_COMMAND}" req	\
 		-new					\
 		-key  "${RAW_KEY_FILE}"	\
 		-out  "${RAW_CSR_FILE}"	\
@@ -375,7 +382,7 @@ fi
 #
 # Create certificate file
 #
-if ! openssl ca								\
+if ! "${OPENSSL_COMMAND}" ca				\
 		-batch								\
 		-extensions	v3_svr_clt				\
 		-out		"${RAW_CERT_FILE}"		\

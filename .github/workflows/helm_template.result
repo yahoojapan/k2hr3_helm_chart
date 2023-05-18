@@ -884,16 +884,24 @@ data:
     #----------------------------------------------------------
     # Check curl command and install
     #----------------------------------------------------------
-    # shellcheck disable=SC2034
-    if ! CURL_COMMAND=$(command -v curl | tr -d '\n'); then
-    	if ! APK_COMMAND=$(command -v apk | tr -d '\n'); then
+    if command -v curl >/dev/null 2>&1; then
+    	CURL_COMMAND=$(command -v curl | tr -d '\n')
+    else
+    	if ! command -v apk >/dev/null 2>&1; then
     		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
     		exit 1
     	fi
+    	APK_COMMAND=$(command -v apk | tr -d '\n')
+    
     	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
     		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
     		exit 1
     	fi
+    	if ! command -v curl >/dev/null 2>&1; then
+    		echo "[ERROR] ${PRGNAME} : Could not install curl by apk(ALPINE)."
+    		exit 1
+    	fi
+    	CURL_COMMAND=$(command -v curl | tr -d '\n')
     fi
     
     #----------------------------------------------------------
@@ -906,7 +914,7 @@ data:
     	API_SCHEMA=$(grep 'apischeme' "${PRODUCTION_FILE}" 2>/dev/null | sed -e "s/['|,]//g" -e 's/^[[:space:]]*apischeme:[[:space:]]*//g' 2>/dev/null | tr -d '\n')
     	API_UP=0
     	while [ "${API_UP}" -eq 0 ]; do
-    		if HTTP_CODE=$(curl -s -S -w '%{http_code}\n' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1); then
+    		if HTTP_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1); then
     			if [ -n "${HTTP_CODE}" ] && [ "${HTTP_CODE}" -eq 200 ]; then
     				API_UP=1
     			fi
@@ -1246,16 +1254,23 @@ data:
     #----------------------------------------------------------
     # Check openssl command
     #----------------------------------------------------------
-    # shellcheck disable=SC2034
-    if ! OPENSSL_COMMAND=$(command -v openssl | tr -d '\n'); then
-    	if ! APK_COMMAND=$(command -v apk | tr -d '\n'); then
+    if command -v openssl >/dev/null 2>&1; then
+    	OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
+    else
+    	if ! command -v apk >/dev/null 2>&1; then
     		echo "[ERROR] This container it not ALPINE, It does not support installations other than ALPINE, so exit."
     		exit 1
     	fi
+    	APK_COMMAND=$(command -v apk | tr -d '\n')
     	if ! "${APK_COMMAND}" add -q --no-progress --no-cache openssl; then
     		echo "[ERROR] Failed to install openssl by apk(ALPINE)."
     		exit 1
     	fi
+    	if ! command -v openssl >/dev/null 2>&1; then
+    		echo "[ERROR] Could not install openssl by apk(ALPINE)."
+    		exit 1
+    	fi
+    	OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
     fi
     
     #----------------------------------------------------------
@@ -1368,9 +1383,9 @@ data:
     #
     # Create private key(2048 bit) without passphrase
     #
-    if ! openssl genrsa				\
-    		-out "${RAW_KEY_FILE}"	\
-    		2048					\
+    if ! "${OPENSSL_COMMAND}" genrsa	\
+    		-out "${RAW_KEY_FILE}"		\
+    		2048						\
     		>> "${LOG_FILE}" 2>&1; then
     
     	echo "[ERROR] Failed to create ${RAW_KEY_FILE} private key."
@@ -1385,7 +1400,7 @@ data:
     #
     # Create CSR file
     #
-    if ! openssl req				\
+    if ! "${OPENSSL_COMMAND}" req	\
     		-new					\
     		-key  "${RAW_KEY_FILE}"	\
     		-out  "${RAW_CSR_FILE}"	\
@@ -1399,7 +1414,7 @@ data:
     #
     # Create certificate file
     #
-    if ! openssl ca								\
+    if ! "${OPENSSL_COMMAND}" ca				\
     		-batch								\
     		-extensions	v3_svr_clt				\
     		-out		"${RAW_CERT_FILE}"		\
@@ -1546,16 +1561,24 @@ data:
     #----------------------------------------------------------
     # Check curl command and install
     #----------------------------------------------------------
-    # shellcheck disable=SC2034
-    if ! CURL_COMMAND=$(command -v curl | tr -d '\n'); then
-    	if ! APK_COMMAND=$(command -v apk | tr -d '\n'); then
+    if command -v curl >/dev/null 2>&1; then
+    	CURL_COMMAND=$(command -v curl | tr -d '\n')
+    else
+    	if ! command -v apk >/dev/null 2>&1; then
     		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
     		exit 1
     	fi
+    	APK_COMMAND=$(command -v apk | tr -d '\n')
+    
     	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
     		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
     		exit 1
     	fi
+    	if ! command -v curl >/dev/null 2>&1; then
+    		echo "[ERROR] ${PRGNAME} : Could not install curl by apk(ALPINE)."
+    		exit 1
+    	fi
+    	CURL_COMMAND=$(command -v curl | tr -d '\n')
     fi
     
     #----------------------------------------------------------
@@ -1569,7 +1592,7 @@ data:
     	K2HR3API_COUNT=$((K2HR3API_COUNT - 1))
     	rm -f "${RESULT_CONTENTS_FILE}"
     
-    	if ! RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure); then
+    	if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure); then
     		echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_LOCAL_BASE_HOSTNAME}${K2HR3API_COUNT}.${K2HR3API_LOCAL_SVC_NAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_LOCAL_PORT}"
     		exit 1
     	fi
@@ -1590,7 +1613,7 @@ data:
     # access to NodePort
     # ex. https://np-r3api-dbaask2hr3.default.svc.cluster.local:8443/
     #
-    if ! RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure); then
+    if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure); then
     	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_NP_PORT}"
     	exit 1
     fi
@@ -1613,7 +1636,7 @@ data:
     # access to NodePort
     # ex. https://np-r3app-dbaask2hr3.default.svc.cluster.local:8443/
     #
-    if ! RESULT_CODE=$(curl -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure); then
+    if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure); then
     	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3APP_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3APP_NP_PORT}"
     	exit 1
     fi
