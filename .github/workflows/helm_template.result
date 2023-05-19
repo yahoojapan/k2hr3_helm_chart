@@ -238,12 +238,9 @@ data:
     SLEEP_SHORT=10
     
     #----------------------------------------------------------
-    # Make configuration file path
+    # Configuration file path
     #----------------------------------------------------------
-    if [ -z "$1" ]; then
-    	CHMPX_MODE="server"
-    	SLEEP_GAP=10
-    elif [ "$1" = "SERVER" ] || [ "$1" = "server" ]; then
+    if [ -z "$1" ] || [ "$1" = "SERVER" ] || [ "$1" = "server" ]; then
     	CHMPX_MODE="server"
     	SLEEP_GAP=10
     elif [ "$1" = "SLAVE" ] || [ "$1" = "slave" ]; then
@@ -257,11 +254,8 @@ data:
     INI_FILE_PATH="${ANTPICKAX_ETC_DIR}/${INI_FILE}"
     
     #----------------------------------------------------------
-    # Main processing
+    # Wait configuration file creation
     #----------------------------------------------------------
-    #
-    # Wait for creating configuarion file
-    #
     FILE_EXISTS=0
     while [ "${FILE_EXISTS}" -eq 0 ]; do
     	if [ -f "${INI_FILE_PATH}" ]; then
@@ -276,10 +270,89 @@ data:
     	fi
     done
     
+    #----------------------------------------------------------
+    # Preparation
+    #----------------------------------------------------------
+    #
+    # Check and Install nslookup
+    #
+    if ! command -v nslookup >/dev/null 2>&1; then
+    	if [ ! -f /etc/os-release ]; then
+    		echo "[ERROR] Not found /etc/os-release file."
+    		exit 1
+    	fi
+    	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
+    
+    	if [ -z "${OS_NAME}" ]; then
+    		echo "[ERROR] Not found OS type."
+    		exit 1
+    	elif [ "${OS_NAME}" = "alpine" ]; then
+    		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache bind-tools >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install bind-tools(nslookup)."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "ubuntu" ]; then
+    		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
+    			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
+    				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
+    				_FOUND_HTTPS_PROXY=$(env | grep -i '^https_proxy' | head -1 | sed -e 's#^https_proxy=##gi')
+    
+    				if echo "${_FOUND_HTTP_PROXY}" | grep -q -v '://'; then
+    					_FOUND_HTTP_PROXY="http://${_FOUND_HTTP_PROXY}"
+    				fi
+    				if echo "${_FOUND_HTTPS_PROXY}" | grep -q -v '://'; then
+    					_FOUND_HTTPS_PROXY="http://${_FOUND_HTTPS_PROXY}"
+    				fi
+    				if [ ! -d /etc/apt/apt.conf.d ]; then
+    					mkdir -p /etc/apt/apt.conf.d
+    				fi
+    				{
+    					echo "Acquire::http::Proxy \"${_FOUND_HTTP_PROXY}\";"
+    					echo "Acquire::https::Proxy \"${_FOUND_HTTPS_PROXY}\";"
+    				} >> /etc/apt/apt.conf.d/00-aptproxy.conf
+    			fi
+    		fi
+    		DEBIAN_FRONTEND=noninteractive
+    		export DEBIAN_FRONTEND
+    
+    		if ! apt-get update -y -q -q >/dev/null 2>&1 || ! apt-get install -y dnsutils >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install dnsutils(nslookup)."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "centos" ]; then
+    		if ! yum update -y -q >/dev/null 2>&1 || ! yum install -y bind-utils >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install bind-utils(nslookup)."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "rocky" ] || [ "${OS_NAME}" = "fedora" ]; then
+    		if ! dnf update -y -q >/dev/null 2>&1 || ! dnf install -y bind-utils >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install bind-utils(nslookup)."
+    			exit 1
+    		fi
+    	else
+    		echo "[ERROR] Unknown OS type(${OS_NAME})."
+    		exit 1
+    	fi
+    fi
+    
     #
     # Check all hostname
     #
     ALL_HOST_NAMES=$(grep 'NAME[[:space:]]*=' "${INI_FILE_PATH}" 2>/dev/null | sed 's/^[[:space:]]*NAME[[:space:]]*=[[:space:]]*//g' 2>/dev/null)
+    
+    #
+    # Sleep time ajusting
+    #
+    for _ONE_NAME in $(echo "${ALL_HOST_NAMES}" | sort); do
+    	if echo "${_ONE_NAME}" | grep -q "$(hostname)"; then
+    		break
+    	fi
+    	SLEEP_GAP=$((SLEEP_GAP + 2))
+    done
+    
+    #
+    # Wait all host lookup
+    #
     DONE_ALL_LOOKUP=0
     while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
     	REST_NAMES=""
@@ -304,12 +377,13 @@ data:
     
     		_FIND_NAME_IN_LIST=0
     		for _GET_NAME in ${_GET_NAMES}; do
-    			if [ -n "${_GET_NAME}" ] && [ "${_GET_NAME}" = "${_ONE_NAME}" ]; then
-    				_FIND_NAME_IN_LIST=1
-    				break;
+    			if [ -n "${_GET_NAME}" ]; then
+    				if [ "${_GET_NAME}" = "${_ONE_NAME}" ] || [ "${_GET_NAME}" = "${_ONE_NAME}." ]; then
+    					_FIND_NAME_IN_LIST=1
+    					break;
+    				fi
     			fi
     		done
-    
     		if [ "${_FIND_NAME_IN_LIST}" -eq 0 ]; then
     			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
     		fi
@@ -320,17 +394,20 @@ data:
     	if [ -z "${ALL_HOST_NAMES}" ]; then
     		DONE_ALL_LOOKUP=1
     	else
-    		if [ "${LOOKUP_RETRYCOUNT}" -gt 0 ]; then
-    			sleep "${SLEEP_SHORT}"
-    			LOOKUP_RETRYCOUNT=$((LOOKUP_RETRYCOUNT - 1))
-    		else
+    		if [ "${LOOKUP_RETRYCOUNT}" -le 0 ]; then
     			echo "[ERROR] Lookup hosts is not completed."
     			exit 1
     		fi
+    		sleep "${SLEEP_SHORT}"
+    		LOOKUP_RETRYCOUNT=$((LOOKUP_RETRYCOUNT - 1))
     	fi
     done
+    
     sleep "${SLEEP_GAP}"
     
+    #----------------------------------------------------------
+    # Main processing
+    #----------------------------------------------------------
     #
     # Run chmpx process
     #
@@ -606,11 +683,9 @@ data:
     WAIT_SEC=5
     POD_NUMBER=$(echo "${CHMPX_SELF_HOSTNAME}" | sed 's/-/ /g' | awk '{print $NF}')
     
-    # shellcheck disable=SC2003,SC2181
-    if expr "${POD_NUMBER}" + 1 >/dev/null 2>&1; then
+    if echo "${POD_NUMBER}" | grep -q -v "[^0-9]"; then
     	WAIT_SEC=$((WAIT_SEC * POD_NUMBER))
     fi
-    
     sleep "${WAIT_SEC}"
     
     exit 0
@@ -652,7 +727,6 @@ data:
     
     RETRYCOUNT=30
     SLEEP_SHORT=10
-    SLEEP_LONG_MANUAL=3600000
     
     #----------------------------------------------------------
     # Configuration file for CHMPX
@@ -663,7 +737,14 @@ data:
     #----------------------------------------------------------
     # Configuration files for K2HR3 API
     #----------------------------------------------------------
-    K2HR3_API_DIR="/usr/lib/node_modules/k2hr3_api"
+    if [ -d /usr/local/lib/node_modules/k2hr3-api ]; then
+    	K2HR3_API_DIR="/usr/local/lib/node_modules/k2hr3-api"
+    elif [ -d /usr/lib/node_modules/k2hr3-api ]; then
+    	K2HR3_API_DIR="/usr/lib/node_modules/k2hr3-api"
+    else
+    	K2HR3_API_DIR="/usr/lib/node_modules/k2hr3_api"
+    fi
+    
     RUN_SCRIPT="${K2HR3_API_DIR}/bin/run.sh"
     PRODUCTION_FILE="${K2HR3_API_DIR}/config/production.json"
     CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-api-production.json"
@@ -677,12 +758,88 @@ data:
     fi
     
     #----------------------------------------------------------
-    # Main processing
+    # Preparation
     #----------------------------------------------------------
     #
-    # Check all hostname
+    # Check and Install nslookup
+    #
+    if ! command -v nslookup >/dev/null 2>&1; then
+    	if [ ! -f /etc/os-release ]; then
+    		echo "[ERROR] Not found /etc/os-release file."
+    		exit 1
+    	fi
+    	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
+    
+    	if [ -z "${OS_NAME}" ]; then
+    		echo "[ERROR] Not found OS type."
+    		exit 1
+    	elif [ "${OS_NAME}" = "alpine" ]; then
+    		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache bind-tools >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install bind-tools(nslookup)."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "ubuntu" ]; then
+    		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
+    			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
+    				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
+    				_FOUND_HTTPS_PROXY=$(env | grep -i '^https_proxy' | head -1 | sed -e 's#^https_proxy=##gi')
+    
+    				if echo "${_FOUND_HTTP_PROXY}" | grep -q -v '://'; then
+    					_FOUND_HTTP_PROXY="http://${_FOUND_HTTP_PROXY}"
+    				fi
+    				if echo "${_FOUND_HTTPS_PROXY}" | grep -q -v '://'; then
+    					_FOUND_HTTPS_PROXY="http://${_FOUND_HTTPS_PROXY}"
+    				fi
+    				if [ ! -d /etc/apt/apt.conf.d ]; then
+    					mkdir -p /etc/apt/apt.conf.d
+    				fi
+    				{
+    					echo "Acquire::http::Proxy \"${_FOUND_HTTP_PROXY}\";"
+    					echo "Acquire::https::Proxy \"${_FOUND_HTTPS_PROXY}\";"
+    				} >> /etc/apt/apt.conf.d/00-aptproxy.conf
+    			fi
+    		fi
+    		DEBIAN_FRONTEND=noninteractive
+    		export DEBIAN_FRONTEND
+    
+    		if ! apt-get update -y -q -q >/dev/null 2>&1 || ! apt-get install -y dnsutils >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install dnsutils(nslookup)."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "centos" ]; then
+    		if ! yum update -y -q >/dev/null 2>&1 || ! yum install -y bind-utils >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install bind-utils(nslookup)."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "rocky" ] || [ "${OS_NAME}" = "fedora" ]; then
+    		if ! dnf update -y -q >/dev/null 2>&1 || ! dnf install -y bind-utils >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install bind-utils(nslookup)."
+    			exit 1
+    		fi
+    	else
+    		echo "[ERROR] Unknown OS type(${OS_NAME})."
+    		exit 1
+    	fi
+    fi
+    
+    #
+    # Get all hostname
     #
     ALL_HOST_NAMES=$(grep 'NAME[[:space:]]*=' "${INI_FILE_PATH}" 2>/dev/null | sed 's/^[[:space:]]*NAME[[:space:]]*=[[:space:]]*//g' 2>/dev/null)
+    
+    #
+    # Sleep time ajusting
+    #
+    for _ONE_NAME in $(echo "${ALL_HOST_NAMES}" | sort); do
+    	if echo "${_ONE_NAME}" | grep -q "$(hostname)"; then
+    		break
+    	fi
+    	SLEEP_GAP=$((SLEEP_GAP + 2))
+    done
+    
+    #
+    # Wait all host lookup
+    #
     LOOKUP_RETRYCOUNT="${RETRYCOUNT}"
     DONE_ALL_LOOKUP=0
     while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
@@ -708,12 +865,13 @@ data:
     
     		_FIND_NAME_IN_LIST=0
     		for _GET_NAME in ${_GET_NAMES}; do
-    			if [ -n "${_GET_NAME}" ] && [ "${_GET_NAME}" = "${_ONE_NAME}" ]; then
-    				_FIND_NAME_IN_LIST=1
-    				break;
+    			if [ -n "${_GET_NAME}" ]; then
+    				if [ "${_GET_NAME}" = "${_ONE_NAME}" ] || [ "${_GET_NAME}" = "${_ONE_NAME}." ]; then
+    					_FIND_NAME_IN_LIST=1
+    					break;
+    				fi
     			fi
     		done
-    
     		if [ "${_FIND_NAME_IN_LIST}" -eq 0 ]; then
     			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
     		fi
@@ -724,16 +882,18 @@ data:
     	if [ -z "${ALL_HOST_NAMES}" ]; then
     		DONE_ALL_LOOKUP=1
     	else
-    		if [ "${LOOKUP_RETRYCOUNT}" -gt 0 ]; then
-    			sleep "${SLEEP_SHORT}"
-    			LOOKUP_RETRYCOUNT=$((LOOKUP_RETRYCOUNT - 1))
-    		else
+    		if [ "${LOOKUP_RETRYCOUNT}" -le 0 ]; then
     			echo "[ERROR] Lookup hosts is not completed."
     			exit 1
     		fi
+    		sleep "${SLEEP_SHORT}"
+    		LOOKUP_RETRYCOUNT=$((LOOKUP_RETRYCOUNT - 1))
     	fi
     done
     
+    #----------------------------------------------------------
+    # Main processing
+    #----------------------------------------------------------
     #
     # Wait CHMPX up
     #
@@ -760,9 +920,7 @@ data:
     set -e
     
     if [ -n "${K2HR3_MANUAL_START}" ] && [ "${K2HR3_MANUAL_START}" = "true" ]; then
-    	while true; do
-    		sleep "${SLEEP_LONG_MANUAL}"
-    	done
+    	tail -f /dev/null
     else
     	"${RUN_SCRIPT}" --production -fg
     fi
@@ -810,12 +968,18 @@ data:
     
     RETRYCOUNT=60
     SLEEP_SHORT=10
-    SLEEP_LONG_MANUAL=3600000
     
     #----------------------------------------------------------
     # Configuration files for K2HR3 APP
     #----------------------------------------------------------
-    K2HR3_APP_DIR="/usr/lib/node_modules/k2hr3_app"
+    if [ -d /usr/local/lib/node_modules/k2hr3-app ]; then
+    	K2HR3_APP_DIR="/usr/local/lib/node_modules/k2hr3-app"
+    elif [ -d /usr/lib/node_modules/k2hr3-app ]; then
+    	K2HR3_APP_DIR="/usr/lib/node_modules/k2hr3-app"
+    else
+    	K2HR3_APP_DIR="/usr/lib/node_modules/k2hr3_app"
+    fi
+    
     RUN_SCRIPT="${K2HR3_APP_DIR}/bin/run.sh"
     PRODUCTION_FILE="${K2HR3_APP_DIR}/config/production.json"
     CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-app-production.json"
@@ -856,9 +1020,8 @@ data:
     		-e "s#%%K2HR3_APP_EXTERNAL_PORT%%#${K2HR3APP_EXTERNAL_PORT}#g"	\
     		-e "s#%%K2HR3_API_EXTERNAL_HOST%%#${K2HR3API_EXTERNAL_HOST}#g"	\
     		-e "s#%%K2HR3_API_EXTERNAL_PORT%%#${K2HR3API_EXTERNAL_PORT}#g"	\
-    		< "${CONFIGMAP_PRODUCTION_FILE}"								\
+    		"${CONFIGMAP_PRODUCTION_FILE}"									\
     		> "${PRODUCTION_FILE}"; then
-    
     	exit 1
     fi
     
@@ -939,9 +1102,7 @@ data:
     set -e
     
     if [ -n "${K2HR3_MANUAL_START}" ] && [ "${K2HR3_MANUAL_START}" = "true" ]; then
-    	while true; do
-    		sleep ${SLEEP_LONG_MANUAL}
-    	done
+    	tail -f /dev/null
     else
     	"${RUN_SCRIPT}" --production -fg
     fi
@@ -1254,24 +1415,65 @@ data:
     #----------------------------------------------------------
     # Check openssl command
     #----------------------------------------------------------
-    if command -v openssl >/dev/null 2>&1; then
-    	OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
-    else
-    	if ! command -v apk >/dev/null 2>&1; then
-    		echo "[ERROR] This container it not ALPINE, It does not support installations other than ALPINE, so exit."
+    if ! command -v openssl >/dev/null 2>&1; then
+    	if [ ! -f /etc/os-release ]; then
+    		echo "[ERROR] Not found /etc/os-release file."
     		exit 1
     	fi
-    	APK_COMMAND=$(command -v apk | tr -d '\n')
-    	if ! "${APK_COMMAND}" add -q --no-progress --no-cache openssl; then
-    		echo "[ERROR] Failed to install openssl by apk(ALPINE)."
+    	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
+    
+    	if [ -z "${OS_NAME}" ]; then
+    		echo "[ERROR] Not found OS type."
+    		exit 1
+    	elif [ "${OS_NAME}" = "alpine" ]; then
+    		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache openssl >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install openssl."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "ubuntu" ]; then
+    		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
+    			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
+    				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
+    				_FOUND_HTTPS_PROXY=$(env | grep -i '^https_proxy' | head -1 | sed -e 's#^https_proxy=##gi')
+    
+    				if echo "${_FOUND_HTTP_PROXY}" | grep -q -v '://'; then
+    					_FOUND_HTTP_PROXY="http://${_FOUND_HTTP_PROXY}"
+    				fi
+    				if echo "${_FOUND_HTTPS_PROXY}" | grep -q -v '://'; then
+    					_FOUND_HTTPS_PROXY="http://${_FOUND_HTTPS_PROXY}"
+    				fi
+    				if [ ! -d /etc/apt/apt.conf.d ]; then
+    					mkdir -p /etc/apt/apt.conf.d
+    				fi
+    				{
+    					echo "Acquire::http::Proxy \"${_FOUND_HTTP_PROXY}\";"
+    					echo "Acquire::https::Proxy \"${_FOUND_HTTPS_PROXY}\";"
+    				} >> /etc/apt/apt.conf.d/00-aptproxy.conf
+    			fi
+    		fi
+    		DEBIAN_FRONTEND=noninteractive
+    		export DEBIAN_FRONTEND
+    
+    		if ! apt-get update -y -q -q >/dev/null 2>&1 || ! apt-get install -y openssl >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install openssl."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "centos" ]; then
+    		if ! yum update -y -q >/dev/null 2>&1 || ! yum install -y openssl >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install openssl."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "rocky" ] || [ "${OS_NAME}" = "fedora" ]; then
+    		if ! dnf update -y -q >/dev/null 2>&1 || ! dnf install -y openssl >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install openssl."
+    			exit 1
+    		fi
+    	else
+    		echo "[ERROR] Unknown OS type(${OS_NAME})."
     		exit 1
     	fi
-    	if ! command -v openssl >/dev/null 2>&1; then
-    		echo "[ERROR] Could not install openssl by apk(ALPINE)."
-    		exit 1
-    	fi
-    	OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
     fi
+    OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
     
     #----------------------------------------------------------
     # Create openssl.cnf 
@@ -1431,19 +1633,17 @@ data:
     #----------------------------------------------------------
     # Set files to /etc/antpickax
     #----------------------------------------------------------
-    COPY_RESULT=0
-    cp -p "${ORG_CA_CERT_FILE}"	"${CA_CERT_FILE}"		|| COPY_RESULT=1
-    cp -p "${RAW_CERT_FILE}"	"${SERVER_CERT_FILE}"	|| COPY_RESULT=1
-    cp -p "${RAW_KEY_FILE}"		"${SERVER_KEY_FILE}"	|| COPY_RESULT=1
-    cp -p "${RAW_CERT_FILE}"	"${CLIENT_CERT_FILE}"	|| COPY_RESULT=1
-    cp -p "${RAW_KEY_FILE}"		"${CLIENT_KEY_FILE}"	|| COPY_RESULT=1
-    chmod 0444 "${CA_CERT_FILE}"						|| COPY_RESULT=1
-    chmod 0444 "${SERVER_CERT_FILE}"					|| COPY_RESULT=1
-    chmod 0400 "${SERVER_KEY_FILE}"						|| COPY_RESULT=1
-    chmod 0444 "${CLIENT_CERT_FILE}"					|| COPY_RESULT=1
-    chmod 0400 "${CLIENT_KEY_FILE}"						|| COPY_RESULT=1
+    if	! cp -p "${ORG_CA_CERT_FILE}"	"${CA_CERT_FILE}"		||
+    	! cp -p "${RAW_CERT_FILE}"		"${SERVER_CERT_FILE}"	||
+    	! cp -p "${RAW_KEY_FILE}"		"${SERVER_KEY_FILE}"	||
+    	! cp -p "${RAW_CERT_FILE}"		"${CLIENT_CERT_FILE}"	||
+    	! cp -p "${RAW_KEY_FILE}"		"${CLIENT_KEY_FILE}"	||
+    	! chmod 0444 "${CA_CERT_FILE}"							||
+    	! chmod 0444 "${SERVER_CERT_FILE}"						||
+    	! chmod 0400 "${SERVER_KEY_FILE}"						||
+    	! chmod 0444 "${CLIENT_CERT_FILE}"						||
+    	! chmod 0400 "${CLIENT_KEY_FILE}"; then
     
-    if [ "${COPY_RESULT}" -ne 0 ]; then
     	echo "[ERROR] Failed to copy certificate files."
     	exit 1
     fi
@@ -1561,25 +1761,65 @@ data:
     #----------------------------------------------------------
     # Check curl command and install
     #----------------------------------------------------------
-    if command -v curl >/dev/null 2>&1; then
-    	CURL_COMMAND=$(command -v curl | tr -d '\n')
-    else
-    	if ! command -v apk >/dev/null 2>&1; then
-    		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
+    if ! command -v curl >/dev/null 2>&1; then
+    	if [ ! -f /etc/os-release ]; then
+    		echo "[ERROR] Not found /etc/os-release file."
     		exit 1
     	fi
-    	APK_COMMAND=$(command -v apk | tr -d '\n')
+    	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
     
-    	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
-    		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
+    	if [ -z "${OS_NAME}" ]; then
+    		echo "[ERROR] Not found OS type."
+    		exit 1
+    	elif [ "${OS_NAME}" = "alpine" ]; then
+    		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache curl >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install curl."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "ubuntu" ]; then
+    		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
+    			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
+    				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
+    				_FOUND_HTTPS_PROXY=$(env | grep -i '^https_proxy' | head -1 | sed -e 's#^https_proxy=##gi')
+    
+    				if echo "${_FOUND_HTTP_PROXY}" | grep -q -v '://'; then
+    					_FOUND_HTTP_PROXY="http://${_FOUND_HTTP_PROXY}"
+    				fi
+    				if echo "${_FOUND_HTTPS_PROXY}" | grep -q -v '://'; then
+    					_FOUND_HTTPS_PROXY="http://${_FOUND_HTTPS_PROXY}"
+    				fi
+    				if [ ! -d /etc/apt/apt.conf.d ]; then
+    					mkdir -p /etc/apt/apt.conf.d
+    				fi
+    				{
+    					echo "Acquire::http::Proxy \"${_FOUND_HTTP_PROXY}\";"
+    					echo "Acquire::https::Proxy \"${_FOUND_HTTPS_PROXY}\";"
+    				} >> /etc/apt/apt.conf.d/00-aptproxy.conf
+    			fi
+    		fi
+    		DEBIAN_FRONTEND=noninteractive
+    		export DEBIAN_FRONTEND
+    
+    		if ! apt-get update -y -q -q >/dev/null 2>&1 || ! apt-get install -y curl >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install curl."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "centos" ]; then
+    		if ! yum update -y -q >/dev/null 2>&1 || ! yum install -y curl >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install curl."
+    			exit 1
+    		fi
+    	elif [ "${OS_NAME}" = "rocky" ] || [ "${OS_NAME}" = "fedora" ]; then
+    		if ! dnf update -y -q >/dev/null 2>&1 || ! dnf install -y curl >/dev/null 2>&1; then
+    			echo "[ERROR] Failed to install curl."
+    			exit 1
+    		fi
+    	else
+    		echo "[ERROR] Unknown OS type(${OS_NAME})."
     		exit 1
     	fi
-    	if ! command -v curl >/dev/null 2>&1; then
-    		echo "[ERROR] ${PRGNAME} : Could not install curl by apk(ALPINE)."
-    		exit 1
-    	fi
-    	CURL_COMMAND=$(command -v curl | tr -d '\n')
     fi
+    CURL_COMMAND=$(command -v curl | tr -d '\n')
     
     #----------------------------------------------------------
     # Check K2HR3 API

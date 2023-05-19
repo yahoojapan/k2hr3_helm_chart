@@ -29,12 +29,18 @@ ANTPICKAX_ETC_DIR="/etc/antpickax"
 
 RETRYCOUNT=60
 SLEEP_SHORT=10
-SLEEP_LONG_MANUAL=3600000
 
 #----------------------------------------------------------
 # Configuration files for K2HR3 APP
 #----------------------------------------------------------
-K2HR3_APP_DIR="/usr/lib/node_modules/k2hr3_app"
+if [ -d /usr/local/lib/node_modules/k2hr3-app ]; then
+	K2HR3_APP_DIR="/usr/local/lib/node_modules/k2hr3-app"
+elif [ -d /usr/lib/node_modules/k2hr3-app ]; then
+	K2HR3_APP_DIR="/usr/lib/node_modules/k2hr3-app"
+else
+	K2HR3_APP_DIR="/usr/lib/node_modules/k2hr3_app"
+fi
+
 RUN_SCRIPT="${K2HR3_APP_DIR}/bin/run.sh"
 PRODUCTION_FILE="${K2HR3_APP_DIR}/config/production.json"
 CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-app-production.json"
@@ -75,9 +81,8 @@ if ! sed -e "s#%%K2HR3_APP_EXTERNAL_HOST%%#${K2HR3APP_EXTERNAL_HOST}#g"	\
 		-e "s#%%K2HR3_APP_EXTERNAL_PORT%%#${K2HR3APP_EXTERNAL_PORT}#g"	\
 		-e "s#%%K2HR3_API_EXTERNAL_HOST%%#${K2HR3API_EXTERNAL_HOST}#g"	\
 		-e "s#%%K2HR3_API_EXTERNAL_PORT%%#${K2HR3API_EXTERNAL_PORT}#g"	\
-		< "${CONFIGMAP_PRODUCTION_FILE}"								\
+		"${CONFIGMAP_PRODUCTION_FILE}"									\
 		> "${PRODUCTION_FILE}"; then
-
 	exit 1
 fi
 
@@ -158,9 +163,7 @@ sleep "${SLEEP_SHORT}"
 set -e
 
 if [ -n "${K2HR3_MANUAL_START}" ] && [ "${K2HR3_MANUAL_START}" = "true" ]; then
-	while true; do
-		sleep ${SLEEP_LONG_MANUAL}
-	done
+	tail -f /dev/null
 else
 	"${RUN_SCRIPT}" --production -fg
 fi

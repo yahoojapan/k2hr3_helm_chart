@@ -222,24 +222,65 @@ LOG_FILE="${CERT_WORK_DIR}/${PRGNAME}.log"
 #----------------------------------------------------------
 # Check openssl command
 #----------------------------------------------------------
-if command -v openssl >/dev/null 2>&1; then
-	OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
-else
-	if ! command -v apk >/dev/null 2>&1; then
-		echo "[ERROR] This container it not ALPINE, It does not support installations other than ALPINE, so exit."
+if ! command -v openssl >/dev/null 2>&1; then
+	if [ ! -f /etc/os-release ]; then
+		echo "[ERROR] Not found /etc/os-release file."
 		exit 1
 	fi
-	APK_COMMAND=$(command -v apk | tr -d '\n')
-	if ! "${APK_COMMAND}" add -q --no-progress --no-cache openssl; then
-		echo "[ERROR] Failed to install openssl by apk(ALPINE)."
+	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
+
+	if [ -z "${OS_NAME}" ]; then
+		echo "[ERROR] Not found OS type."
+		exit 1
+	elif [ "${OS_NAME}" = "alpine" ]; then
+		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache openssl >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install openssl."
+			exit 1
+		fi
+	elif [ "${OS_NAME}" = "ubuntu" ]; then
+		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
+			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
+				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
+				_FOUND_HTTPS_PROXY=$(env | grep -i '^https_proxy' | head -1 | sed -e 's#^https_proxy=##gi')
+
+				if echo "${_FOUND_HTTP_PROXY}" | grep -q -v '://'; then
+					_FOUND_HTTP_PROXY="http://${_FOUND_HTTP_PROXY}"
+				fi
+				if echo "${_FOUND_HTTPS_PROXY}" | grep -q -v '://'; then
+					_FOUND_HTTPS_PROXY="http://${_FOUND_HTTPS_PROXY}"
+				fi
+				if [ ! -d /etc/apt/apt.conf.d ]; then
+					mkdir -p /etc/apt/apt.conf.d
+				fi
+				{
+					echo "Acquire::http::Proxy \"${_FOUND_HTTP_PROXY}\";"
+					echo "Acquire::https::Proxy \"${_FOUND_HTTPS_PROXY}\";"
+				} >> /etc/apt/apt.conf.d/00-aptproxy.conf
+			fi
+		fi
+		DEBIAN_FRONTEND=noninteractive
+		export DEBIAN_FRONTEND
+
+		if ! apt-get update -y -q -q >/dev/null 2>&1 || ! apt-get install -y openssl >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install openssl."
+			exit 1
+		fi
+	elif [ "${OS_NAME}" = "centos" ]; then
+		if ! yum update -y -q >/dev/null 2>&1 || ! yum install -y openssl >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install openssl."
+			exit 1
+		fi
+	elif [ "${OS_NAME}" = "rocky" ] || [ "${OS_NAME}" = "fedora" ]; then
+		if ! dnf update -y -q >/dev/null 2>&1 || ! dnf install -y openssl >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install openssl."
+			exit 1
+		fi
+	else
+		echo "[ERROR] Unknown OS type(${OS_NAME})."
 		exit 1
 	fi
-	if ! command -v openssl >/dev/null 2>&1; then
-		echo "[ERROR] Could not install openssl by apk(ALPINE)."
-		exit 1
-	fi
-	OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
 fi
+OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
 
 #----------------------------------------------------------
 # Create openssl.cnf 
@@ -399,19 +440,17 @@ fi
 #----------------------------------------------------------
 # Set files to /etc/antpickax
 #----------------------------------------------------------
-COPY_RESULT=0
-cp -p "${ORG_CA_CERT_FILE}"	"${CA_CERT_FILE}"		|| COPY_RESULT=1
-cp -p "${RAW_CERT_FILE}"	"${SERVER_CERT_FILE}"	|| COPY_RESULT=1
-cp -p "${RAW_KEY_FILE}"		"${SERVER_KEY_FILE}"	|| COPY_RESULT=1
-cp -p "${RAW_CERT_FILE}"	"${CLIENT_CERT_FILE}"	|| COPY_RESULT=1
-cp -p "${RAW_KEY_FILE}"		"${CLIENT_KEY_FILE}"	|| COPY_RESULT=1
-chmod 0444 "${CA_CERT_FILE}"						|| COPY_RESULT=1
-chmod 0444 "${SERVER_CERT_FILE}"					|| COPY_RESULT=1
-chmod 0400 "${SERVER_KEY_FILE}"						|| COPY_RESULT=1
-chmod 0444 "${CLIENT_CERT_FILE}"					|| COPY_RESULT=1
-chmod 0400 "${CLIENT_KEY_FILE}"						|| COPY_RESULT=1
+if	! cp -p "${ORG_CA_CERT_FILE}"	"${CA_CERT_FILE}"		||
+	! cp -p "${RAW_CERT_FILE}"		"${SERVER_CERT_FILE}"	||
+	! cp -p "${RAW_KEY_FILE}"		"${SERVER_KEY_FILE}"	||
+	! cp -p "${RAW_CERT_FILE}"		"${CLIENT_CERT_FILE}"	||
+	! cp -p "${RAW_KEY_FILE}"		"${CLIENT_KEY_FILE}"	||
+	! chmod 0444 "${CA_CERT_FILE}"							||
+	! chmod 0444 "${SERVER_CERT_FILE}"						||
+	! chmod 0400 "${SERVER_KEY_FILE}"						||
+	! chmod 0444 "${CLIENT_CERT_FILE}"						||
+	! chmod 0400 "${CLIENT_KEY_FILE}"; then
 
-if [ "${COPY_RESULT}" -ne 0 ]; then
 	echo "[ERROR] Failed to copy certificate files."
 	exit 1
 fi

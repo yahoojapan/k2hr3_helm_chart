@@ -91,25 +91,65 @@ fi
 #----------------------------------------------------------
 # Check curl command and install
 #----------------------------------------------------------
-if command -v curl >/dev/null 2>&1; then
-	CURL_COMMAND=$(command -v curl | tr -d '\n')
-else
-	if ! command -v apk >/dev/null 2>&1; then
-		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
+if ! command -v curl >/dev/null 2>&1; then
+	if [ ! -f /etc/os-release ]; then
+		echo "[ERROR] Not found /etc/os-release file."
 		exit 1
 	fi
-	APK_COMMAND=$(command -v apk | tr -d '\n')
+	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
 
-	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
-		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
+	if [ -z "${OS_NAME}" ]; then
+		echo "[ERROR] Not found OS type."
+		exit 1
+	elif [ "${OS_NAME}" = "alpine" ]; then
+		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache curl >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install curl."
+			exit 1
+		fi
+	elif [ "${OS_NAME}" = "ubuntu" ]; then
+		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
+			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
+				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
+				_FOUND_HTTPS_PROXY=$(env | grep -i '^https_proxy' | head -1 | sed -e 's#^https_proxy=##gi')
+
+				if echo "${_FOUND_HTTP_PROXY}" | grep -q -v '://'; then
+					_FOUND_HTTP_PROXY="http://${_FOUND_HTTP_PROXY}"
+				fi
+				if echo "${_FOUND_HTTPS_PROXY}" | grep -q -v '://'; then
+					_FOUND_HTTPS_PROXY="http://${_FOUND_HTTPS_PROXY}"
+				fi
+				if [ ! -d /etc/apt/apt.conf.d ]; then
+					mkdir -p /etc/apt/apt.conf.d
+				fi
+				{
+					echo "Acquire::http::Proxy \"${_FOUND_HTTP_PROXY}\";"
+					echo "Acquire::https::Proxy \"${_FOUND_HTTPS_PROXY}\";"
+				} >> /etc/apt/apt.conf.d/00-aptproxy.conf
+			fi
+		fi
+		DEBIAN_FRONTEND=noninteractive
+		export DEBIAN_FRONTEND
+
+		if ! apt-get update -y -q -q >/dev/null 2>&1 || ! apt-get install -y curl >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install curl."
+			exit 1
+		fi
+	elif [ "${OS_NAME}" = "centos" ]; then
+		if ! yum update -y -q >/dev/null 2>&1 || ! yum install -y curl >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install curl."
+			exit 1
+		fi
+	elif [ "${OS_NAME}" = "rocky" ] || [ "${OS_NAME}" = "fedora" ]; then
+		if ! dnf update -y -q >/dev/null 2>&1 || ! dnf install -y curl >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install curl."
+			exit 1
+		fi
+	else
+		echo "[ERROR] Unknown OS type(${OS_NAME})."
 		exit 1
 	fi
-	if ! command -v curl >/dev/null 2>&1; then
-		echo "[ERROR] ${PRGNAME} : Could not install curl by apk(ALPINE)."
-		exit 1
-	fi
-	CURL_COMMAND=$(command -v curl | tr -d '\n')
 fi
+CURL_COMMAND=$(command -v curl | tr -d '\n')
 
 #----------------------------------------------------------
 # Check K2HR3 API
