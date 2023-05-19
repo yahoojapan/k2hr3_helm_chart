@@ -229,15 +229,12 @@ if ! command -v openssl >/dev/null 2>&1; then
 	fi
 	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
 
-	if [ -z "${OS_NAME}" ]; then
-		echo "[ERROR] Not found OS type."
-		exit 1
-	elif [ "${OS_NAME}" = "alpine" ]; then
+	if echo "${OS_NAME}" | grep -q -i "alpine"; then
 		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache openssl >/dev/null 2>&1; then
 			echo "[ERROR] Failed to install openssl."
 			exit 1
 		fi
-	elif [ "${OS_NAME}" = "ubuntu" ]; then
+	elif echo "${OS_NAME}" | grep -q -i "ubuntu"; then
 		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
 			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
 				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
@@ -265,12 +262,12 @@ if ! command -v openssl >/dev/null 2>&1; then
 			echo "[ERROR] Failed to install openssl."
 			exit 1
 		fi
-	elif [ "${OS_NAME}" = "centos" ]; then
+	elif echo "${OS_NAME}" | grep -q -i "centos"; then
 		if ! yum update -y -q >/dev/null 2>&1 || ! yum install -y openssl >/dev/null 2>&1; then
 			echo "[ERROR] Failed to install openssl."
 			exit 1
 		fi
-	elif [ "${OS_NAME}" = "rocky" ] || [ "${OS_NAME}" = "fedora" ]; then
+	elif echo "${OS_NAME}" | grep -q -i -e "rocky" -e "fedora"; then
 		if ! dnf update -y -q >/dev/null 2>&1 || ! dnf install -y openssl >/dev/null 2>&1; then
 			echo "[ERROR] Failed to install openssl."
 			exit 1
