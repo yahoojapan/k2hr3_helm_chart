@@ -27,12 +27,9 @@ LOOKUP_RETRYCOUNT=60
 SLEEP_SHORT=10
 
 #----------------------------------------------------------
-# Make configuration file path
+# Configuration file path
 #----------------------------------------------------------
-if [ -z "$1" ]; then
-	CHMPX_MODE="server"
-	SLEEP_GAP=10
-elif [ "$1" = "SERVER" ] || [ "$1" = "server" ]; then
+if [ -z "$1" ] || [ "$1" = "SERVER" ] || [ "$1" = "server" ]; then
 	CHMPX_MODE="server"
 	SLEEP_GAP=10
 elif [ "$1" = "SLAVE" ] || [ "$1" = "slave" ]; then
@@ -46,11 +43,8 @@ INI_FILE="${CHMPX_MODE}.ini"
 INI_FILE_PATH="${ANTPICKAX_ETC_DIR}/${INI_FILE}"
 
 #----------------------------------------------------------
-# Main processing
+# Wait configuration file creation
 #----------------------------------------------------------
-#
-# Wait for creating configuarion file
-#
 FILE_EXISTS=0
 while [ "${FILE_EXISTS}" -eq 0 ]; do
 	if [ -f "${INI_FILE_PATH}" ]; then
@@ -65,10 +59,89 @@ while [ "${FILE_EXISTS}" -eq 0 ]; do
 	fi
 done
 
+#----------------------------------------------------------
+# Preparation
+#----------------------------------------------------------
+#
+# Check and Install nslookup
+#
+if ! command -v nslookup >/dev/null 2>&1; then
+	if [ ! -f /etc/os-release ]; then
+		echo "[ERROR] Not found /etc/os-release file."
+		exit 1
+	fi
+	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
+
+	if [ -z "${OS_NAME}" ]; then
+		echo "[ERROR] Not found OS type."
+		exit 1
+	elif [ "${OS_NAME}" = "alpine" ]; then
+		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache bind-tools >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install bind-tools(nslookup)."
+			exit 1
+		fi
+	elif [ "${OS_NAME}" = "ubuntu" ]; then
+		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
+			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
+				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
+				_FOUND_HTTPS_PROXY=$(env | grep -i '^https_proxy' | head -1 | sed -e 's#^https_proxy=##gi')
+
+				if echo "${_FOUND_HTTP_PROXY}" | grep -q -v '://'; then
+					_FOUND_HTTP_PROXY="http://${_FOUND_HTTP_PROXY}"
+				fi
+				if echo "${_FOUND_HTTPS_PROXY}" | grep -q -v '://'; then
+					_FOUND_HTTPS_PROXY="http://${_FOUND_HTTPS_PROXY}"
+				fi
+				if [ ! -d /etc/apt/apt.conf.d ]; then
+					mkdir -p /etc/apt/apt.conf.d
+				fi
+				{
+					echo "Acquire::http::Proxy \"${_FOUND_HTTP_PROXY}\";"
+					echo "Acquire::https::Proxy \"${_FOUND_HTTPS_PROXY}\";"
+				} >> /etc/apt/apt.conf.d/00-aptproxy.conf
+			fi
+		fi
+		DEBIAN_FRONTEND=noninteractive
+		export DEBIAN_FRONTEND
+
+		if ! apt-get update -y -q -q >/dev/null 2>&1 || ! apt-get install -y dnsutils >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install dnsutils(nslookup)."
+			exit 1
+		fi
+	elif [ "${OS_NAME}" = "centos" ]; then
+		if ! yum update -y -q >/dev/null 2>&1 || ! yum install -y bind-utils >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install bind-utils(nslookup)."
+			exit 1
+		fi
+	elif [ "${OS_NAME}" = "rocky" ] || [ "${OS_NAME}" = "fedora" ]; then
+		if ! dnf update -y -q >/dev/null 2>&1 || ! dnf install -y bind-utils >/dev/null 2>&1; then
+			echo "[ERROR] Failed to install bind-utils(nslookup)."
+			exit 1
+		fi
+	else
+		echo "[ERROR] Unknown OS type(${OS_NAME})."
+		exit 1
+	fi
+fi
+
 #
 # Check all hostname
 #
 ALL_HOST_NAMES=$(grep 'NAME[[:space:]]*=' "${INI_FILE_PATH}" 2>/dev/null | sed 's/^[[:space:]]*NAME[[:space:]]*=[[:space:]]*//g' 2>/dev/null)
+
+#
+# Sleep time ajusting
+#
+for _ONE_NAME in $(echo "${ALL_HOST_NAMES}" | sort); do
+	if echo "${_ONE_NAME}" | grep -q "$(hostname)"; then
+		break
+	fi
+	SLEEP_GAP=$((SLEEP_GAP + 2))
+done
+
+#
+# Wait all host lookup
+#
 DONE_ALL_LOOKUP=0
 while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 	REST_NAMES=""
@@ -93,12 +166,13 @@ while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 
 		_FIND_NAME_IN_LIST=0
 		for _GET_NAME in ${_GET_NAMES}; do
-			if [ -n "${_GET_NAME}" ] && [ "${_GET_NAME}" = "${_ONE_NAME}" ]; then
-				_FIND_NAME_IN_LIST=1
-				break;
+			if [ -n "${_GET_NAME}" ]; then
+				if [ "${_GET_NAME}" = "${_ONE_NAME}" ] || [ "${_GET_NAME}" = "${_ONE_NAME}." ]; then
+					_FIND_NAME_IN_LIST=1
+					break;
+				fi
 			fi
 		done
-
 		if [ "${_FIND_NAME_IN_LIST}" -eq 0 ]; then
 			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
 		fi
@@ -109,17 +183,20 @@ while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 	if [ -z "${ALL_HOST_NAMES}" ]; then
 		DONE_ALL_LOOKUP=1
 	else
-		if [ "${LOOKUP_RETRYCOUNT}" -gt 0 ]; then
-			sleep "${SLEEP_SHORT}"
-			LOOKUP_RETRYCOUNT=$((LOOKUP_RETRYCOUNT - 1))
-		else
+		if [ "${LOOKUP_RETRYCOUNT}" -le 0 ]; then
 			echo "[ERROR] Lookup hosts is not completed."
 			exit 1
 		fi
+		sleep "${SLEEP_SHORT}"
+		LOOKUP_RETRYCOUNT=$((LOOKUP_RETRYCOUNT - 1))
 	fi
 done
+
 sleep "${SLEEP_GAP}"
 
+#----------------------------------------------------------
+# Main processing
+#----------------------------------------------------------
 #
 # Run chmpx process
 #

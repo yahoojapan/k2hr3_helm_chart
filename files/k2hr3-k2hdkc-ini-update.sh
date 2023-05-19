@@ -251,11 +251,9 @@ set +e
 WAIT_SEC=5
 POD_NUMBER=$(echo "${CHMPX_SELF_HOSTNAME}" | sed 's/-/ /g' | awk '{print $NF}')
 
-# shellcheck disable=SC2003,SC2181
-if expr "${POD_NUMBER}" + 1 >/dev/null 2>&1; then
+if echo "${POD_NUMBER}" | grep -q -v "[^0-9]"; then
 	WAIT_SEC=$((WAIT_SEC * POD_NUMBER))
 fi
-
 sleep "${WAIT_SEC}"
 
 exit 0
