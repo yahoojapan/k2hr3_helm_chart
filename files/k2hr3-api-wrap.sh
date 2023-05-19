@@ -68,15 +68,12 @@ if ! command -v nslookup >/dev/null 2>&1; then
 	fi
 	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
 
-	if [ -z "${OS_NAME}" ]; then
-		echo "[ERROR] Not found OS type."
-		exit 1
-	elif [ "${OS_NAME}" = "alpine" ]; then
+	if echo "${OS_NAME}" | grep -q -i "alpine"; then
 		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache bind-tools >/dev/null 2>&1; then
 			echo "[ERROR] Failed to install bind-tools(nslookup)."
 			exit 1
 		fi
-	elif [ "${OS_NAME}" = "ubuntu" ]; then
+	elif echo "${OS_NAME}" | grep -q -i "ubuntu"; then
 		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
 			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
 				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
@@ -104,12 +101,12 @@ if ! command -v nslookup >/dev/null 2>&1; then
 			echo "[ERROR] Failed to install dnsutils(nslookup)."
 			exit 1
 		fi
-	elif [ "${OS_NAME}" = "centos" ]; then
+	elif echo "${OS_NAME}" | grep -q -i "centos"; then
 		if ! yum update -y -q >/dev/null 2>&1 || ! yum install -y bind-utils >/dev/null 2>&1; then
 			echo "[ERROR] Failed to install bind-utils(nslookup)."
 			exit 1
 		fi
-	elif [ "${OS_NAME}" = "rocky" ] || [ "${OS_NAME}" = "fedora" ]; then
+	elif echo "${OS_NAME}" | grep -q -i -e "rocky" -e "fedora"; then
 		if ! dnf update -y -q >/dev/null 2>&1 || ! dnf install -y bind-utils >/dev/null 2>&1; then
 			echo "[ERROR] Failed to install bind-utils(nslookup)."
 			exit 1
@@ -153,13 +150,13 @@ while [ "${DONE_ALL_LOOKUP}" -eq 0 ]; do
 		#
 		# Get lastest IP address
 		#
-		_ONE_IP=$(nslookup "${_ONE_NAME}" | grep '[A|a]ddress:' | tail -1 | sed -e 's/^[[:space:]]*[A|a]ddress:[[:space:]]*//g')
+		_ONE_IP=$(nslookup "${_ONE_NAME}" | grep -i 'address:' | tail -1 | sed -e 's/^[[:space:]]*address:[[:space:]]*//gi')
 
 		if ! nslookup "${_ONE_IP}" >/dev/null 2>&1; then
 			REST_NAMES="${REST_NAMES} ${_ONE_NAME}"
 			continue
 		fi
-		_GET_NAMES=$(nslookup "${_ONE_IP}" | grep 'name[[:space:]]*=' | sed -e 's/^.*[[:space:]]*name[[:space:]]*=[[:space:]]*//g')
+		_GET_NAMES=$(nslookup "${_ONE_IP}" | grep -i 'name[[:space:]]*=' | sed -e 's/^.*[[:space:]]*name[[:space:]]*=[[:space:]]*//gi')
 
 		_FIND_NAME_IN_LIST=0
 		for _GET_NAME in ${_GET_NAMES}; do
