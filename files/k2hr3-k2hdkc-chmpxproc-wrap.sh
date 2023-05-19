@@ -77,7 +77,7 @@ if ! command -v nslookup >/dev/null 2>&1; then
 			echo "[ERROR] Failed to install bind-tools(nslookup)."
 			exit 1
 		fi
-	elif echo "${OS_NAME}" | grep -q -i "ubuntu"; then
+	elif echo "${OS_NAME}" | grep -q -i -e "ubuntu" -e "debian"; then
 		if env | grep -i -e '^http_proxy' -e '^https_proxy'; then
 			if ! test -f /etc/apt/apt.conf.d/00-aptproxy.conf || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
 				_FOUND_HTTP_PROXY=$(env | grep -i '^http_proxy' | head -1 | sed -e 's#^http_proxy=##gi')
