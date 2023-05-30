@@ -277,7 +277,7 @@ if ! command -v openssl >/dev/null 2>&1; then
 		exit 1
 	fi
 fi
-OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
+OPENSSL_COMMAND=$(command -v openssl 2>/dev/null)
 
 #----------------------------------------------------------
 # Create openssl.cnf 
@@ -300,19 +300,36 @@ fi
 #	stateOrProvinceName = optional					in [ policy_match ] section
 #	organizationName	= optional					in [ policy_match ] section
 #
-if ! sed -e 's/\[[[:space:]]*CA_default[[:space:]]*\]/\[ CA_default ]\nunique_subject = no\nemail_in_dn = no\nrand_serial = no/g' \
-		-e 's/\[[[:space:]]*v3_ca[[:space:]]*\]/\[ v3_ca ]\nkeyUsage = cRLSign, keyCertSign/g'						\
-		-e "s#^dir[[:space:]]*=[[:space:]]*.*CA.*#dir = ${CERT_WORK_DIR}#g"											\
-		-e 's/^[[:space:]]*countryName[[:space:]]*=[[:space:]]*match.*$/countryName = optional/g'					\
-		-e 's/^[[:space:]]*stateOrProvinceName[[:space:]]*=[[:space:]]*match.*$/stateOrProvinceName = optional/g'	\
-		-e 's/^[[:space:]]*organizationName[[:space:]]*=[[:space:]]*match.*$/organizationName = optional/g'			\
-		"${ORG_OPENSSL_CNF}"																						\
-		> "${CUSTOM_OPENSSL_CNF}"; then
+while IFS= read -r ONE_LINE; do
+	if [ -z "${ONE_LINE}" ]; then
+		echo ""
 
-	echo "[ERROR] Could not create file ${CUSTOM_OPENSSL_CNF}"
-	exit 1
-fi
+	elif echo "${ONE_LINE}" | grep -q '[[[:space:]]*CA_default[[:space:]]*]'; then
+		echo '[ CA_default ]'
+		echo 'unique_subject = no'
+		echo 'email_in_dn = no'
+		echo 'rand_serial = no'
 
+	elif echo "${ONE_LINE}" | grep -q '[[[:space:]]*v3_ca[[:space:]]*]'; then
+		echo '[ v3_ca ]'
+		echo 'keyUsage = cRLSign, keyCertSign'
+
+	elif echo "${ONE_LINE}" | grep -q '^dir[[:space:]]*=[[:space:]]*.*CA.*'; then
+		echo "dir = ${CERT_WORK_DIR}"
+
+	elif echo "${ONE_LINE}" | grep -q '^[[:space:]]*countryName[[:space:]]*=[[:space:]]*match.*$'; then
+		echo 'countryName = optional'
+
+	elif echo "${ONE_LINE}" | grep -q '^[[:space:]]*stateOrProvinceName[[:space:]]*=[[:space:]]*match.*$'; then
+		echo 'stateOrProvinceName = optional'
+
+	elif echo "${ONE_LINE}" | grep -q '^[[:space:]]*organizationName[[:space:]]*=[[:space:]]*match.*$'; then
+		echo 'organizationName = optional'
+
+	else
+		echo "${ONE_LINE}"
+	fi
+done < "${ORG_OPENSSL_CNF}" > "${CUSTOM_OPENSSL_CNF}"
 
 #
 # Add section to  openssl.cnf

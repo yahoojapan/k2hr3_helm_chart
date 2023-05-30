@@ -64,7 +64,7 @@ if [ -z "${K2HR3APP_EXTERNAL_PORT}" ] || [ "${K2HR3APP_EXTERNAL_PORT}" = "0" ] ;
 	TMP_APP_NP_NAME=$(echo "${K2HR3APP_SERVICE_NAME}" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
 	TMP_APP_NP_NAME="${TMP_APP_NP_NAME}_SERVICE_PORT="
 
-	K2HR3APP_EXTERNAL_PORT=$(env | grep "${TMP_APP_NP_NAME}" | sed -e "s/${TMP_APP_NP_NAME}//g" | tr -d '\n')
+	K2HR3APP_EXTERNAL_PORT=$(env | grep "${TMP_APP_NP_NAME}" | sed -e "s/${TMP_APP_NP_NAME}//g")
 fi
 
 if [ -z "${K2HR3API_EXTERNAL_PORT}" ] || [ "${K2HR3API_EXTERNAL_PORT}" = "0" ] ; then
@@ -74,7 +74,7 @@ if [ -z "${K2HR3API_EXTERNAL_PORT}" ] || [ "${K2HR3API_EXTERNAL_PORT}" = "0" ] ;
 	TMP_API_NP_NAME=$(echo "${K2HR3API_SERVICE_NAME}" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
 	TMP_API_NP_NAME="${TMP_API_NP_NAME}_SERVICE_PORT="
 
-	K2HR3API_EXTERNAL_PORT=$(env | grep "${TMP_API_NP_NAME}" | sed -e "s/${TMP_API_NP_NAME}//g" | tr -d '\n')
+	K2HR3API_EXTERNAL_PORT=$(env | grep "${TMP_API_NP_NAME}" | sed -e "s/${TMP_API_NP_NAME}//g")
 fi
 
 if [ ! -d "${PRODUCTION_DIR}" ]; then
@@ -116,13 +116,13 @@ fi
 # Check curl command and install
 #----------------------------------------------------------
 if command -v curl >/dev/null 2>&1; then
-	CURL_COMMAND=$(command -v curl | tr -d '\n')
+	CURL_COMMAND=$(command -v curl 2>/dev/null)
 else
 	if ! command -v apk >/dev/null 2>&1; then
 		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
 		exit 1
 	fi
-	APK_COMMAND=$(command -v apk | tr -d '\n')
+	APK_COMMAND=$(command -v apk 2>/dev/null)
 
 	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
 		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
@@ -132,7 +132,7 @@ else
 		echo "[ERROR] ${PRGNAME} : Could not install curl by apk(ALPINE)."
 		exit 1
 	fi
-	CURL_COMMAND=$(command -v curl | tr -d '\n')
+	CURL_COMMAND=$(command -v curl 2>/dev/null)
 fi
 
 #----------------------------------------------------------
@@ -142,10 +142,10 @@ fi
 # Wait for api server up
 #
 if [ -z "${K2HR3APP_RUN_ON_MINIKUBE}" ] || [ "${K2HR3APP_RUN_ON_MINIKUBE}" != "true" ]; then
-	API_SCHEMA=$(grep 'apischeme' "${PRODUCTION_FILE}" 2>/dev/null | sed -e "s/['|,]//g" -e 's/^[[:space:]]*apischeme:[[:space:]]*//g' 2>/dev/null | tr -d '\n')
+	API_SCHEMA=$(grep 'apischeme' "${PRODUCTION_FILE}" 2>/dev/null | sed -e "s/['|,]//g" -e 's/^[[:space:]]*apischeme:[[:space:]]*//g' 2>/dev/null)
 	API_UP=0
 	while [ "${API_UP}" -eq 0 ]; do
-		if HTTP_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1); then
+		if HTTP_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1); then
 			if [ -n "${HTTP_CODE}" ] && [ "${HTTP_CODE}" -eq 200 ]; then
 				API_UP=1
 			fi
