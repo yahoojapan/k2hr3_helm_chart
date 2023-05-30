@@ -43,6 +43,29 @@ The following options/values are supported. See values.yaml for more detailed do
 | `k2hr3.app.count`              | optional     | Specify the server count of K2HR3 Web Application.                                                                                  | 2       |
 | `k2hr3.app.extHostname`        | optional     | Specify the external hostname(FQDN) for K2HR3 Web Application system, default is empty in which case internal hostanme will be used.| ""      |
 | `k2hr3.app.extPort`            | optional     | Specify the external port number for K2HR3 Web Application system, default is 0 in which case 32443 will be used.                   | 0       |
+| `k2hr3.env.httpProxy`          | optional     | Specify the HTTP PROXY(ex. "http://proxy.local:8080") for K2HR3 system, default is empty.                                           | ""      |
+| `k2hr3.env.httpsProxy`         | optional     | Specify the HTTPS PROXY(ex. "http://proxy.local:8080") for K2HR3 system, default is empty.                                          | ""      |
+| `k2hr3.env.noProxy`            | optional     | Specify the NO PROXY(ex. "internal,127.1.1.1") for K2HR3 system, default is empty.                                                  | ""      |
+| `images.app.fullImageName`     | optional     | Specify the image full name(organaization/name/version) for K2HR3 Web Application.                                                  | ""      |
+| `images.app.organization`      | optional     | Specify the organaization for K2HR3 Web Application, Valid only when images.app.fullImageName is not specified.                     | ""      |
+| `images.app.imageName`         | optional     | Specify the image name for K2HR3 Web Application, Valid only when images.app.fullImageName is not specified.                        | ""      |
+| `images.app.version`           | optional     | Specify the image version for K2HR3 Web Application, Valid only when images.app.fullImageName is not specified.                     | ""      |
+| `images.api.fullImageName`     | optional     | Specify the image full name(organaization/name/version) for K2HR3 REST API.                                                         | ""      |
+| `images.api.organization`      | optional     | Specify the organaization for K2HR3 REST API, Valid only when images.app.fullImageName is not specified.                            | ""      |
+| `images.api.imageName`         | optional     | Specify the image name for K2HR3 REST API, Valid only when images.app.fullImageName is not specified.                               | ""      |
+| `images.api.version`           | optional     | Specify the image version for K2HR3 REST API, Valid only when images.app.fullImageName is not specified.                            | ""      |
+| `images.dkc.fullImageName`     | optional     | Specify the image full name(organaization/name/version) for the backend K2HDKC.                                                     | ""      |
+| `images.dkc.organization`      | optional     | Specify the organaization for the backend K2HDKC, Valid only when images.app.fullImageName is not specified.                        | ""      |
+| `images.dkc.imageName`         | optional     | Specify the image name for the backend K2HDKC, Valid only when images.app.fullImageName is not specified.                           | ""      |
+| `images.dkc.version`           | optional     | Specify the image version for the backend K2HDKC, Valid only when images.app.fullImageName is not specified.                        | ""      |
+| `images.chmpx.fullImageName`   | optional     | Specify the image full name(organaization/name/version) for the backend CHMPX.                                                      | ""      |
+| `images.chmpx.organization`    | optional     | Specify the organaization for the backend CHMPX, Valid only when images.app.fullImageName is not specified.                         | ""      |
+| `images.chmpx.imageName`       | optional     | Specify the image name for the backend CHMPX, Valid only when images.app.fullImageName is not specified.                            | ""      |
+| `images.chmpx.version`         | optional     | Specify the image version for the backend CHMPX, Valid only when images.app.fullImageName is not specified.                         | ""      |
+| `images.init.fullImageName`    | optional     | Specify the image full name(organaization/name/version) for the init container.                                                     | ""      |
+| `images.init.organization`     | optional     | Specify the organaization for the init container, Valid only when images.app.fullImageName is not specified.                        | ""      |
+| `images.init.imageName`        | optional     | Specify the image name for the init container, Valid only when images.app.fullImageName is not specified.                           | ""      |
+| `images.init.version`          | optional     | Specify the image version for the init container, Valid only when images.app.fullImageName is not specified.                        | ""      |
 | `mountPoint.configMap`         | optional     | Specify the directory path in each pods to mount the configmap.                                                                     | "/configmap" |
 | `mountPoint.ca`                | optional     | Specify the directory path in each pods to mount the secret which has CA self signed certificates.                                  | "/secret-ca" |
 | `k8s.namespace`                | optional     | Specify the kubernetes namespace to deploy K2HR3 system, default is empty. If not set, use Release.Namespace.                       | ""      |

@@ -42,7 +42,8 @@ else
 fi
 
 RUN_SCRIPT="${K2HR3_APP_DIR}/bin/run.sh"
-PRODUCTION_FILE="${K2HR3_APP_DIR}/config/production.json"
+PRODUCTION_DIR="${K2HR3_APP_DIR}/config"
+PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
 CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-app-production.json"
 
 if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
@@ -74,6 +75,12 @@ if [ -z "${K2HR3API_EXTERNAL_PORT}" ] || [ "${K2HR3API_EXTERNAL_PORT}" = "0" ] ;
 	TMP_API_NP_NAME="${TMP_API_NP_NAME}_SERVICE_PORT="
 
 	K2HR3API_EXTERNAL_PORT=$(env | grep "${TMP_API_NP_NAME}" | sed -e "s/${TMP_API_NP_NAME}//g" | tr -d '\n')
+fi
+
+if [ ! -d "${PRODUCTION_DIR}" ]; then
+	if ! mkdir -p "${PRODUCTION_DIR}"; then
+		exit 1
+	fi
 fi
 
 # shellcheck disable=SC2153

@@ -60,10 +60,18 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-{{ include "k2hr3.r3appBaseName" . }}
-          image: alpine:3.13.5
+          image: {{ include "images.initImage" . }}
           command: ["/bin/sh"]
           args: ["{{ .Values.mountPoint.configMap }}/k2hr3-app-init.sh"]
           env:
+            - name: HTTP_PROXY
+              value: "{{ include "k2hr3.env.httpProxy" . }}"
+            - name: HTTPS_PROXY
+              value: "{{ include "k2hr3.env.httpsProxy" . }}"
+            - name: NO_PROXY
+              value: "{{ include "k2hr3.env.noProxy" . }}"
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
             - name: USING_SERVICE_NAME
               value: "np-{{ include "k2hr3.r3appBaseName" . }}"
             - name: ANTPICKAX_ETC_DIR
@@ -85,8 +93,16 @@ spec:
               readOnly: true
       containers:
         - name: container-{{ include "k2hr3.r3appBaseName" . }}
-          image: {{ include "images.k2hr3appOrg" . }}/k2hr3-app:{{ include "images.k2hr3appVer" . }}
+          image: {{ include "images.k2hr3appImage" . }}
           env:
+            - name: HTTP_PROXY
+              value: "{{ include "k2hr3.env.httpProxy" . }}"
+            - name: HTTPS_PROXY
+              value: "{{ include "k2hr3.env.httpsProxy" . }}"
+            - name: NO_PROXY
+              value: "{{ include "k2hr3.env.noProxy" . }}"
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
             - name: K2HR3_MANUAL_START
               value: "{{ .Values.k2hr3.startManual }}"
             - name: K2HR3API_SERVICE_NAME

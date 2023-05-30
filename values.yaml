@@ -64,12 +64,14 @@ minikube: false
 #	baseDomain		Specifies the base domain name for the k2hr3
 #					system. Normally, leave this value empty. If
 #					empty, k8s.domain will be used.
+#
 #	dkc.baseName	Specifies the base name for k2hdkc in k2hr3
 #					system. Normally, leave this value empty.
 #					If empty, "r3dkc-<k2hr3.clusterName>" will
 #					be used.
 #	dkc.count		Specifies the k2hdkc server count in k2hr3
 #					system.
+#
 #	api.baseName	Specifies the base name for k2hr3 api in k2hr3
 #					system. Normally, leave this value empty. If
 #					empty, "r3api-<k2hr3.clusterName>" will be
@@ -95,6 +97,13 @@ minikube: false
 #					NodePort. If this value is empty, it will be
 #					set 32443.
 #
+#	env.httpProxy	Specifies HTTP PROXY environment for k2hr3 system.
+#					If this value is empty, it will be set empty.
+#	env.httpsProxy	Specifies HTTPS PROXY environment for k2hr3 system.
+#					If this value is empty, it will be set empty.
+#	env.noProxy		Specifies NO PROXY environment for k2hr3 system.
+#					If this value is empty, it will be set empty.
+#
 k2hr3:
   clusterName: ""
   startManual: false
@@ -112,26 +121,48 @@ k2hr3:
     count: 2
     extHostname: ""
     extPort: 0
+  env:
+    httpProxy: ""
+    httpsProxy: ""
+    noProxy: ""
 
 #---------------------------------------------------------
 # Images
 #
-#	app/api/dkc/chmpx	image type(k2hr3-api/k2hr3-app/k2hdkc/chmpx)
-#		organization	Specify organaization name for images(default is "antpickax")
-#		version			Specify image version(default is set automatically)
+#	app/api/dkc/chmpx/init	image type(k2hr3-api/k2hr3-app/k2hdkc/chmpx/init-container)
+#		fullImageName		Specify full image name("organaization/image-name:tag")
+#		organization		Specify organaization name for images(default is "antpickax" or empty for "alpine" image)
+#		imageName			Specify image name(default is "k2hr3-api", "k2hr3-app", "k2hdkc", "chmpx" or "alpine")
+#		version				Specify image version(default is set automatically)
+#
+# [NOTE]
+# "organization" and "imageName" and "version" values are valid only if "fullImageName" is empty.
 #
 images:
   app:
+    fullImageName: ""
     organization: ""
+    imageName: ""
     version: ""
   api:
+    fullImageName: ""
     organization: ""
+    imageName: ""
     version: ""
   dkc:
+    fullImageName: ""
     organization: ""
+    imageName: ""
     version: ""
   chmpx:
+    fullImageName: ""
     organization: ""
+    imageName: ""
+    version: ""
+  init:
+    fullImageName: ""
+    organization: ""
+    imageName: ""
     version: ""
 
 #---------------------------------------------------------

@@ -26,7 +26,7 @@
 *
 */}}
 {{- define "k2hr3.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+	{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{-
@@ -40,16 +40,16 @@
 *
 */}}
 {{- define "k2hr3.fullname" -}}
-{{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
-{{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
-{{- end }}
+	{{- if .Values.fullnameOverride }}
+		{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+	{{- else }}
+		{{- $name := default .Chart.Name .Values.nameOverride }}
+		{{- if contains $name .Release.Name }}
+			{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+		{{- else }}
+			{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+		{{- end }}
+	{{- end }}
 {{- end }}
 
 {{-
@@ -58,8 +58,8 @@
 *
 */}}
 {{- define "k2hr3.clusterName" -}}
-{{- $tmpname := default .Release.Name .Values.k2hr3.clusterName }}
-{{- printf "%s" $tmpname | trunc 63 | trimSuffix "-" }}
+	{{- $tmpname := default .Release.Name .Values.k2hr3.clusterName }}
+	{{- printf "%s" $tmpname | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{-
@@ -68,8 +68,8 @@
 *
 */}}
 {{- define "k2hr3.k8sNamespace" -}}
-{{- $tmpname := default .Release.Namespace .Values.k8s.namespace }}
-{{- printf "%s" $tmpname }}
+	{{- $tmpname := default .Release.Namespace .Values.k8s.namespace }}
+	{{- printf "%s" $tmpname }}
 {{- end }}
 
 {{-
@@ -78,8 +78,8 @@
 *
 */}}
 {{- define "k2hr3.k2hr3BaseDomain" -}}
-{{- $tmpdomain := default .Values.k8s.domain .Values.k2hr3.baseDomain }}
-{{- printf "%s" $tmpdomain }}
+	{{- $tmpdomain := default .Values.k8s.domain .Values.k2hr3.baseDomain }}
+	{{- printf "%s" $tmpdomain }}
 {{- end }}
 
 {{-
@@ -88,30 +88,30 @@
 *
 */}}
 {{- define "k2hr3.r3dkcBaseName" -}}
-{{- if .Values.k2hr3.dkc.baseName }}
-{{- .Values.k2hr3.dkc.baseName }}
-{{- else }}
-{{- $tmpbasename := include "k2hr3.clusterName" . }}
-{{- printf "r3dkc-%s" $tmpbasename }}
-{{- end }}
+	{{- if .Values.k2hr3.dkc.baseName }}
+		{{- .Values.k2hr3.dkc.baseName }}
+	{{- else }}
+		{{- $tmpbasename := include "k2hr3.clusterName" . }}
+		{{- printf "r3dkc-%s" $tmpbasename }}
+	{{- end }}
 {{- end }}
 
 {{- define "k2hr3.r3apiBaseName" -}}
-{{- if .Values.k2hr3.api.baseName }}
-{{- .Values.k2hr3.api.baseName }}
-{{- else }}
-{{- $tmpbasename := include "k2hr3.clusterName" . }}
-{{- printf "r3api-%s" $tmpbasename }}
-{{- end }}
+	{{- if .Values.k2hr3.api.baseName }}
+		{{- .Values.k2hr3.api.baseName }}
+	{{- else }}
+		{{- $tmpbasename := include "k2hr3.clusterName" . }}
+		{{- printf "r3api-%s" $tmpbasename }}
+	{{- end }}
 {{- end }}
 
 {{- define "k2hr3.r3appBaseName" -}}
-{{- if .Values.k2hr3.app.baseName }}
-{{- .Values.k2hr3.app.baseName }}
-{{- else }}
-{{- $tmpbasename := include "k2hr3.clusterName" . }}
-{{- printf "r3app-%s" $tmpbasename }}
-{{- end }}
+	{{- if .Values.k2hr3.app.baseName }}
+		{{- .Values.k2hr3.app.baseName }}
+	{{- else }}
+		{{- $tmpbasename := include "k2hr3.clusterName" . }}
+		{{- printf "r3app-%s" $tmpbasename }}
+	{{- end }}
 {{- end }}
 
 {{-
@@ -120,23 +120,23 @@
 *
 */}}
 {{- define "k2hr3.r3apiIntHostname" -}}
-{{- printf "svc-%s.%s.%s" (include "k2hr3.r3apiBaseName" .) (include "k2hr3.k8sNamespace" .) (include "k2hr3.k2hr3BaseDomain" .) }}
+	{{- printf "svc-%s.%s.%s" (include "k2hr3.r3apiBaseName" .) (include "k2hr3.k8sNamespace" .) (include "k2hr3.k2hr3BaseDomain" .) }}
 {{- end }}
 
 {{- define "k2hr3.r3apiExtHostname" -}}
-{{- if .Values.k2hr3.api.extHostname }}
-{{- .Values.k2hr3.api.extHostname }}
-{{- else }}
-{{- printf "localhost" }}
-{{- end }}
+	{{- if .Values.k2hr3.api.extHostname }}
+		{{- .Values.k2hr3.api.extHostname }}
+	{{- else }}
+		{{- printf "localhost" }}
+	{{- end }}
 {{- end }}
 
 {{- define "k2hr3.r3appExtHostname" -}}
-{{- if .Values.k2hr3.app.extHostname }}
-{{- .Values.k2hr3.app.extHostname }}
-{{- else }}
-{{- printf "localhost" }}
-{{- end }}
+	{{- if .Values.k2hr3.app.extHostname }}
+		{{- .Values.k2hr3.app.extHostname }}
+	{{- else }}
+		{{- printf "localhost" }}
+	{{- end }}
 {{- end }}
 
 {{-
@@ -145,19 +145,45 @@
 *
 */}}
 {{- define "k2hr3.r3apiExtPort" -}}
-{{- $tmpport := default 31443 .Values.k2hr3.api.extPort }}
-{{- printf "%d" $tmpport }}
+	{{- $tmpport := default 31443 .Values.k2hr3.api.extPort }}
+	{{- printf "%d" $tmpport }}
 {{- end }}
+
 {{- define "k2hr3.r3apiNodePort" -}}
-{{ include "k2hr3.r3apiExtPort" . }}
+	{{ include "k2hr3.r3apiExtPort" . }}
 {{- end }}
 
 {{- define "k2hr3.r3appExtPort" -}}
-{{- $tmpport := default 32443 .Values.k2hr3.app.extPort }}
-{{- printf "%d" $tmpport }}
+	{{- $tmpport := default 32443 .Values.k2hr3.app.extPort }}
+	{{- printf "%d" $tmpport }}
 {{- end }}
+
 {{- define "k2hr3.r3appNodePort" -}}
-{{ include "k2hr3.r3appExtPort" . }}
+	{{ include "k2hr3.r3appExtPort" . }}
+{{- end }}
+
+
+{{-
+/*---------------------------------------------------------
+* Set PROXY environments for k2hr3 system.
+*
+*/}}
+{{- define "k2hr3.env.httpProxy" -}}
+	{{- if contains "://" .Values.k2hr3.env.httpProxy }}
+		{{- default "" .Values.k2hr3.env.httpProxy }}
+	{{- else }}
+		{{- printf "http://%s" .Values.k2hr3.env.httpProxy }}
+	{{- end }}
+{{- end }}
+{{- define "k2hr3.env.httpsProxy" -}}
+	{{- if contains "://" .Values.k2hr3.env.httpsProxy }}
+		{{- default "" .Values.k2hr3.env.httpsProxy }}
+	{{- else }}
+		{{- printf "http://%s" .Values.k2hr3.env.httpsProxy }}
+	{{- end }}
+{{- end }}
+{{- define "k2hr3.env.noProxy" -}}
+	{{- default "" .Values.k2hr3.env.noProxy }}
 {{- end }}
 
 {{-
@@ -166,7 +192,7 @@
 *
 */}}
 {{- define "k2hr3.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+	{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{-
@@ -199,11 +225,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 *
 */}}
 {{- define "k2hr3.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "k2hr3.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
+	{{- if .Values.serviceAccount.create }}
+		{{- default (include "k2hr3.fullname" .) .Values.serviceAccount.name }}
+	{{- else }}
+		{{- default "default" .Values.serviceAccount.name }}
+	{{- end }}
 {{- end }}
 
 {{-
@@ -214,8 +240,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 *
 */}}
 {{- define "k2hr3.certPeriodDays" -}}
-{{- int (mul .Values.antpickax.certPeriodYear 365) }}
+	{{- int (mul .Values.antpickax.certPeriodYear 365) }}
 {{- end }}
+
 {{- define "k2hr3.cacert" -}}
 {{- $tmpcadomain := printf "%s.%s" (include "k2hr3.k8sNamespace" .) (include "k2hr3.k2hr3BaseDomain" .) }}
 {{- $tmpperioddays := int (include "k2hr3.certPeriodDays" .) }}
@@ -230,32 +257,108 @@ Key: {{ b64enc $ca.Key }}
 * Set organization and version fo images
 *
 */}}
-{{- define "images.k2hr3appOrg" -}}
-{{- default "antpickax" .Values.images.app.organization }}
-{{- end }}
-{{- define "images.k2hr3appVer" -}}
-{{- default "1.0.4" .Values.images.app.version }}
+{{- define "images.k2hr3appImage" -}}
+	{{- if .Values.images.app.fullImageName }}
+		{{- .Values.images.app.fullImageName }}
+	{{- else }}
+		{{- $tmpapporg  := "antpickax" }}
+		{{- $tmpappname := "k2hr3-app" }}
+		{{- $tmpappver  := "1.0.16" }}
+		{{- if .Values.images.app.organization }}
+			{{- $tmpapporg = .Values.images.app.organization }}
+		{{- end }}
+		{{- if .Values.images.app.imageName }}
+			{{- $tmpappname = .Values.images.app.imageName }}
+		{{- end }}
+		{{- if .Values.images.app.version }}
+			{{- $tmpappver = .Values.images.app.version }}
+		{{- end }}
+		{{- printf "%s/%s:%s" $tmpapporg $tmpappname $tmpappver }}
+	{{- end }}
 {{- end }}
 
-{{- define "images.k2hr3apiOrg" -}}
-{{- default "antpickax" .Values.images.api.organization }}
-{{- end }}
-{{- define "images.k2hr3apiVer" -}}
-{{- default "1.0.7" .Values.images.api.version }}
+{{- define "images.k2hr3apiImage" -}}
+	{{- if .Values.images.api.fullImageName }}
+		{{- .Values.images.api.fullImageName }}
+	{{- else }}
+		{{- $tmpapiorg  := "antpickax" }}
+		{{- $tmpapiname := "k2hr3-api" }}
+		{{- $tmpapiver  := "1.0.20" }}
+		{{- if .Values.images.api.organization }}
+			{{- $tmpapiorg = .Values.images.api.organization }}
+		{{- end }}
+		{{- if .Values.images.api.imageName }}
+			{{- $tmpapiname = .Values.images.api.imageName }}
+		{{- end }}
+		{{- if .Values.images.api.version }}
+			{{- $tmpapiver = .Values.images.api.version }}
+		{{- end }}
+		{{- printf "%s/%s:%s" $tmpapiorg $tmpapiname $tmpapiver }}
+	{{- end }}
 {{- end }}
 
-{{- define "images.k2hdkcOrg" -}}
-{{- default "antpickax" .Values.images.dkc.organization }}
-{{- end }}
-{{- define "images.k2hdkcVer" -}}
-{{- default "1.0.3" .Values.images.dkc.version }}
+{{- define "images.k2hdkcImage" -}}
+	{{- if .Values.images.dkc.fullImageName }}
+		{{- .Values.images.dkc.fullImageName }}
+	{{- else }}
+		{{- $tmpdkcorg  := "antpickax" }}
+		{{- $tmpdkcname := "k2hdkc" }}
+		{{- $tmpdkcver  := "1.0.6" }}
+		{{- if .Values.images.dkc.organization }}
+			{{- $tmpdkcorg = .Values.images.dkc.organization }}
+		{{- end }}
+		{{- if .Values.images.dkc.imageName }}
+			{{- $tmpdkcname = .Values.images.dkc.imageName }}
+		{{- end }}
+		{{- if .Values.images.dkc.version }}
+			{{- $tmpdkcver = .Values.images.dkc.version }}
+		{{- end }}
+		{{- printf "%s/%s:%s" $tmpdkcorg $tmpdkcname $tmpdkcver }}
+	{{- end }}
 {{- end }}
 
-{{- define "images.chmpxOrg" -}}
-{{- default "antpickax" .Values.images.chmpx.organization }}
+{{- define "images.chmpxImage" -}}
+	{{- if .Values.images.chmpx.fullImageName }}
+		{{- .Values.images.chmpx.fullImageName }}
+	{{- else }}
+		{{- $tmpchmpxorg  := "antpickax" }}
+		{{- $tmpchmpxname := "chmpx" }}
+		{{- $tmpchmpxver  := "1.0.99" }}
+		{{- if .Values.images.chmpx.organization }}
+			{{- $tmpchmpxorg = .Values.images.chmpx.organization }}
+		{{- end }}
+		{{- if .Values.images.chmpx.imageName }}
+			{{- $tmpchmpxname = .Values.images.chmpx.imageName }}
+		{{- end }}
+		{{- if .Values.images.chmpx.version }}
+			{{- $tmpchmpxver = .Values.images.chmpx.version }}
+		{{- end }}
+		{{- printf "%s/%s:%s" $tmpchmpxorg $tmpchmpxname $tmpchmpxver }}
+	{{- end }}
 {{- end }}
-{{- define "images.chmpxVer" -}}
-{{- default "1.0.96" .Values.images.chmpx.version }}
+
+{{- define "images.initImage" -}}
+	{{- if .Values.images.init.fullImageName }}
+		{{- .Values.images.init.fullImageName }}
+	{{- else }}
+		{{- $tmpinitorg  := "" }}
+		{{- $tmpinitname := "alpine" }}
+		{{- $tmpinitver  := "3.17.3" }}
+		{{- if .Values.images.init.organization }}
+			{{- $tmpinitorg = .Values.images.init.organization }}
+		{{- end }}
+		{{- if .Values.images.init.imageName }}
+			{{- $tmpinitname = .Values.images.init.imageName }}
+		{{- end }}
+		{{- if .Values.images.init.version }}
+			{{- $tmpinitver = .Values.images.init.version }}
+		{{- end }}
+		{{- if $tmpinitorg }}
+			{{- printf "%s/%s:%s" $tmpinitorg $tmpinitname $tmpinitver }}
+		{{- else }}
+			{{- printf "%s:%s" $tmpinitname $tmpinitver }}
+		{{- end }}
+	{{- end }}
 {{- end }}
 
 {{-

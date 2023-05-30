@@ -122,7 +122,7 @@
                 },
                 {
                   "type": "string",
-                  "maxLength": 0
+                  "maxLength": 255
                 }
               ]
             },
@@ -162,7 +162,7 @@
                 },
                 {
                   "type": "string",
-                  "maxLength": 0
+                  "maxLength": 255
                 }
               ]
             },
@@ -178,6 +178,33 @@
             "extHostname",
             "extPort"
           ]
+        },
+
+        "env": {
+          "description": "[optional] The environments for the K2HR3 system.",
+          "type": "object",
+          "properties": {
+            "httpProxy": {
+              "description": "[optional] Specify the HTTP PROXY environment(ex. http://proxy.local:8080) for the K2HR3 system, default is empty.",
+              "type": "string",
+              "maxLength": 255
+            },
+            "httpsProxy": {
+              "description": "[optional] Specify the HTTPS PROXY environment(ex. http://proxy.local:8080) for the K2HR3 system, default is empty.",
+              "type": "string",
+              "maxLength": 255
+            },
+            "noProxy": {
+              "description": "[optional] Specify the NO PROXY environment(ex. internal,127.1.1.1) for the K2HR3 system, default is empty.",
+              "type": "string",
+              "maxLength": 2047
+            }
+          },
+          "required": [
+            "httpProxy",
+            "httpsProxy",
+            "noProxy"
+          ]
         }
       },
       "required": [
@@ -191,90 +218,130 @@
     },
 
     "images": {
-      "description": "[optional] Specify the organization and version of the image used by the pods deployed.",
+      "description": "[optional] Specify the image's organization and name and version of the image used by the pods deployed.",
       "type": "object",
       "properties": {
         "app": {
-          "description": "[optional] Specify the K2HR3 Web Application(k2hr3-app) image organization and version.",
+          "description": "[optional] Specify the K2HR3 Web Application(k2hr3-app) image organization and name and version.",
           "type": "object",
           "properties": {
+            "fullImageName": {
+              "description": "[optional] Specify the image full name(organaization/name/version) for K2HR3 Web Application, default is empty.",
+              "type": "string"
+            },
             "organization": {
-              "description": "[optional] Specify the organaization for K2HR3 Web Application, default is empty in which case antpickax will be used.",
+              "description": "[optional] Specify the organaization for K2HR3 Web Application, default is empty. (valid only if fullImageName is empty)",
+              "type": "string"
+            },
+            "imageName": {
+              "description": "[optional] Specify the image name for K2HR3 Web Application, default is empty. (valid only if fullImageName is empty)",
               "type": "string"
             },
             "version": {
-              "description": "[optional] Specify the version for K2HR3 Web Application, default is empty in which case one of version number will be used.",
+              "description": "[optional] Specify the version for K2HR3 Web Application, default is empty. (valid only if fullImageName is empty)",
               "type": "string"
             }
-          },
-          "required": [
-            "organization",
-            "version"
-          ]
+          }
         },
 
         "api": {
-          "description": "[optional] Specify the K2HR3 REST API(k2hr3-api) image organization and version.",
+          "description": "[optional] Specify the K2HR3 REST API(k2hr3-api) image organization and name and version.",
           "type": "object",
           "properties": {
+            "fullImageName": {
+              "description": "[optional] Specify the image full name(organaization/name/version) for K2HR3 REST API, default is empty.",
+              "type": "string"
+            },
             "organization": {
-              "description": "[optional] Specify the organaization for K2HR3 REST API, default is empty in which case antpickax will be used.",
+              "description": "[optional] Specify the organaization for K2HR3 REST API, default is empty. (valid only if fullImageName is empty)",
+              "type": "string"
+            },
+            "imageName": {
+              "description": "[optional] Specify the image name for K2HR3 REST API, default is empty. (valid only if fullImageName is empty)",
               "type": "string"
             },
             "version": {
-              "description": "[optional] Specify the version for K2HR3 REST API, default is empty in which case one of version number will be used.",
+              "description": "[optional] Specify the version for K2HR3 REST API, default is empty. (valid only if fullImageName is empty)",
               "type": "string"
             }
-          },
-          "required": [
-            "organization",
-            "version"
-          ]
+          }
         },
 
         "dkc": {
-          "description": "[optional] Specify the backend K2HDKC image organization and version.",
+          "description": "[optional] Specify the backend K2HDKC image organization and name and version.",
           "type": "object",
           "properties": {
+            "fullImageName": {
+              "description": "[optional] Specify the image full name(organaization/name/version) for the backend K2HDKC, default is empty.",
+              "type": "string"
+            },
             "organization": {
-              "description": "[optional] Specify the organaization for the backend K2HDKC image, default is empty in which case antpickax will be used.",
+              "description": "[optional] Specify the organaization for the backend K2HDKC image, default is empty. (valid only if fullImageName is empty)",
+              "type": "string"
+            },
+            "imageName": {
+              "description": "[optional] Specify the image name for the backend K2HDKC, default is empty. (valid only if fullImageName is empty)",
               "type": "string"
             },
             "version": {
-              "description": "[optional] Specify the version for the backend K2HDKC image, default is empty in which case one of version number will be used.",
+              "description": "[optional] Specify the version for the backend K2HDKC image, default is empty. (valid only if fullImageName is empty)",
               "type": "string"
             }
-          },
-          "required": [
-            "organization",
-            "version"
-          ]
+          }
         },
 
         "chmpx": {
-          "description": "[optional] Specify the backend CHMPX image organization and version.",
+          "description": "[optional] Specify the backend CHMPX image organization and name and version.",
           "type": "object",
           "properties": {
+            "fullImageName": {
+              "description": "[optional] Specify the image full name(organaization/name/version) for the backend CHMPX, default is empty.",
+              "type": "string"
+            },
             "organization": {
-              "description": "[optional] Specify the organaization for the backend CHMPX image, default is empty in which case antpickax will be used.",
+              "description": "[optional] Specify the organaization for the backend CHMPX image, default is empty. (valid only if fullImageName is empty)",
+              "type": "string"
+            },
+            "imageName": {
+              "description": "[optional] Specify the image name for the backend CHMPX, default is empty. (valid only if fullImageName is empty)",
               "type": "string"
             },
             "version": {
-              "description": "[optional] Specify the version for the backend CHMPX image, default is empty in which case one of version number will be used.",
+              "description": "[optional] Specify the version for the backend CHMPX image, default is empty. (valid only if fullImageName is empty)",
               "type": "string"
             }
-          },
-          "required": [
-            "organization",
-            "version"
-          ]
+          }
+        },
+
+        "init": {
+          "description": "[optional] Specify the organization and name and version of the container initialization image.",
+          "type": "object",
+          "properties": {
+            "fullImageName": {
+              "description": "[optional] Specify the image full name(organaization/name/version) for the container initialization image, default is empty.",
+              "type": "string"
+            },
+            "organization": {
+              "description": "[optional] Specify the organization of the container initialization image, default is empty. (valid only if fullImageName is empty)",
+              "type": "string"
+            },
+            "imageName": {
+              "description": "[optional] Specify the image name for the container initialization image, default is empty. (valid only if fullImageName is empty)",
+              "type": "string"
+            },
+            "version": {
+              "description": "[optional] Specify the version of the container initialization image, default is empty. (valid only if fullImageName is empty)",
+              "type": "string"
+            }
+          }
         }
       },
       "required": [
         "app",
         "api",
         "dkc",
-        "chmpx"
+        "chmpx",
+        "init"
       ]
     },
 

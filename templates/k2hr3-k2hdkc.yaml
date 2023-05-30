@@ -87,10 +87,18 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-{{ include "k2hr3.r3dkcBaseName" . }}
-          image: alpine:3.13.5
+          image: {{ include "images.initImage" . }}
           command: ["/bin/sh"]
           args: ["{{ .Values.mountPoint.configMap }}/k2hr3-k2hdkc-ini-update.sh"]
           env:
+            - name: HTTP_PROXY
+              value: "{{ include "k2hr3.env.httpProxy" . }}"
+            - name: HTTPS_PROXY
+              value: "{{ include "k2hr3.env.httpsProxy" . }}"
+            - name: NO_PROXY
+              value: "{{ include "k2hr3.env.noProxy" . }}"
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
             - name: CHMPX_INI_TEMPLATE_FILE
               value: "{{ .Values.mountPoint.configMap }}/k2hr3-k2hdkc.ini.templ"
             - name: CHMPX_INI_DIR
@@ -136,7 +144,16 @@ spec:
               readOnly: true
       containers:
         - name: container-{{ include "k2hr3.r3dkcBaseName" . }}
-          image: {{ include "images.k2hdkcOrg" . }}/k2hdkc:{{ include "images.k2hdkcVer" . }}
+          image: {{ include "images.k2hdkcImage" . }}
+          env:
+            - name: HTTP_PROXY
+              value: "{{ include "k2hr3.env.httpProxy" . }}"
+            - name: HTTPS_PROXY
+              value: "{{ include "k2hr3.env.httpsProxy" . }}"
+            - name: NO_PROXY
+              value: "{{ include "k2hr3.env.noProxy" . }}"
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
           volumeMounts:
             - mountPath: {{ .Values.antpickax.configDir }}
               name: antpickax-etc-volume
@@ -150,7 +167,16 @@ spec:
           command: ["/bin/sh"]
           args: ["{{ .Values.mountPoint.configMap }}/k2hr3-k2hdkc-serverproc-wrap.sh", "server"]
         - name: sidecar-{{ include "k2hr3.r3dkcBaseName" . }}
-          image: {{ include "images.chmpxOrg" . }}/chmpx:{{ include "images.chmpxVer" . }}
+          image: {{ include "images.chmpxImage" . }}
+          env:
+            - name: HTTP_PROXY
+              value: "{{ include "k2hr3.env.httpProxy" . }}"
+            - name: HTTPS_PROXY
+              value: "{{ include "k2hr3.env.httpsProxy" . }}"
+            - name: NO_PROXY
+              value: "{{ include "k2hr3.env.noProxy" . }}"
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
           volumeMounts:
             - mountPath: {{ .Values.antpickax.configDir }}
               name: antpickax-etc-volume
