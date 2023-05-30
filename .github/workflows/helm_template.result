@@ -605,8 +605,6 @@ data:
     	GLOBAL_PART_SLAVE_PRIKEY="SLAVE_PRIKEY = ${CHMPX_INI_DIR}/client.key"
     fi
     
-    CHMPX_SSL_SETTING="${GLOBAL_PART_SSL}\\n${GLOBAL_PART_SSL_VERIFY_PEER}\\n${GLOBAL_PART_CAPATH}\\n${GLOBAL_PART_SERVER_CERT}\\n${GLOBAL_PART_SERVER_PRIKEY}\\n${GLOBAL_PART_SLAVE_CERT}\\n${GLOBAL_PART_SLAVE_PRIKEY}"
-    
     #----------------------------------------------------------
     # Create file
     #----------------------------------------------------------
@@ -614,11 +612,32 @@ data:
     	#
     	# Create Base parts
     	#
-    	sed -e "s#%%CHMPX_DATE%%#${DATE}#g"						\
-    		-e "s#%%CHMPX_MODE%%#${CHMPX_MODE}#g"				\
-    		-e "s#%%CHMPX_SELFPORT%%#${CHMPX_SELFPORT}#g"		\
-    		-e "s#%%CHMPX_SSL_SETTING%%#${CHMPX_SSL_SETTING}#g"	\
-    		"${CHMPX_INI_TEMPLATE_FILE}"
+    	while IFS= read -r ONE_LINE; do
+    		if [ -z "${ONE_LINE}" ]; then
+    			echo ""
+    
+    		elif echo "${ONE_LINE}" | grep -q '%%CHMPX_DATE%%'; then
+    			echo "${ONE_LINE}" | sed -e "s#%%CHMPX_DATE%%#${DATE}#g"
+    
+    		elif echo "${ONE_LINE}" | grep -q '%%CHMPX_MODE%%'; then
+    			echo "${ONE_LINE}" | sed -e "s#%%CHMPX_MODE%%#${CHMPX_MODE}#g"
+    
+    		elif echo "${ONE_LINE}" | grep -q '%%CHMPX_SELFPORT%%'; then
+    			echo "${ONE_LINE}" | sed -e "s#%%CHMPX_SELFPORT%%#${CHMPX_SELFPORT}#g"
+    
+    		elif echo "${ONE_LINE}" | grep -q '%%CHMPX_SSL_SETTING%%'; then
+    			echo "${GLOBAL_PART_SSL}"
+    			echo "${GLOBAL_PART_SSL_VERIFY_PEER}"
+    			echo "${GLOBAL_PART_CAPATH}"
+    			echo "${GLOBAL_PART_SERVER_CERT}"
+    			echo "${GLOBAL_PART_SERVER_PRIKEY}"
+    			echo "${GLOBAL_PART_SLAVE_CERT}"
+    			echo "${GLOBAL_PART_SLAVE_PRIKEY}"
+    
+    		else
+    			echo "${ONE_LINE}"
+    		fi
+    	done < "${CHMPX_INI_TEMPLATE_FILE}"
     
     	#
     	# Set server nodes
@@ -1002,7 +1021,7 @@ data:
     	TMP_APP_NP_NAME=$(echo "${K2HR3APP_SERVICE_NAME}" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
     	TMP_APP_NP_NAME="${TMP_APP_NP_NAME}_SERVICE_PORT="
     
-    	K2HR3APP_EXTERNAL_PORT=$(env | grep "${TMP_APP_NP_NAME}" | sed -e "s/${TMP_APP_NP_NAME}//g" | tr -d '\n')
+    	K2HR3APP_EXTERNAL_PORT=$(env | grep "${TMP_APP_NP_NAME}" | sed -e "s/${TMP_APP_NP_NAME}//g")
     fi
     
     if [ -z "${K2HR3API_EXTERNAL_PORT}" ] || [ "${K2HR3API_EXTERNAL_PORT}" = "0" ] ; then
@@ -1012,7 +1031,7 @@ data:
     	TMP_API_NP_NAME=$(echo "${K2HR3API_SERVICE_NAME}" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
     	TMP_API_NP_NAME="${TMP_API_NP_NAME}_SERVICE_PORT="
     
-    	K2HR3API_EXTERNAL_PORT=$(env | grep "${TMP_API_NP_NAME}" | sed -e "s/${TMP_API_NP_NAME}//g" | tr -d '\n')
+    	K2HR3API_EXTERNAL_PORT=$(env | grep "${TMP_API_NP_NAME}" | sed -e "s/${TMP_API_NP_NAME}//g")
     fi
     
     if [ ! -d "${PRODUCTION_DIR}" ]; then
@@ -1054,13 +1073,13 @@ data:
     # Check curl command and install
     #----------------------------------------------------------
     if command -v curl >/dev/null 2>&1; then
-    	CURL_COMMAND=$(command -v curl | tr -d '\n')
+    	CURL_COMMAND=$(command -v curl 2>/dev/null)
     else
     	if ! command -v apk >/dev/null 2>&1; then
     		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
     		exit 1
     	fi
-    	APK_COMMAND=$(command -v apk | tr -d '\n')
+    	APK_COMMAND=$(command -v apk 2>/dev/null)
     
     	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
     		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
@@ -1070,7 +1089,7 @@ data:
     		echo "[ERROR] ${PRGNAME} : Could not install curl by apk(ALPINE)."
     		exit 1
     	fi
-    	CURL_COMMAND=$(command -v curl | tr -d '\n')
+    	CURL_COMMAND=$(command -v curl 2>/dev/null)
     fi
     
     #----------------------------------------------------------
@@ -1080,10 +1099,10 @@ data:
     # Wait for api server up
     #
     if [ -z "${K2HR3APP_RUN_ON_MINIKUBE}" ] || [ "${K2HR3APP_RUN_ON_MINIKUBE}" != "true" ]; then
-    	API_SCHEMA=$(grep 'apischeme' "${PRODUCTION_FILE}" 2>/dev/null | sed -e "s/['|,]//g" -e 's/^[[:space:]]*apischeme:[[:space:]]*//g' 2>/dev/null | tr -d '\n')
+    	API_SCHEMA=$(grep 'apischeme' "${PRODUCTION_FILE}" 2>/dev/null | sed -e "s/['|,]//g" -e 's/^[[:space:]]*apischeme:[[:space:]]*//g' 2>/dev/null)
     	API_UP=0
     	while [ "${API_UP}" -eq 0 ]; do
-    		if HTTP_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1); then
+    		if HTTP_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}' -o /dev/null --insecure -X GET "${API_SCHEMA}://${K2HR3API_EXTERNAL_HOST}:${K2HR3API_EXTERNAL_PORT}/" 2>&1); then
     			if [ -n "${HTTP_CODE}" ] && [ "${HTTP_CODE}" -eq 200 ]; then
     				API_UP=1
     			fi
@@ -1476,7 +1495,7 @@ data:
     		exit 1
     	fi
     fi
-    OPENSSL_COMMAND=$(command -v openssl | tr -d '\n')
+    OPENSSL_COMMAND=$(command -v openssl 2>/dev/null)
     
     #----------------------------------------------------------
     # Create openssl.cnf 
@@ -1499,19 +1518,36 @@ data:
     #	stateOrProvinceName = optional					in [ policy_match ] section
     #	organizationName	= optional					in [ policy_match ] section
     #
-    if ! sed -e 's/\[[[:space:]]*CA_default[[:space:]]*\]/\[ CA_default ]\nunique_subject = no\nemail_in_dn = no\nrand_serial = no/g' \
-    		-e 's/\[[[:space:]]*v3_ca[[:space:]]*\]/\[ v3_ca ]\nkeyUsage = cRLSign, keyCertSign/g'						\
-    		-e "s#^dir[[:space:]]*=[[:space:]]*.*CA.*#dir = ${CERT_WORK_DIR}#g"											\
-    		-e 's/^[[:space:]]*countryName[[:space:]]*=[[:space:]]*match.*$/countryName = optional/g'					\
-    		-e 's/^[[:space:]]*stateOrProvinceName[[:space:]]*=[[:space:]]*match.*$/stateOrProvinceName = optional/g'	\
-    		-e 's/^[[:space:]]*organizationName[[:space:]]*=[[:space:]]*match.*$/organizationName = optional/g'			\
-    		"${ORG_OPENSSL_CNF}"																						\
-    		> "${CUSTOM_OPENSSL_CNF}"; then
+    while IFS= read -r ONE_LINE; do
+    	if [ -z "${ONE_LINE}" ]; then
+    		echo ""
     
-    	echo "[ERROR] Could not create file ${CUSTOM_OPENSSL_CNF}"
-    	exit 1
-    fi
+    	elif echo "${ONE_LINE}" | grep -q '[[[:space:]]*CA_default[[:space:]]*]'; then
+    		echo '[ CA_default ]'
+    		echo 'unique_subject = no'
+    		echo 'email_in_dn = no'
+    		echo 'rand_serial = no'
     
+    	elif echo "${ONE_LINE}" | grep -q '[[[:space:]]*v3_ca[[:space:]]*]'; then
+    		echo '[ v3_ca ]'
+    		echo 'keyUsage = cRLSign, keyCertSign'
+    
+    	elif echo "${ONE_LINE}" | grep -q '^dir[[:space:]]*=[[:space:]]*.*CA.*'; then
+    		echo "dir = ${CERT_WORK_DIR}"
+    
+    	elif echo "${ONE_LINE}" | grep -q '^[[:space:]]*countryName[[:space:]]*=[[:space:]]*match.*$'; then
+    		echo 'countryName = optional'
+    
+    	elif echo "${ONE_LINE}" | grep -q '^[[:space:]]*stateOrProvinceName[[:space:]]*=[[:space:]]*match.*$'; then
+    		echo 'stateOrProvinceName = optional'
+    
+    	elif echo "${ONE_LINE}" | grep -q '^[[:space:]]*organizationName[[:space:]]*=[[:space:]]*match.*$'; then
+    		echo 'organizationName = optional'
+    
+    	else
+    		echo "${ONE_LINE}"
+    	fi
+    done < "${ORG_OPENSSL_CNF}" > "${CUSTOM_OPENSSL_CNF}"
     
     #
     # Add section to  openssl.cnf
@@ -1819,7 +1855,7 @@ data:
     		exit 1
     	fi
     fi
-    CURL_COMMAND=$(command -v curl | tr -d '\n')
+    CURL_COMMAND=$(command -v curl 2>/dev/null)
     
     #----------------------------------------------------------
     # Check K2HR3 API
@@ -1832,7 +1868,7 @@ data:
     	K2HR3API_COUNT=$((K2HR3API_COUNT - 1))
     	rm -f "${RESULT_CONTENTS_FILE}"
     
-    	if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure); then
+    	if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure); then
     		echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_LOCAL_BASE_HOSTNAME}${K2HR3API_COUNT}.${K2HR3API_LOCAL_SVC_NAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_LOCAL_PORT}"
     		exit 1
     	fi
@@ -1853,7 +1889,7 @@ data:
     # access to NodePort
     # ex. https://np-r3api-dbaask2hr3.default.svc.cluster.local:8443/
     #
-    if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure); then
+    if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure); then
     	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_NP_PORT}"
     	exit 1
     fi
@@ -1876,7 +1912,7 @@ data:
     # access to NodePort
     # ex. https://np-r3app-dbaask2hr3.default.svc.cluster.local:8443/
     #
-    if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure); then
+    if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure); then
     	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3APP_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3APP_NP_PORT}"
     	exit 1
     fi

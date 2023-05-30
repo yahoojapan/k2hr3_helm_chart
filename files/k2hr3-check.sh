@@ -146,7 +146,7 @@ if ! command -v curl >/dev/null 2>&1; then
 		exit 1
 	fi
 fi
-CURL_COMMAND=$(command -v curl | tr -d '\n')
+CURL_COMMAND=$(command -v curl 2>/dev/null)
 
 #----------------------------------------------------------
 # Check K2HR3 API
@@ -159,7 +159,7 @@ while [ "${K2HR3API_COUNT}" -gt 0 ]; do
 	K2HR3API_COUNT=$((K2HR3API_COUNT - 1))
 	rm -f "${RESULT_CONTENTS_FILE}"
 
-	if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure); then
+	if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_LOCAL_BASE_HOSTNAME}""${K2HR3API_COUNT}"."${K2HR3API_LOCAL_SVC_NAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_LOCAL_PORT}"/ --insecure); then
 		echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_LOCAL_BASE_HOSTNAME}${K2HR3API_COUNT}.${K2HR3API_LOCAL_SVC_NAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_LOCAL_PORT}"
 		exit 1
 	fi
@@ -180,7 +180,7 @@ rm -f "${RESULT_CONTENTS_FILE}"
 # access to NodePort
 # ex. https://np-r3api-dbaask2hr3.default.svc.cluster.local:8443/
 #
-if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure); then
+if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3API_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3API_NP_PORT}"/ --insecure); then
 	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3API_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3API_NP_PORT}"
 	exit 1
 fi
@@ -203,7 +203,7 @@ rm -f "${RESULT_CONTENTS_FILE}"
 # access to NodePort
 # ex. https://np-r3app-dbaask2hr3.default.svc.cluster.local:8443/
 #
-if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}\n' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure); then
+if ! RESULT_CODE=$("${CURL_COMMAND}" -s -S -w '%{http_code}' -o "${RESULT_CONTENTS_FILE}" -X GET https://"${K2HR3APP_NP_BASE_HOSTNAME}"."${K2HR3_NAMESPACE}"."${K2HR3_BASE_DOMAIN}":"${K2HR3APP_NP_PORT}"/ --insecure); then
 	echo "[ERROR] ${PRGNAME} : curl command is failed for ${K2HR3APP_NP_BASE_HOSTNAME}.${K2HR3_NAMESPACE}.${K2HR3_BASE_DOMAIN}:${K2HR3APP_NP_PORT}"
 	exit 1
 fi

@@ -176,8 +176,6 @@ if [ -n "${SEC_CA_MOUNTPOINT}" ]; then
 	GLOBAL_PART_SLAVE_PRIKEY="SLAVE_PRIKEY = ${CHMPX_INI_DIR}/client.key"
 fi
 
-CHMPX_SSL_SETTING="${GLOBAL_PART_SSL}\\n${GLOBAL_PART_SSL_VERIFY_PEER}\\n${GLOBAL_PART_CAPATH}\\n${GLOBAL_PART_SERVER_CERT}\\n${GLOBAL_PART_SERVER_PRIKEY}\\n${GLOBAL_PART_SLAVE_CERT}\\n${GLOBAL_PART_SLAVE_PRIKEY}"
-
 #----------------------------------------------------------
 # Create file
 #----------------------------------------------------------
@@ -185,11 +183,32 @@ CHMPX_SSL_SETTING="${GLOBAL_PART_SSL}\\n${GLOBAL_PART_SSL_VERIFY_PEER}\\n${GLOBA
 	#
 	# Create Base parts
 	#
-	sed -e "s#%%CHMPX_DATE%%#${DATE}#g"						\
-		-e "s#%%CHMPX_MODE%%#${CHMPX_MODE}#g"				\
-		-e "s#%%CHMPX_SELFPORT%%#${CHMPX_SELFPORT}#g"		\
-		-e "s#%%CHMPX_SSL_SETTING%%#${CHMPX_SSL_SETTING}#g"	\
-		"${CHMPX_INI_TEMPLATE_FILE}"
+	while IFS= read -r ONE_LINE; do
+		if [ -z "${ONE_LINE}" ]; then
+			echo ""
+
+		elif echo "${ONE_LINE}" | grep -q '%%CHMPX_DATE%%'; then
+			echo "${ONE_LINE}" | sed -e "s#%%CHMPX_DATE%%#${DATE}#g"
+
+		elif echo "${ONE_LINE}" | grep -q '%%CHMPX_MODE%%'; then
+			echo "${ONE_LINE}" | sed -e "s#%%CHMPX_MODE%%#${CHMPX_MODE}#g"
+
+		elif echo "${ONE_LINE}" | grep -q '%%CHMPX_SELFPORT%%'; then
+			echo "${ONE_LINE}" | sed -e "s#%%CHMPX_SELFPORT%%#${CHMPX_SELFPORT}#g"
+
+		elif echo "${ONE_LINE}" | grep -q '%%CHMPX_SSL_SETTING%%'; then
+			echo "${GLOBAL_PART_SSL}"
+			echo "${GLOBAL_PART_SSL_VERIFY_PEER}"
+			echo "${GLOBAL_PART_CAPATH}"
+			echo "${GLOBAL_PART_SERVER_CERT}"
+			echo "${GLOBAL_PART_SERVER_PRIKEY}"
+			echo "${GLOBAL_PART_SLAVE_CERT}"
+			echo "${GLOBAL_PART_SLAVE_PRIKEY}"
+
+		else
+			echo "${ONE_LINE}"
+		fi
+	done < "${CHMPX_INI_TEMPLATE_FILE}"
 
 	#
 	# Set server nodes
