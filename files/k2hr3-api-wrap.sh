@@ -44,13 +44,18 @@ else
 fi
 
 RUN_SCRIPT="${K2HR3_API_DIR}/bin/run.sh"
-PRODUCTION_FILE="${K2HR3_API_DIR}/config/production.json"
+PRODUCTION_DIR="${K2HR3_API_DIR}/config"
+PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
 CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-api-production.json"
 
 if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
 	exit 1
 fi
-
+if [ ! -d "${PRODUCTION_DIR}" ]; then
+	if ! mkdir -p "${PRODUCTION_DIR}"; then
+		exit 1
+	fi
+fi
 if ! cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"; then
 	exit 1
 fi

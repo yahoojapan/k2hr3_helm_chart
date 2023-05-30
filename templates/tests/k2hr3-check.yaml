@@ -38,7 +38,7 @@ spec:
             path: k2hr3-check.sh
   containers:
     - name: checker
-      image: alpine:3.13.5
+      image: {{ include "images.initImage" . }}
       env:
       - name: K2HR3_NAMESPACE
         valueFrom:

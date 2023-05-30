@@ -90,7 +90,7 @@ questions:
   required: true
   group: "K2HR3 Web Application"
   min_length: 0
-  max_length: 63
+  max_length: 255
 
 - variable: k2hr3.app.extPort
   default: 0
@@ -102,10 +102,30 @@ questions:
   min: 0
   max: 32767
 
+- variable: images.app.fullImageName
+  default: ""
+  label: "Image organization and name and version for K2HR3 Web Application"
+  description: "Specify the organaization and name and version for K2HR3 Web Application, default is empty string in which case \"antpickax/k2hr3-app:X.Y.Z\" will be used."
+  type: string
+  required: false
+  group: "K2HR3 Web Application"
+  min_length: 0
+  max_length: 63
+
 - variable: images.app.organization
   default: ""
-  label: "Image Organaization name for K2HR3 Web Application"
+  label: "Image organaization for K2HR3 Web Application"
   description: "Specify the organaization for K2HR3 Web Application, default is empty string in which case \"antpickax\" will be used."
+  type: string
+  required: false
+  group: "K2HR3 Web Application"
+  min_length: 0
+  max_length: 63
+
+- variable: images.app.imageName
+  default: ""
+  label: "Image name for K2HR3 Web Application"
+  description: "Specify the image name for K2HR3 Web Application, default is empty string in which case \"k2hr3-app\" will be used."
   type: string
   required: false
   group: "K2HR3 Web Application"
@@ -145,10 +165,30 @@ questions:
   min: 0
   max: 32767
 
+- variable: images.api.fullImageName
+  default: ""
+  label: "Image organization and name and version for K2HR3 REST API"
+  description: "Specify the organaization and name and version for K2HR3 REST API, default is empty string in which case \"antpickax/k2hr3-api:X.Y.Z\" will be used."
+  type: string
+  required: false
+  group: "K2HR3 REST API"
+  min_length: 0
+  max_length: 63
+
 - variable: images.api.organization
   default: ""
-  label: "Image Organaization name for K2HR3 REST API"
+  label: "Image organaization for K2HR3 REST API"
   description: "Specify the organaization for K2HR3 REST API, default is empty string in which case \"antpickax\" will be used."
+  type: string
+  required: false
+  group: "K2HR3 REST API"
+  min_length: 0
+  max_length: 63
+
+- variable: images.api.imageName
+  default: ""
+  label: "Image name for K2HR3 REST API"
+  description: "Specify the image name for K2HR3 REST API, default is empty string in which case \"k2hr3-api\" will be used."
   type: string
   required: false
   group: "K2HR3 REST API"
@@ -168,10 +208,30 @@ questions:
 #
 # Backend K2HDKC Cluster
 #
+- variable: images.dkc.fullImageName
+  default: ""
+  label: "Image organaization and name and version for K2HDKC"
+  description: "Specify the organaization and name and version for K2HDKC image, default is empty string in which case \"antpickax/k2hdkc:X.Y.Z\" will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 63
+
 - variable: images.dkc.organization
   default: ""
-  label: "Image Organaization name for K2HDKC"
+  label: "Image organaization name for K2HDKC"
   description: "Specify the organaization for K2HDKC image, default string is empty in which case \"antpickax\" will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 63
+
+- variable: images.dkc.imageName
+  default: ""
+  label: "Image name for K2HDKC"
+  description: "Specify the name for K2HDKC image, default is empty string in which case \"k2hdkc\" will be used."
   type: string
   required: false
   group: "Backend K2HDKC Cluster"
@@ -188,10 +248,30 @@ questions:
   min_length: 0
   max_length: 31
 
+- variable: images.chmpx.fullImageName
+  default: ""
+  label: "Image organaization and name and version for CHMPX"
+  description: "Specify the organaization and name and version for CHMPX image, default is empty string in which case \"antpickax/chmpx:X.Y.Z\" will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 63
+
 - variable: images.chmpx.organization
   default: ""
-  label: "Image Organaization name for CHMPX"
+  label: "Image organaization for CHMPX"
   description: "Specify the organaization for CHMPX image, default is empty string in which case \"antpickax\" will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 63
+
+- variable: images.chmpx.imageName
+  default: ""
+  label: "Image name for CHMPX"
+  description: "Specify the name for CHMPX image, default is empty string in which case \"chmpx\" will be used."
   type: string
   required: false
   group: "Backend K2HDKC Cluster"
@@ -207,6 +287,79 @@ questions:
   group: "Backend K2HDKC Cluster"
   min_length: 0
   max_length: 31
+
+- variable: images.init.fullImageName
+  default: ""
+  label: "Image organaization and name and version for init container"
+  description: "Specify the organaization and name and version for init container image, default is empty string in which case \"alpine:X.Y.Z\" will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 63
+
+- variable: images.init.organization
+  default: ""
+  label: "Image organaization for init container"
+  description: "Specify the organaization for init container image, default is empty."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 63
+
+- variable: images.init.imageName
+  default: ""
+  label: "Image name for init container"
+  description: "Specify the name for init container image, default is empty string in which case \"alpine\" will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 63
+
+- variable: images.init.version
+  default: ""
+  label: "Image version for init container"
+  description: "Specify the version for init container image, default is empty in which case one of version number will be used."
+  type: string
+  required: false
+  group: "Backend K2HDKC Cluster"
+  min_length: 0
+  max_length: 31
+
+#
+# PROXY Environments
+#
+- variable: k2hr3.env.httpProxy
+  default: ""
+  label: "HTTP PROXY environment"
+  description: "Specify the HTTP PROXY for K2HR3 system, default is empty. Specify PROXY host and port(ex. http://proxy.local:8080) when connecting to an external network."
+  type: string
+  required: false
+  group: "PROXY Environments"
+  min_length: 0
+  max_length: 255
+
+- variable: k2hr3.env.httpsProxy
+  default: ""
+  label: "HTTPS PROXY environment"
+  description: "Specify the HTTPS PROXY for K2HR3 system, default is empty. Specify PROXY host and port(ex. http://proxy.local:8080) when connecting to an external network."
+  type: string
+  required: false
+  group: "PROXY Environments"
+  min_length: 0
+  max_length: 255
+
+- variable: k2hr3.env.noProxy
+  default: ""
+  label: "NO PROXY environment"
+  description: "Specify the NO PROXY for K2HR3 system, default is empty. Specify hosts and IP addresses(ex. internal,127.1.1.1)."
+  type: string
+  required: false
+  group: "PROXY Environments"
+  min_length: 0
+  max_length: 2047
 
 #
 # Local variables:

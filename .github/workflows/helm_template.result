@@ -743,13 +743,18 @@ data:
     fi
     
     RUN_SCRIPT="${K2HR3_API_DIR}/bin/run.sh"
-    PRODUCTION_FILE="${K2HR3_API_DIR}/config/production.json"
+    PRODUCTION_DIR="${K2HR3_API_DIR}/config"
+    PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
     CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-api-production.json"
     
     if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
     	exit 1
     fi
-    
+    if [ ! -d "${PRODUCTION_DIR}" ]; then
+    	if ! mkdir -p "${PRODUCTION_DIR}"; then
+    		exit 1
+    	fi
+    fi
     if ! cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"; then
     	exit 1
     fi
@@ -975,7 +980,8 @@ data:
     fi
     
     RUN_SCRIPT="${K2HR3_APP_DIR}/bin/run.sh"
-    PRODUCTION_FILE="${K2HR3_APP_DIR}/config/production.json"
+    PRODUCTION_DIR="${K2HR3_APP_DIR}/config"
+    PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
     CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-app-production.json"
     
     if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
@@ -1007,6 +1013,12 @@ data:
     	TMP_API_NP_NAME="${TMP_API_NP_NAME}_SERVICE_PORT="
     
     	K2HR3API_EXTERNAL_PORT=$(env | grep "${TMP_API_NP_NAME}" | sed -e "s/${TMP_API_NP_NAME}//g" | tr -d '\n')
+    fi
+    
+    if [ ! -d "${PRODUCTION_DIR}" ]; then
+    	if ! mkdir -p "${PRODUCTION_DIR}"; then
+    		exit 1
+    	fi
     fi
     
     # shellcheck disable=SC2153
@@ -2295,10 +2307,18 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-r3app-dummy
-          image: alpine:3.13.5
+          image: alpine:3.17.3
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-app-init.sh"]
           env:
+            - name: HTTP_PROXY
+              value: "http://"
+            - name: HTTPS_PROXY
+              value: "http://"
+            - name: NO_PROXY
+              value: ""
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
             - name: USING_SERVICE_NAME
               value: "np-r3app-dummy"
             - name: ANTPICKAX_ETC_DIR
@@ -2320,8 +2340,16 @@ spec:
               readOnly: true
       containers:
         - name: container-r3app-dummy
-          image: antpickax/k2hr3-app:1.0.4
+          image: antpickax/k2hr3-app:1.0.16
           env:
+            - name: HTTP_PROXY
+              value: "http://"
+            - name: HTTPS_PROXY
+              value: "http://"
+            - name: NO_PROXY
+              value: ""
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
             - name: K2HR3_MANUAL_START
               value: "false"
             - name: K2HR3API_SERVICE_NAME
@@ -2396,10 +2424,18 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-r3dkc-dummy
-          image: alpine:3.13.5
+          image: alpine:3.17.3
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-ini-update.sh"]
           env:
+            - name: HTTP_PROXY
+              value: "http://"
+            - name: HTTPS_PROXY
+              value: "http://"
+            - name: NO_PROXY
+              value: ""
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
             - name: CHMPX_INI_TEMPLATE_FILE
               value: "/configmap/k2hr3-k2hdkc.ini.templ"
             - name: CHMPX_INI_DIR
@@ -2445,7 +2481,16 @@ spec:
               readOnly: true
       containers:
         - name: container-r3dkc-dummy
-          image: antpickax/k2hdkc:1.0.3
+          image: antpickax/k2hdkc:1.0.6
+          env:
+            - name: HTTP_PROXY
+              value: "http://"
+            - name: HTTPS_PROXY
+              value: "http://"
+            - name: NO_PROXY
+              value: ""
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
           volumeMounts:
             - mountPath: /etc/antpickax
               name: antpickax-etc-volume
@@ -2459,7 +2504,16 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-serverproc-wrap.sh", "server"]
         - name: sidecar-r3dkc-dummy
-          image: antpickax/chmpx:1.0.96
+          image: antpickax/chmpx:1.0.99
+          env:
+            - name: HTTP_PROXY
+              value: "http://"
+            - name: HTTPS_PROXY
+              value: "http://"
+            - name: NO_PROXY
+              value: ""
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
           volumeMounts:
             - mountPath: /etc/antpickax
               name: antpickax-etc-volume
@@ -2522,10 +2576,18 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-r3api-dummy
-          image: alpine:3.13.5
+          image: alpine:3.17.3
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-ini-update.sh"]
           env:
+            - name: HTTP_PROXY
+              value: "http://"
+            - name: HTTPS_PROXY
+              value: "http://"
+            - name: NO_PROXY
+              value: ""
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
             - name: USING_SERVICE_NAME
               value: "np-r3api-dummy"
             - name: CHMPX_INI_TEMPLATE_FILE
@@ -2575,8 +2637,16 @@ spec:
               readOnly: true
       containers:
         - name: container-r3api-dummy
-          image: antpickax/k2hr3-api:1.0.7
+          image: antpickax/k2hr3-api:1.0.20
           env:
+            - name: HTTP_PROXY
+              value: "http://"
+            - name: HTTPS_PROXY
+              value: "http://"
+            - name: NO_PROXY
+              value: ""
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
             - name: K2HR3_MANUAL_START
               value: "false"
           volumeMounts:
@@ -2592,7 +2662,16 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-api-wrap.sh"]
         - name: sidecar-r3api-dummy
-          image: antpickax/chmpx:1.0.96
+          image: antpickax/chmpx:1.0.99
+          env:
+            - name: HTTP_PROXY
+              value: "http://"
+            - name: HTTPS_PROXY
+              value: "http://"
+            - name: NO_PROXY
+              value: ""
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
           volumeMounts:
             - mountPath: /etc/antpickax
               name: antpickax-etc-volume
@@ -2623,7 +2702,7 @@ spec:
             path: k2hr3-check.sh
   containers:
     - name: checker
-      image: alpine:3.13.5
+      image: alpine:3.17.3
       env:
       - name: K2HR3_NAMESPACE
         valueFrom:
