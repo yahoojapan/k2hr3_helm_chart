@@ -46,6 +46,22 @@ file ready.
 -->
 # Change Log for K2HR3 Helm Chart
 
+## [1.0.3] - 2023-05-31
+### Changed
+- Fixed a bug about PROXY variables in _helpers.tpl
+- Removed LF code from shell scripts output to configmap.yaml
+- Added parameters for PROXY and Image, and fixed bugs
+- Fixed bugs about checking os type in scripts
+- Fixed bugs in scripts in files directory
+- Updated scripts under files directory
+- Fixed bugs about shellscript contidion
+- Updated header and footer in comment lines
+- Updated issue/pullrequest templates
+- Reviewed ShellCheck processing
+- Updated ci.yml for upgrading actions/checkout
+- Updated azure/setup-helm from v1 to v3
+- Updated helm_packager.sh for changing grep parameter
+
 ## [1.0.2] - 2022-03-11
 ### Changed
 - Fixed a bug(helm_package.sh) and Updated some files
@@ -58,6 +74,7 @@ file ready.
 ### Changed
 - Initial Commit and publishing
 
+[1.0.3]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/58ea5df...v1.0.0
