@@ -2348,9 +2348,9 @@ spec:
           args: ["/configmap/k2hr3-app-init.sh"]
           env:
             - name: HTTP_PROXY
-              value: "http://"
+              value: ""
             - name: HTTPS_PROXY
-              value: "http://"
+              value: ""
             - name: NO_PROXY
               value: ""
             - name: DEBIAN_FRONTEND
@@ -2379,9 +2379,9 @@ spec:
           image: antpickax/k2hr3-app:1.0.16
           env:
             - name: HTTP_PROXY
-              value: "http://"
+              value: ""
             - name: HTTPS_PROXY
-              value: "http://"
+              value: ""
             - name: NO_PROXY
               value: ""
             - name: DEBIAN_FRONTEND
@@ -2465,9 +2465,9 @@ spec:
           args: ["/configmap/k2hr3-k2hdkc-ini-update.sh"]
           env:
             - name: HTTP_PROXY
-              value: "http://"
+              value: ""
             - name: HTTPS_PROXY
-              value: "http://"
+              value: ""
             - name: NO_PROXY
               value: ""
             - name: DEBIAN_FRONTEND
@@ -2520,9 +2520,9 @@ spec:
           image: antpickax/k2hdkc:1.0.6
           env:
             - name: HTTP_PROXY
-              value: "http://"
+              value: ""
             - name: HTTPS_PROXY
-              value: "http://"
+              value: ""
             - name: NO_PROXY
               value: ""
             - name: DEBIAN_FRONTEND
@@ -2543,9 +2543,9 @@ spec:
           image: antpickax/chmpx:1.0.99
           env:
             - name: HTTP_PROXY
-              value: "http://"
+              value: ""
             - name: HTTPS_PROXY
-              value: "http://"
+              value: ""
             - name: NO_PROXY
               value: ""
             - name: DEBIAN_FRONTEND
@@ -2617,9 +2617,9 @@ spec:
           args: ["/configmap/k2hr3-k2hdkc-ini-update.sh"]
           env:
             - name: HTTP_PROXY
-              value: "http://"
+              value: ""
             - name: HTTPS_PROXY
-              value: "http://"
+              value: ""
             - name: NO_PROXY
               value: ""
             - name: DEBIAN_FRONTEND
@@ -2676,9 +2676,9 @@ spec:
           image: antpickax/k2hr3-api:1.0.20
           env:
             - name: HTTP_PROXY
-              value: "http://"
+              value: ""
             - name: HTTPS_PROXY
-              value: "http://"
+              value: ""
             - name: NO_PROXY
               value: ""
             - name: DEBIAN_FRONTEND
@@ -2701,9 +2701,9 @@ spec:
           image: antpickax/chmpx:1.0.99
           env:
             - name: HTTP_PROXY
-              value: "http://"
+              value: ""
             - name: HTTPS_PROXY
-              value: "http://"
+              value: ""
             - name: NO_PROXY
               value: ""
             - name: DEBIAN_FRONTEND

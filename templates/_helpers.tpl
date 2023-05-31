@@ -169,17 +169,25 @@
 *
 */}}
 {{- define "k2hr3.env.httpProxy" -}}
-	{{- if contains "://" .Values.k2hr3.env.httpProxy }}
-		{{- default "" .Values.k2hr3.env.httpProxy }}
+	{{- if .Values.k2hr3.env.httpProxy }}
+		{{- if contains "://" .Values.k2hr3.env.httpProxy }}
+			{{- default "" .Values.k2hr3.env.httpProxy }}
+		{{- else }}
+			{{- printf "http://%s" .Values.k2hr3.env.httpProxy }}
+		{{- end }}
 	{{- else }}
-		{{- printf "http://%s" .Values.k2hr3.env.httpProxy }}
+		{{- default "" .Values.k2hr3.env.httpProxy }}
 	{{- end }}
 {{- end }}
 {{- define "k2hr3.env.httpsProxy" -}}
-	{{- if contains "://" .Values.k2hr3.env.httpsProxy }}
-		{{- default "" .Values.k2hr3.env.httpsProxy }}
+	{{- if .Values.k2hr3.env.httpsProxy }}
+		{{- if contains "://" .Values.k2hr3.env.httpsProxy }}
+			{{- default "" .Values.k2hr3.env.httpsProxy }}
+		{{- else }}
+			{{- printf "http://%s" .Values.k2hr3.env.httpsProxy }}
+		{{- end }}
 	{{- else }}
-		{{- printf "http://%s" .Values.k2hr3.env.httpsProxy }}
+		{{- default "" .Values.k2hr3.env.httpsProxy }}
 	{{- end }}
 {{- end }}
 {{- define "k2hr3.env.noProxy" -}}
