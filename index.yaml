@@ -3,11 +3,59 @@ entries:
   k2hr3:
   - annotations:
       artifacthub.io/changes: |
+        - Fixed a bug about PROXY variables in _helpers.tpl
+        - Removed LF code from shell scripts output to configmap.yaml
+        - Added parameters for PROXY and Image, and fixed bugs
+        - Fixed bugs about checking os type in scripts
+        - Fixed bugs in scripts in files directory
+        - Updated scripts under files directory
+        - Fixed bugs about shellscript contidion
+        - Updated header and footer in comment lines
+        - Updated issue/pullrequest templates
+        - Reviewed ShellCheck processing
+        - Updated ci.yml for upgrading actions/checkout
+        - Updated azure/setup-helm from v1 to v3
+        - Updated helm_packager.sh for changing grep parameter
+      catalog.cattle.io/display-name: K2HR3 - RBAC System
+    apiVersion: v2
+    appVersion: 1.0.3
+    created: "2023-05-31T05:11:13.893534905Z"
+    description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
+      Rules) is one of extended RBAC(Role Based Access Control) system.
+    digest: cdd79371946ff579d84602ae3223718c94f5e7d0426c1e4c6a49f6551b44d22f
+    home: https://k2hr3.antpick.ax/
+    icon: https://antpick.ax/images/antpickax_circle_512x512.png
+    keywords:
+    - K2HR3
+    - RBAC
+    - K2HDKC DBaaS
+    - AntPickax
+    - Helm
+    - kubernetes
+    - K2HASH
+    - NOSQL
+    - KVS
+    - CHMPX
+    kubeVersion: '>=v1.20'
+    maintainers:
+    - email: ggtakec@gmail.com
+      name: Takeshi Nakatani
+    - email: hiwakaba@yahoo-corp.jp
+      name: Hirotaka Wakabayashi
+    name: k2hr3
+    sources:
+    - https://github.com/yahoojapan/k2hr3_helm_chart
+    type: application
+    urls:
+    - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.3/k2hr3-1.0.3.tgz
+    version: 1.0.3
+  - annotations:
+      artifacthub.io/changes: |
         - Fixed a bug(helm_package.sh) and Updated some files
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.2
-    created: "2022-03-11T05:21:31.86933061Z"
+    created: "2023-05-31T05:11:13.891386296Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: bbae5d89f94d4473a92377f96dee3c9018c0f67ac615e26d22489584da7b1c7b
@@ -43,7 +91,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2022-03-11T05:21:31.867393906Z"
+    created: "2023-05-31T05:11:13.889498288Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 7ceca5fccb49be14784216538006a80d570700dd7a87a53c9c9285c1e47b0121
@@ -78,7 +126,7 @@ entries:
         - Initial Commit and publishing
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-03-11T05:21:31.864212099Z"
+    created: "2023-05-31T05:11:13.886790177Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: b135439c222d58c97a8e179417aacadd15dc072a55ad72520b72db2daf8052f7
@@ -108,4 +156,4 @@ entries:
     urls:
     - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.0/k2hr3-1.0.0.tgz
     version: 1.0.0
-generated: "2022-03-11T05:21:31.85955219Z"
+generated: "2023-05-31T05:11:13.882954861Z"
