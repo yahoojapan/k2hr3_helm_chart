@@ -3,11 +3,47 @@ entries:
   k2hr3:
   - annotations:
       artifacthub.io/changes: |
+        - Re2-updated default image tag for K2HR3 APP and API
+      catalog.cattle.io/display-name: K2HR3 - RBAC System
+    apiVersion: v2
+    appVersion: 1.0.6
+    created: "2023-06-01T12:02:56.258418437Z"
+    description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
+      Rules) is one of extended RBAC(Role Based Access Control) system.
+    digest: f515f1ed06666116bb6410ef04836d012bc0662598c4ba37521c6c1314b0d323
+    home: https://k2hr3.antpick.ax/
+    icon: https://antpick.ax/images/antpickax_circle_512x512.png
+    keywords:
+    - K2HR3
+    - RBAC
+    - K2HDKC DBaaS
+    - AntPickax
+    - Helm
+    - kubernetes
+    - K2HASH
+    - NOSQL
+    - KVS
+    - CHMPX
+    kubeVersion: '>=v1.20'
+    maintainers:
+    - email: ggtakec@gmail.com
+      name: Takeshi Nakatani
+    - email: hiwakaba@yahoo-corp.jp
+      name: Hirotaka Wakabayashi
+    name: k2hr3
+    sources:
+    - https://github.com/yahoojapan/k2hr3_helm_chart
+    type: application
+    urls:
+    - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.6/k2hr3-1.0.6.tgz
+    version: 1.0.6
+  - annotations:
+      artifacthub.io/changes: |
         - Re-updated default image tag for K2HR3 APP and API
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.5
-    created: "2023-06-01T08:46:53.307662162Z"
+    created: "2023-06-01T12:02:56.256939606Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 247b3a0c73434497840e41da453c26964d14cef02ccd027f5df9fc3ebb68a360
@@ -43,7 +79,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.4
-    created: "2023-06-01T08:46:53.30557956Z"
+    created: "2023-06-01T12:02:56.255419774Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 4f1f5b472f9ddc0d1b82a7e7c0a2f94be9d16665fe12da62755bf23db174de46
@@ -91,7 +127,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.3
-    created: "2023-06-01T08:46:53.304062458Z"
+    created: "2023-06-01T12:02:56.253856941Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: cdd79371946ff579d84602ae3223718c94f5e7d0426c1e4c6a49f6551b44d22f
@@ -127,7 +163,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.2
-    created: "2023-06-01T08:46:53.302525757Z"
+    created: "2023-06-01T12:02:56.251240087Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: bbae5d89f94d4473a92377f96dee3c9018c0f67ac615e26d22489584da7b1c7b
@@ -163,7 +199,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2023-06-01T08:46:53.301114555Z"
+    created: "2023-06-01T12:02:56.249815457Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 7ceca5fccb49be14784216538006a80d570700dd7a87a53c9c9285c1e47b0121
@@ -198,7 +234,7 @@ entries:
         - Initial Commit and publishing
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2023-06-01T08:46:53.298968053Z"
+    created: "2023-06-01T12:02:56.247798415Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: b135439c222d58c97a8e179417aacadd15dc072a55ad72520b72db2daf8052f7
@@ -228,4 +264,4 @@ entries:
     urls:
     - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.0/k2hr3-1.0.0.tgz
     version: 1.0.0
-generated: "2023-06-01T08:46:53.295210249Z"
+generated: "2023-06-01T12:02:56.245687371Z"
