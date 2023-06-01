@@ -2376,7 +2376,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3app-dummy
-          image: antpickax/k2hr3-app:1.0.16
+          image: antpickax/k2hr3-app:1.0.17
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2673,7 +2673,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3api-dummy
-          image: antpickax/k2hr3-api:1.0.20
+          image: antpickax/k2hr3-api:1.0.21
           env:
             - name: HTTP_PROXY
               value: ""
