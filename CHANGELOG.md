@@ -46,6 +46,10 @@ file ready.
 -->
 # Change Log for K2HR3 Helm Chart
 
+## [1.0.6] - 2023-06-01
+### Changed
+- Re2-updated default image tag for K2HR3 APP and API
+
 ## [1.0.5] - 2023-06-01
 ### Changed
 - Re-updated default image tag for K2HR3 APP and API
@@ -82,6 +86,7 @@ file ready.
 ### Changed
 - Initial Commit and publishing
 
+[1.0.6]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.2...v1.0.3
