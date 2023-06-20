@@ -162,6 +162,18 @@
 	{{ include "k2hr3.r3appExtPort" . }}
 {{- end }}
 
+{{-
+/*---------------------------------------------------------
+* Set custom configration(local.json) for k2hr3 system.
+*
+*/}}
+{{- define "k2hr3.r3apiCustomConf" -}}
+	{{- default "" .Values.k2hr3.api.customConf }}
+{{- end }}
+
+{{- define "k2hr3.r3appCustomConf" -}}
+	{{- default "" .Values.k2hr3.app.customConf }}
+{{- end }}
 
 {{-
 /*---------------------------------------------------------
@@ -271,7 +283,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpapporg  := "antpickax" }}
 		{{- $tmpappname := "k2hr3-app" }}
-		{{- $tmpappver  := "1.0.19" }}
+		{{- $tmpappver  := "1.0.20" }}
 		{{- if .Values.images.app.organization }}
 			{{- $tmpapporg = .Values.images.app.organization }}
 		{{- end }}
@@ -291,7 +303,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpapiorg  := "antpickax" }}
 		{{- $tmpapiname := "k2hr3-api" }}
-		{{- $tmpapiver  := "1.0.23" }}
+		{{- $tmpapiver  := "1.0.24" }}
 		{{- if .Values.images.api.organization }}
 			{{- $tmpapiorg = .Values.images.api.organization }}
 		{{- end }}
