@@ -81,6 +81,11 @@ minikube: false
 #	api.extHostname	Specifies the k2hr3 api external host name.
 #					If this value empty, internal hostname will be
 #					used.
+#	api.customConf	Specify the custom configuration file content
+#					formatted by json string(config/local.json).
+#					By setting this value, you can add or change an
+#					existing configuration.
+#
 #	app.extPort		Specifies the k2hr3 api external port and
 #					NodePort. If this value is empty, it will be
 #					set 31443.
@@ -96,6 +101,10 @@ minikube: false
 #	app.extPort		Specifies the k2hr3 app external port and
 #					NodePort. If this value is empty, it will be
 #					set 32443.
+#	app.customConf	Specify the custom configuration file content
+#					formatted by json string(config/local.json).
+#					By setting this value, you can add or change an
+#					existing configuration.
 #
 #	env.httpProxy	Specifies HTTP PROXY environment for k2hr3 system.
 #					If this value is empty, it will be set empty.
@@ -116,11 +125,13 @@ k2hr3:
     count: 2
     extHostname: ""
     extPort: 0
+    customConf: ""
   app:
     baseName: ""
     count: 2
     extHostname: ""
     extPort: 0
+    customConf: ""
   env:
     httpProxy: ""
     httpsProxy: ""

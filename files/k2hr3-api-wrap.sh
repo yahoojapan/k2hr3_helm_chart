@@ -47,6 +47,8 @@ RUN_SCRIPT="${K2HR3_API_DIR}/bin/run.sh"
 PRODUCTION_DIR="${K2HR3_API_DIR}/config"
 PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
 CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-api-production.json"
+LOCAL_FILE="${PRODUCTION_DIR}/local.json"
+CONFIGMAP_LOCAL_FILE="/configmap/k2hr3-api-local.json"
 
 if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
 	exit 1
@@ -58,6 +60,11 @@ if [ ! -d "${PRODUCTION_DIR}" ]; then
 fi
 if ! cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"; then
 	exit 1
+fi
+if [ -f "${CONFIGMAP_LOCAL_FILE}" ]; then
+	if ! cp "${CONFIGMAP_LOCAL_FILE}" "${LOCAL_FILE}"; then
+		exit 1
+	fi
 fi
 
 #----------------------------------------------------------

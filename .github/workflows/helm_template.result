@@ -765,6 +765,8 @@ data:
     PRODUCTION_DIR="${K2HR3_API_DIR}/config"
     PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
     CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-api-production.json"
+    LOCAL_FILE="${PRODUCTION_DIR}/local.json"
+    CONFIGMAP_LOCAL_FILE="/configmap/k2hr3-api-local.json"
     
     if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
     	exit 1
@@ -776,6 +778,11 @@ data:
     fi
     if ! cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"; then
     	exit 1
+    fi
+    if [ -f "${CONFIGMAP_LOCAL_FILE}" ]; then
+    	if ! cp "${CONFIGMAP_LOCAL_FILE}" "${LOCAL_FILE}"; then
+    		exit 1
+    	fi
     fi
     
     #----------------------------------------------------------
@@ -1002,6 +1009,8 @@ data:
     PRODUCTION_DIR="${K2HR3_APP_DIR}/config"
     PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
     CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-app-production.json"
+    LOCAL_FILE="${PRODUCTION_DIR}/local.json"
+    CONFIGMAP_LOCAL_FILE="/configmap/k2hr3-app-local.json"
     
     if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
     	exit 1
@@ -1048,6 +1057,12 @@ data:
     		"${CONFIGMAP_PRODUCTION_FILE}"									\
     		> "${PRODUCTION_FILE}"; then
     	exit 1
+    fi
+    
+    if [ -f "${CONFIGMAP_LOCAL_FILE}" ]; then
+    	if ! cp "${CONFIGMAP_LOCAL_FILE}" "${LOCAL_FILE}"; then
+    		exit 1
+    	fi
     fi
     
     #----------------------------------------------------------
@@ -2376,7 +2391,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3app-dummy
-          image: antpickax/k2hr3-app:1.0.19
+          image: antpickax/k2hr3-app:1.0.20
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2673,7 +2688,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3api-dummy
-          image: antpickax/k2hr3-api:1.0.23
+          image: antpickax/k2hr3-api:1.0.24
           env:
             - name: HTTP_PROXY
               value: ""

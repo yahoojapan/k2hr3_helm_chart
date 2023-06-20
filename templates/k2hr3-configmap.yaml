@@ -40,7 +40,9 @@ data:
   {{- $clusterName := include "k2hr3.clusterName" . -}}
   {{- $apiIntHostname := include "k2hr3.r3apiIntHostname" . -}}
   {{- $apiExtHostname := include "k2hr3.r3apiExtHostname" . -}}
+  {{- $apiCustomConf := include "k2hr3.r3apiCustomConf" . -}}
   {{- $appExtHostname := include "k2hr3.r3appExtHostname" . -}}
+  {{- $appCustomConf := include "k2hr3.r3appCustomConf" . -}}
   {{- $k8sApiUrl := .Values.k8s.apiUrl -}}
   {{- $caCert := .Values.k8s.caCert -}}
   {{- $saToken := .Values.k8s.saToken -}}
@@ -58,6 +60,14 @@ data:
   {{ .key }}: |-
 {{- $files.Get .path | replace "%%K2HR3_TENANT_NAME%%" $k8sNamespace | replace "%%K2HDKC_DBAAS_CLUSTER_NAME%%" $clusterName | replace "%%K2HR3_API_INTERNAL_HOST%%" $apiIntHostname | replace "%%K2HR3_API_EXTERNAL_HOST%%" $apiExtHostname | replace "%%K2HR3_APP_EXTERNAL_HOST%%" $appExtHostname | replace "%%K8S_API_URL%%" $k8sApiUrl | replace "%%K8S_CA_CERT%%" $caCert | replace "%%K8S_SA_TOKEN%%" $saToken | replace "%%OIDC_CLIENT_ID%%" $clientId | replace "%%OIDC_CLIENT_SECRET%%" $clientSecret | replace "%%OIDC_COOKIE_EXPIRE%%" $cookieExpire | replace "%%OIDC_COOKIENAME%%" $cookieName | replace "%%OIDC_ISSUER_URL%%" $issuerUrl | replace "%%OIDC_USERNAME_KEY%%" $usernameKey | nindent 4 }}
   {{- end }}
+{{- if $apiCustomConf }}
+  k2hr3-api-local.json: |-
+    {{ printf "%s\n\n" $apiCustomConf }}
+{{- end }}
+{{- if $appCustomConf }}
+  k2hr3-app-local.json: |-
+    {{ printf "%s\n\n" $appCustomConf }}
+{{- end }}
 
 {{-
 /*

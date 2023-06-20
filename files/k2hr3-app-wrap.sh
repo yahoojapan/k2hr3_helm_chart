@@ -45,6 +45,8 @@ RUN_SCRIPT="${K2HR3_APP_DIR}/bin/run.sh"
 PRODUCTION_DIR="${K2HR3_APP_DIR}/config"
 PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
 CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-app-production.json"
+LOCAL_FILE="${PRODUCTION_DIR}/local.json"
+CONFIGMAP_LOCAL_FILE="/configmap/k2hr3-app-local.json"
 
 if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
 	exit 1
@@ -91,6 +93,12 @@ if ! sed -e "s#%%K2HR3_APP_EXTERNAL_HOST%%#${K2HR3APP_EXTERNAL_HOST}#g"	\
 		"${CONFIGMAP_PRODUCTION_FILE}"									\
 		> "${PRODUCTION_FILE}"; then
 	exit 1
+fi
+
+if [ -f "${CONFIGMAP_LOCAL_FILE}" ]; then
+	if ! cp "${CONFIGMAP_LOCAL_FILE}" "${LOCAL_FILE}"; then
+		exit 1
+	fi
 fi
 
 #----------------------------------------------------------
