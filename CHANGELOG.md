@@ -46,6 +46,10 @@ file ready.
 -->
 # Change Log for K2HR3 Helm Chart
 
+## [1.0.9] - 2023-06-21
+### Changed
+- Updated README.md and values.schema.json
+
 ## [1.0.8] - 2023-06-21
 ### Changed
 - Fixed questions.yaml due to bugs in RANCHER support
@@ -94,7 +98,8 @@ file ready.
 ### Changed
 - Initial Commit and publishing
 
-[1.0.7]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.7...v1.0.8
+[1.0.9]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.8...v1.0.9
+[1.0.8]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.4...v1.0.5
