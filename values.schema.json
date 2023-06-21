@@ -130,6 +130,11 @@
               "description": "[optional] Specify the external port number for K2HR3 REST API system, default is 0 in which case 31443 will be used.",
               "type": "number",
               "minimum": 0
+            },
+            "customConf": {
+              "description": "[optional] Specify the custom configuration file content formatted by json string(config/local.json).",
+              "type": "string",
+              "maxLength": 4095
             }
           },
           "required": [
@@ -170,6 +175,11 @@
               "description": "[optional] Specify the external port number for K2HR3 Web Application system, default is 0 in which case 32443 will be used.",
               "type": "number",
               "minimum": 0
+            },
+            "customConf": {
+              "description": "[optional] Specify the custom configuration file content formatted by json string(config/local.json).",
+              "type": "string",
+              "maxLength": 4095
             }
           },
           "required": [
