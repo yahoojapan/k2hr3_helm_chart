@@ -135,6 +135,10 @@
               "description": "[optional] Specify the custom configuration file content formatted by json string(config/local.json).",
               "type": "string",
               "maxLength": 4095
+            },
+            "localTenant": {
+              "description": "[optional] Specify whether to support the LOCAL TENANT API.",
+              "type": "boolean"
             }
           },
           "required": [
@@ -180,6 +184,10 @@
               "description": "[optional] Specify the custom configuration file content formatted by json string(config/local.json).",
               "type": "string",
               "maxLength": 4095
+            },
+            "localTenant": {
+              "description": "[optional] Specify whether to support the LOCAL TENANT.",
+              "type": "boolean"
             }
           },
           "required": [

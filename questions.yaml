@@ -152,6 +152,14 @@ questions:
   min_length: 0
   max_length: 4096
 
+- variable: k2hr3.app.localTenant
+  default: true
+  label: "Local Tenant"
+  description: "Specify whether to support the LOCAL TENANT."
+  type: boolean
+  required: false
+  group: "K2HR3 Web Application"
+
 #
 # K2HR3 REST API
 #
@@ -224,6 +232,14 @@ questions:
   group: "K2HR3 REST API"
   min_length: 0
   max_length: 4096
+
+- variable: k2hr3.api.localTenant
+  default: true
+  label: "Local Tenant API"
+  description: "Specify whether to support the LOCAL TENANT API."
+  type: boolean
+  required: false
+  group: "K2HR3 REST API"
 
 #
 # Backend K2HDKC Cluster

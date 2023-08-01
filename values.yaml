@@ -85,6 +85,7 @@ minikube: false
 #					formatted by json string(config/local.json).
 #					By setting this value, you can add or change an
 #					existing configuration.
+#	api.localTenant	Specifies whether to support the LOCAL TENANT API.
 #
 #	app.extPort		Specifies the k2hr3 api external port and
 #					NodePort. If this value is empty, it will be
@@ -105,6 +106,7 @@ minikube: false
 #					formatted by json string(config/local.json).
 #					By setting this value, you can add or change an
 #					existing configuration.
+#	app.localTenant	Specifies whether to support the LOCAL TENANT.
 #
 #	env.httpProxy	Specifies HTTP PROXY environment for k2hr3 system.
 #					If this value is empty, it will be set empty.
@@ -126,12 +128,14 @@ k2hr3:
     extHostname: ""
     extPort: 0
     customConf: ""
+    localTenant: true
   app:
     baseName: ""
     count: 2
     extHostname: ""
     extPort: 0
     customConf: ""
+    localTenant: true
   env:
     httpProxy: ""
     httpsProxy: ""

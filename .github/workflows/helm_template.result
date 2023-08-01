@@ -2113,6 +2113,8 @@ data:
     		'passphrase':		'k2hr3_regpass'
     	},
     
+    	'localtenants':		true,
+    
     	'chkipconfig': {
     		'type':			'NoCheck',
     		'pendingsec':	864000,
@@ -2177,19 +2179,20 @@ data:
     //
     //--------------------------------------------------------------
     {
-    	'scheme':		'https',
-    	'port':			443,
-    	'multiproc':	true,
-    	'runuser':		'root',
-    	'privatekey':	'/etc/antpickax/server.key',
-    	'cert':			'/etc/antpickax/server.crt',
-    	'ca':			'/etc/antpickax/ca.crt',
-    	'lang':			'ja',
+    	'scheme':				'https',
+    	'port':					443,
+    	'multiproc':			true,
+    	'runuser':				'root',
+    	'privatekey':			'/etc/antpickax/server.key',
+    	'cert':					'/etc/antpickax/server.crt',
+    	'ca':					'/etc/antpickax/ca.crt',
+    	'uselocaltenant':		true,
+    	'lang':					'ja',
     
-    	'validator':	'userValidateOidc',
-    	'validobj':		null,
+    	'validator':			'userValidateOidc',
+    	'validobj':				null,
     	'rejectUnauthorized':	true,
-    	'lang':			'en',
+    	'lang':					'en',
     	'extrouter': {
     		'oidc': {
     			'name':						'oidc',
