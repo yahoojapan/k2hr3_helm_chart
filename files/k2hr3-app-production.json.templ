@@ -35,19 +35,20 @@
 //
 //--------------------------------------------------------------
 {
-	'scheme':		'https',
-	'port':			443,
-	'multiproc':	true,
-	'runuser':		'root',
-	'privatekey':	'/etc/antpickax/server.key',
-	'cert':			'/etc/antpickax/server.crt',
-	'ca':			'/etc/antpickax/ca.crt',
-	'lang':			'ja',
+	'scheme':				'https',
+	'port':					443,
+	'multiproc':			true,
+	'runuser':				'root',
+	'privatekey':			'/etc/antpickax/server.key',
+	'cert':					'/etc/antpickax/server.crt',
+	'ca':					'/etc/antpickax/ca.crt',
+	'uselocaltenant':		%%K2HR3_APP_LOCALTENANT%%,
+	'lang':					'ja',
 
-	'validator':	'userValidateOidc',
-	'validobj':		null,
+	'validator':			'userValidateOidc',
+	'validobj':				null,
 	'rejectUnauthorized':	true,
-	'lang':			'en',
+	'lang':					'en',
 	'extrouter': {
 		'oidc': {
 			'name':						'oidc',

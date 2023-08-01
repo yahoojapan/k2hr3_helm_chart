@@ -175,6 +175,18 @@
 	{{- default "" .Values.k2hr3.app.customConf }}
 {{- end }}
 
+/*---------------------------------------------------------
+* Set local tenant configration(local.json) for k2hr3 system.
+*
+*/}}
+{{- define "k2hr3.r3apiLocalTenant" -}}
+	{{- .Values.k2hr3.api.localTenant }}
+{{- end }}
+
+{{- define "k2hr3.r3appLocalTenant" -}}
+	{{- .Values.k2hr3.app.localTenant }}
+{{- end }}
+
 {{-
 /*---------------------------------------------------------
 * Set PROXY environments for k2hr3 system.
