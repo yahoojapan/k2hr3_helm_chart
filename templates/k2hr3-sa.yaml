@@ -19,12 +19,13 @@
 * REVISION:
 *
 */ -}}
+{{- if ne (include "k2hr3.serviceAccountName" .) "default" }}
 
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: sa-{{ include "k2hr3.r3apiBaseName" . }}
+  name: {{ include "k2hr3.serviceAccountName" . }}
   namespace: {{ include "k2hr3.k8sNamespace" . }}
 automountServiceAccountToken: true
 
@@ -49,9 +50,10 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 subjects:
 - kind: ServiceAccount
-  name: sa-{{ include "k2hr3.r3apiBaseName" . }}
+  name: {{ include "k2hr3.serviceAccountName" . }}
   namespace: {{ include "k2hr3.k8sNamespace" . }}
 
+{{- end }}
 {{-
 /*
 * Local variables:

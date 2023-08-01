@@ -15,11 +15,11 @@
     },
 
     "serviceAccount": {
-      "description": "[optional] Service account setting.",
+      "description": "[optional] Service account setting for K2HR3 API.",
       "type": "object",
       "properties": {
         "create": {
-          "description": "[optional] Specifies whether to create a service account, default is true.",
+          "description": "[optional] Specifies whether to create a service account, default is true. If set false, not create service account.",
           "type": "boolean"
         },
         "annotations": {

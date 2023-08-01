@@ -53,7 +53,7 @@ spec:
       labels:
         app: {{ include "k2hr3.r3apiBaseName" . }}
     spec:
-      serviceAccountName: sa-{{ include "k2hr3.r3apiBaseName" . }}
+      serviceAccountName: {{ include "k2hr3.serviceAccountName" . }}
       volumes:
         - name: antpickax-etc-volume
           emptyDir:

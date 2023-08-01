@@ -258,7 +258,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 */}}
 {{- define "k2hr3.serviceAccountName" -}}
 	{{- if .Values.serviceAccount.create }}
-		{{- default (include "k2hr3.fullname" .) .Values.serviceAccount.name }}
+		{{- if .Values.serviceAccount.name }}
+			{{- .Values.serviceAccount.name }}
+		{{- else }}
+			{{- printf "sa-%s" (include "k2hr3.r3apiBaseName" .) }}
+		{{- end }}
 	{{- else }}
 		{{- default "default" .Values.serviceAccount.name }}
 	{{- end }}

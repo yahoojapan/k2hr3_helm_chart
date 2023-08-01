@@ -241,6 +241,14 @@ questions:
   required: false
   group: "K2HR3 REST API"
 
+- variable: serviceAccount.create
+  default: true
+  label: "Create Service Account"
+  description: "Specify whether to create Service Account for K2HR3 API."
+  type: boolean
+  required: false
+  group: "K2HR3 REST API"
+
 #
 # Backend K2HDKC Cluster
 #
