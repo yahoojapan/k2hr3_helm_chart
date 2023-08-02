@@ -3,11 +3,49 @@ entries:
   k2hr3:
   - annotations:
       artifacthub.io/changes: |
+        - Updated to the latest the Docker image used version
+        - Changed Service Account creation can be dis/enable
+        - Add input values for local tenant
+      catalog.cattle.io/display-name: K2HR3 - RBAC System
+    apiVersion: v2
+    appVersion: 1.0.10
+    created: "2023-08-02T03:18:30.506606534Z"
+    description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
+      Rules) is one of extended RBAC(Role Based Access Control) system.
+    digest: b781d509c6d3158a47a2d770c834cdacbe196d32a31973366d12cd17a7e862aa
+    home: https://k2hr3.antpick.ax/
+    icon: https://antpick.ax/images/antpickax_circle_512x512.png
+    keywords:
+    - K2HR3
+    - RBAC
+    - K2HDKC DBaaS
+    - AntPickax
+    - Helm
+    - kubernetes
+    - K2HASH
+    - NOSQL
+    - KVS
+    - CHMPX
+    kubeVersion: '>=v1.20'
+    maintainers:
+    - email: ggtakec@gmail.com
+      name: Takeshi Nakatani
+    - email: hiwakaba@yahoo-corp.jp
+      name: Hirotaka Wakabayashi
+    name: k2hr3
+    sources:
+    - https://github.com/yahoojapan/k2hr3_helm_chart
+    type: application
+    urls:
+    - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.10/k2hr3-1.0.10.tgz
+    version: 1.0.10
+  - annotations:
+      artifacthub.io/changes: |
         - Updated README.md and values.schema.json
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.9
-    created: "2023-06-21T05:32:51.902969857Z"
+    created: "2023-08-02T03:18:30.522307419Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 126f40172756c38cc2647bd6986ede2545a5ca50c1924deeee952cae803df3ee
@@ -43,7 +81,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.8
-    created: "2023-06-21T05:32:51.901363335Z"
+    created: "2023-08-02T03:18:30.520444309Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: c4717923b158993e0b9871df0e0ca3433044e55d0a99b69dd0dc531d84d58a56
@@ -79,7 +117,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.7
-    created: "2023-06-21T05:32:51.896842273Z"
+    created: "2023-08-02T03:18:30.518664499Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: dd4e36f46ff8e9d1ff44e27156a7976c48f97749bd87726d148b029d7358dc05
@@ -115,7 +153,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.6
-    created: "2023-06-21T05:32:51.89521825Z"
+    created: "2023-08-02T03:18:30.516628188Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: f515f1ed06666116bb6410ef04836d012bc0662598c4ba37521c6c1314b0d323
@@ -151,7 +189,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.5
-    created: "2023-06-21T05:32:51.893666029Z"
+    created: "2023-08-02T03:18:30.514821279Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 247b3a0c73434497840e41da453c26964d14cef02ccd027f5df9fc3ebb68a360
@@ -187,7 +225,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.4
-    created: "2023-06-21T05:32:51.892071507Z"
+    created: "2023-08-02T03:18:30.512121164Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 4f1f5b472f9ddc0d1b82a7e7c0a2f94be9d16665fe12da62755bf23db174de46
@@ -235,7 +273,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.3
-    created: "2023-06-21T05:32:51.890490785Z"
+    created: "2023-08-02T03:18:30.509946352Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: cdd79371946ff579d84602ae3223718c94f5e7d0426c1e4c6a49f6551b44d22f
@@ -271,7 +309,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.2
-    created: "2023-06-21T05:32:51.887563345Z"
+    created: "2023-08-02T03:18:30.508205043Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: bbae5d89f94d4473a92377f96dee3c9018c0f67ac615e26d22489584da7b1c7b
@@ -307,7 +345,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2023-06-21T05:32:51.885829621Z"
+    created: "2023-08-02T03:18:30.504614223Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 7ceca5fccb49be14784216538006a80d570700dd7a87a53c9c9285c1e47b0121
@@ -342,7 +380,7 @@ entries:
         - Initial Commit and publishing
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2023-06-21T05:32:51.883746293Z"
+    created: "2023-08-02T03:18:30.501843908Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: b135439c222d58c97a8e179417aacadd15dc072a55ad72520b72db2daf8052f7
@@ -372,4 +410,4 @@ entries:
     urls:
     - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.0/k2hr3-1.0.0.tgz
     version: 1.0.0
-generated: "2023-06-21T05:32:51.881024555Z"
+generated: "2023-08-02T03:18:30.497903487Z"
