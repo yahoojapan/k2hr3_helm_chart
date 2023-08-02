@@ -30,10 +30,14 @@ The following options/values are supported. See values.yaml for more detailed do
 | `k2hr3.api.count`              | optional     | Specify the server count of K2HR3 REST API.                                                                                         | 2       |
 | `k2hr3.api.extHostname`        | optional     | Specify the external hostname(FQDN) for K2HR3 REST API system, default is empty in which case internal hostanme will be used.       | ""      |
 | `k2hr3.api.extPort`            | optional     | Specify the external port number for K2HR3 REST API system, default is 0 in which case 31443 will be used.                          | 0       |
+| `k2hr3.api.customConf`         | optional     | Specify the custom configuration file content formatted by json string(config/local.json).                                          | ""      |
+| `k2hr3.api.localTenant`        | optional     | Specifies whether to support the LOCAL TENANT API.                                                                                  | true    |
 | `k2hr3.app.baseName`           | optional     | Specify the base name for K2HR3 Web Application, default is empty in which case "r3app" will be used.                               | ""      |
 | `k2hr3.app.count`              | optional     | Specify the server count of K2HR3 Web Application.                                                                                  | 2       |
 | `k2hr3.app.extHostname`        | optional     | Specify the external hostname(FQDN) for K2HR3 Web Application system, default is empty in which case internal hostanme will be used.| ""      |
 | `k2hr3.app.extPort`            | optional     | Specify the external port number for K2HR3 Web Application system, default is 0 in which case 32443 will be used.                   | 0       |
+| `k2hr3.app.customConf`         | optional     | Specify the custom configuration file content formatted by json string(config/local.json).                                          | ""      |
+| `k2hr3.app.localTenant`        | optional     | Specifies whether to support the LOCAL TENANT.                                                                                      | true    |
 | `k2hr3.env.httpProxy`          | optional     | Specify the HTTP PROXY(ex. "http://proxy.local:8080") for K2HR3 system, default is empty.                                           | ""      |
 | `k2hr3.env.httpsProxy`         | optional     | Specify the HTTPS PROXY(ex. "http://proxy.local:8080") for K2HR3 system, default is empty.                                          | ""      |
 | `k2hr3.env.noProxy`            | optional     | Specify the NO PROXY(ex. "internal,127.1.1.1") for K2HR3 system, default is empty.                                                  | ""      |
