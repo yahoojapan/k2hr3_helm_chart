@@ -2361,7 +2361,7 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-r3app-dummy
-          image: alpine:3.17.3
+          image: alpine:3.17.4
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-app-init.sh"]
           env:
@@ -2394,7 +2394,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3app-dummy
-          image: antpickax/k2hr3-app:1.0.20
+          image: antpickax/k2hr3-app:1.0.23
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2478,7 +2478,7 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-r3dkc-dummy
-          image: alpine:3.17.3
+          image: alpine:3.17.4
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-ini-update.sh"]
           env:
@@ -2535,7 +2535,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3dkc-dummy
-          image: antpickax/k2hdkc:1.0.6
+          image: antpickax/k2hdkc:1.0.7
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2558,7 +2558,7 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-serverproc-wrap.sh", "server"]
         - name: sidecar-r3dkc-dummy
-          image: antpickax/chmpx:1.0.99
+          image: antpickax/chmpx:1.0.100
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2630,7 +2630,7 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-r3api-dummy
-          image: alpine:3.17.3
+          image: alpine:3.17.4
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-ini-update.sh"]
           env:
@@ -2691,7 +2691,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3api-dummy
-          image: antpickax/k2hr3-api:1.0.24
+          image: antpickax/k2hr3-api:1.0.27
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2716,7 +2716,7 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-api-wrap.sh"]
         - name: sidecar-r3api-dummy
-          image: antpickax/chmpx:1.0.99
+          image: antpickax/chmpx:1.0.100
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2756,7 +2756,7 @@ spec:
             path: k2hr3-check.sh
   containers:
     - name: checker
-      image: alpine:3.17.3
+      image: alpine:3.17.4
       env:
       - name: K2HR3_NAMESPACE
         valueFrom:
