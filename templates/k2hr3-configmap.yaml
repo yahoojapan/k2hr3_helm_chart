@@ -26,7 +26,7 @@
 * [NOTE]
 * %%K2HR3_API(APP)_EXTERNAL(INTERNAL)_PORT%% are not converted here.
 * Please note that in each pod, these NodePort is obtained from the
-* environment variable and set to json.
+* environment variable and set to json(json5).
 *
 */ -}}
 ---
@@ -63,11 +63,11 @@ data:
 {{- $files.Get .path | replace "%%K2HR3_TENANT_NAME%%" $k8sNamespace | replace "%%K2HDKC_DBAAS_CLUSTER_NAME%%" $clusterName | replace "%%K2HR3_API_INTERNAL_HOST%%" $apiIntHostname | replace "%%K2HR3_API_LOCALTENANT%%" $apiLocalTenant | replace "%%K2HR3_API_EXTERNAL_HOST%%" $apiExtHostname | replace "%%K2HR3_APP_EXTERNAL_HOST%%" $appExtHostname | replace "%%K2HR3_APP_LOCALTENANT%%" $appLocalTenant | replace "%%K8S_API_URL%%" $k8sApiUrl | replace "%%K8S_CA_CERT%%" $caCert | replace "%%K8S_SA_TOKEN%%" $saToken | replace "%%OIDC_CLIENT_ID%%" $clientId | replace "%%OIDC_CLIENT_SECRET%%" $clientSecret | replace "%%OIDC_COOKIE_EXPIRE%%" $cookieExpire | replace "%%OIDC_COOKIENAME%%" $cookieName | replace "%%OIDC_ISSUER_URL%%" $issuerUrl | replace "%%OIDC_USERNAME_KEY%%" $usernameKey | nindent 4 }}
   {{- end }}
 {{- if $apiCustomConf }}
-  k2hr3-api-local.json: |-
+  k2hr3-api-local.json5: |-
     {{ printf "%s\n\n" $apiCustomConf }}
 {{- end }}
 {{- if $appCustomConf }}
-  k2hr3-app-local.json: |-
+  k2hr3-app-local.json5: |-
     {{ printf "%s\n\n" $appCustomConf }}
 {{- end }}
 

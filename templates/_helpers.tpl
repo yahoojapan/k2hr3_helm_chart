@@ -164,7 +164,7 @@
 
 {{-
 /*---------------------------------------------------------
-* Set custom configration(local.json) for k2hr3 system.
+* Set custom configration(local.json(local.json5)) for k2hr3 system.
 *
 */}}
 {{- define "k2hr3.r3apiCustomConf" -}}
@@ -176,7 +176,7 @@
 {{- end }}
 
 /*---------------------------------------------------------
-* Set local tenant configration(local.json) for k2hr3 system.
+* Set local tenant configration(local.json(local.json5)) for k2hr3 system.
 *
 */}}
 {{- define "k2hr3.r3apiLocalTenant" -}}
