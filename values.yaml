@@ -82,7 +82,7 @@ minikube: false
 #					If this value empty, internal hostname will be
 #					used.
 #	api.customConf	Specify the custom configuration file content
-#					formatted by json string(config/local.json).
+#					formatted by json string(config/local.json(local.json5)).
 #					By setting this value, you can add or change an
 #					existing configuration.
 #	api.localTenant	Specifies whether to support the LOCAL TENANT API.
@@ -103,7 +103,7 @@ minikube: false
 #					NodePort. If this value is empty, it will be
 #					set 32443.
 #	app.customConf	Specify the custom configuration file content
-#					formatted by json string(config/local.json).
+#					formatted by json string(config/local.json(local.json5)).
 #					By setting this value, you can add or change an
 #					existing configuration.
 #	app.localTenant	Specifies whether to support the LOCAL TENANT.
@@ -258,10 +258,10 @@ unconvertedFiles:
 #
 convertedFiles:
   k2hr3:
-    - key: k2hr3-api-production.json
-      path: files/k2hr3-api-production.json.templ
-    - key: k2hr3-app-production.json
-      path: files/k2hr3-app-production.json.templ
+    - key: k2hr3-api-production.json5
+      path: files/k2hr3-api-production.json5.templ
+    - key: k2hr3-app-production.json5
+      path: files/k2hr3-app-production.json5.templ
 
 #
 # Local variables:

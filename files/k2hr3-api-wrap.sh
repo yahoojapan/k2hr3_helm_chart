@@ -45,24 +45,41 @@ fi
 
 RUN_SCRIPT="${K2HR3_API_DIR}/bin/run.sh"
 PRODUCTION_DIR="${K2HR3_API_DIR}/config"
-PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
-CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-api-production.json"
-LOCAL_FILE="${PRODUCTION_DIR}/local.json"
-CONFIGMAP_LOCAL_FILE="/configmap/k2hr3-api-local.json"
 
-if [ ! -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
-	exit 1
-fi
+# [NOTE]
+# Configuration files accept json or json5 extensions.
+#
+PRODUCTION_FILE="${PRODUCTION_DIR}/production.json"
+PRODUCTION5_FILE="${PRODUCTION_DIR}/production.json5"
+CONFIGMAP_PRODUCTION_FILE="/configmap/k2hr3-api-production.json"
+CONFIGMAP_PRODUCTION5_FILE="/configmap/k2hr3-api-production.json5"
+LOCAL_FILE="${PRODUCTION_DIR}/local.json"
+LOCAL5_FILE="${PRODUCTION_DIR}/local.json5"
+CONFIGMAP_LOCAL_FILE="/configmap/k2hr3-api-local.json"
+CONFIGMAP_LOCAL5_FILE="/configmap/k2hr3-api-local.json5"
+
 if [ ! -d "${PRODUCTION_DIR}" ]; then
 	if ! mkdir -p "${PRODUCTION_DIR}"; then
 		exit 1
 	fi
 fi
-if ! cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"; then
+if [ -f "${CONFIGMAP_PRODUCTION_FILE}" ]; then
+	if ! cp "${CONFIGMAP_PRODUCTION_FILE}" "${PRODUCTION_FILE}"; then
+		exit 1
+	fi
+elif [ -f "${CONFIGMAP_PRODUCTION5_FILE}" ]; then
+	if ! cp "${CONFIGMAP_PRODUCTION5_FILE}" "${PRODUCTION5_FILE}"; then
+		exit 1
+	fi
+else
 	exit 1
 fi
 if [ -f "${CONFIGMAP_LOCAL_FILE}" ]; then
 	if ! cp "${CONFIGMAP_LOCAL_FILE}" "${LOCAL_FILE}"; then
+		exit 1
+	fi
+elif [ -f "${CONFIGMAP_LOCAL5_FILE}" ]; then
+	if ! cp "${CONFIGMAP_LOCAL5_FILE}" "${LOCAL5_FILE}"; then
 		exit 1
 	fi
 fi

@@ -145,7 +145,7 @@ questions:
 - variable: k2hr3.app.customConf
   default: ""
   label: "Custom configuration"
-  description: "Specify the custom configuration file content formatted by json string(config/local.json). Note: that the [,] character must be escaped."
+  description: "Specify the custom configuration file content formatted by json string(config/local.json(local.json5)). Note: that the [,] character must be escaped."
   type: string
   required: false
   group: "K2HR3 Web Application"
@@ -226,7 +226,7 @@ questions:
 - variable: k2hr3.api.customConf
   default: ""
   label: "Custom configuration"
-  description: "Specify the custom configuration file content formatted by json string(config/local.json). Note: that the [,] character must be escaped."
+  description: "Specify the custom configuration file content formatted by json string(config/local.json(local.json5)). Note: that the [,] character must be escaped."
   type: string
   required: false
   group: "K2HR3 REST API"

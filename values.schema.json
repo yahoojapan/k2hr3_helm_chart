@@ -132,7 +132,7 @@
               "minimum": 0
             },
             "customConf": {
-              "description": "[optional] Specify the custom configuration file content formatted by json string(config/local.json).",
+              "description": "[optional] Specify the custom configuration file content formatted by json string(config/local.json(local.json5)).",
               "type": "string",
               "maxLength": 4095
             },
@@ -181,7 +181,7 @@
               "minimum": 0
             },
             "customConf": {
-              "description": "[optional] Specify the custom configuration file content formatted by json string(config/local.json).",
+              "description": "[optional] Specify the custom configuration file content formatted by json string(config/local.json(local.json5)).",
               "type": "string",
               "maxLength": 4095
             },

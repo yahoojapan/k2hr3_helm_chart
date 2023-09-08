@@ -52,8 +52,8 @@ spec:
                 path: k2hr3-app-wrap.sh
               - key: k2hr3-setup-certificate.sh
                 path: k2hr3-setup-certificate.sh
-              - key: k2hr3-app-production.json
-                path: k2hr3-app-production.json
+              - key: k2hr3-app-production.json5
+                path: k2hr3-app-production.json5
         - name: secret-k2hr3-ca-{{ include "k2hr3.clusterName" . }}
           secret:
             secretName: secret-k2hr3-ca-{{ include "k2hr3.clusterName" . }}
