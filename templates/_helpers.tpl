@@ -189,37 +189,6 @@
 
 {{-
 /*---------------------------------------------------------
-* Set PROXY environments for k2hr3 system.
-*
-*/}}
-{{- define "k2hr3.env.httpProxy" -}}
-	{{- if .Values.k2hr3.env.httpProxy }}
-		{{- if contains "://" .Values.k2hr3.env.httpProxy }}
-			{{- default "" .Values.k2hr3.env.httpProxy }}
-		{{- else }}
-			{{- printf "http://%s" .Values.k2hr3.env.httpProxy }}
-		{{- end }}
-	{{- else }}
-		{{- default "" .Values.k2hr3.env.httpProxy }}
-	{{- end }}
-{{- end }}
-{{- define "k2hr3.env.httpsProxy" -}}
-	{{- if .Values.k2hr3.env.httpsProxy }}
-		{{- if contains "://" .Values.k2hr3.env.httpsProxy }}
-			{{- default "" .Values.k2hr3.env.httpsProxy }}
-		{{- else }}
-			{{- printf "http://%s" .Values.k2hr3.env.httpsProxy }}
-		{{- end }}
-	{{- else }}
-		{{- default "" .Values.k2hr3.env.httpsProxy }}
-	{{- end }}
-{{- end }}
-{{- define "k2hr3.env.noProxy" -}}
-	{{- default "" .Values.k2hr3.env.noProxy }}
-{{- end }}
-
-{{-
-/*---------------------------------------------------------
 * Create chart name and version as used by the chart label.
 *
 */}}
@@ -287,19 +256,20 @@ Cert: {{ b64enc $ca.Cert }}
 Key: {{ b64enc $ca.Key }}
 {{- end }}
 
-
 {{-
 /*---------------------------------------------------------
 * Set organization and version fo images
 *
-*/}}
+* K2HR3 APP Image ( tmpAppImage / images.k2hr3appImage )
+*/
+-}}
 {{- define "images.k2hr3appImage" -}}
 	{{- if .Values.images.app.fullImageName }}
-		{{- .Values.images.app.fullImageName }}
+		{{- default "" .Values.images.app.fullImageName }}
 	{{- else }}
-		{{- $tmpapporg  := "antpickax" }}
+		{{- $tmpapporg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpappname := "k2hr3-app" }}
-		{{- $tmpappver  := "1.0.24" }}
+		{{- $tmpappver  := "1.0.29" }}
 		{{- if .Values.images.app.organization }}
 			{{- $tmpapporg = .Values.images.app.organization }}
 		{{- end }}
@@ -313,13 +283,18 @@ Key: {{ b64enc $ca.Key }}
 	{{- end }}
 {{- end }}
 
+{{-
+/*
+* K2HR3 API Image ( tmpApiImage / images.k2hr3apiImage )
+*/
+-}}
 {{- define "images.k2hr3apiImage" -}}
 	{{- if .Values.images.api.fullImageName }}
-		{{- .Values.images.api.fullImageName }}
+		{{- default "" .Values.images.api.fullImageName }}
 	{{- else }}
-		{{- $tmpapiorg  := "antpickax" }}
+		{{- $tmpapiorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpapiname := "k2hr3-api" }}
-		{{- $tmpapiver  := "1.0.27" }}
+		{{- $tmpapiver  := "1.0.31" }}
 		{{- if .Values.images.api.organization }}
 			{{- $tmpapiorg = .Values.images.api.organization }}
 		{{- end }}
@@ -333,13 +308,18 @@ Key: {{ b64enc $ca.Key }}
 	{{- end }}
 {{- end }}
 
+{{-
+/*
+* K2HDKC Image ( tmpDkcImage / images.k2hdkcImage )
+*/
+-}}
 {{- define "images.k2hdkcImage" -}}
 	{{- if .Values.images.dkc.fullImageName }}
-		{{- .Values.images.dkc.fullImageName }}
+		{{- default "" .Values.images.dkc.fullImageName }}
 	{{- else }}
-		{{- $tmpdkcorg  := "antpickax" }}
+		{{- $tmpdkcorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpdkcname := "k2hdkc" }}
-		{{- $tmpdkcver  := "1.0.7" }}
+		{{- $tmpdkcver  := "1.0.9" }}
 		{{- if .Values.images.dkc.organization }}
 			{{- $tmpdkcorg = .Values.images.dkc.organization }}
 		{{- end }}
@@ -353,13 +333,18 @@ Key: {{ b64enc $ca.Key }}
 	{{- end }}
 {{- end }}
 
+{{-
+/*
+* Chmpx Image ( tmpChmpxImage / images.chmpxImage )
+*/
+-}}
 {{- define "images.chmpxImage" -}}
 	{{- if .Values.images.chmpx.fullImageName }}
-		{{- .Values.images.chmpx.fullImageName }}
+		{{- default "" .Values.images.chmpx.fullImageName }}
 	{{- else }}
-		{{- $tmpchmpxorg  := "antpickax" }}
+		{{- $tmpchmpxorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpchmpxname := "chmpx" }}
-		{{- $tmpchmpxver  := "1.0.100" }}
+		{{- $tmpchmpxver  := "1.0.102" }}
 		{{- if .Values.images.chmpx.organization }}
 			{{- $tmpchmpxorg = .Values.images.chmpx.organization }}
 		{{- end }}
@@ -373,13 +358,18 @@ Key: {{ b64enc $ca.Key }}
 	{{- end }}
 {{- end }}
 
+{{-
+/*
+* Init Image ( tmpInitImage / images.initImage )
+*/
+-}}
 {{- define "images.initImage" -}}
 	{{- if .Values.images.init.fullImageName }}
-		{{- .Values.images.init.fullImageName }}
+		{{- default "" .Values.images.init.fullImageName }}
 	{{- else }}
 		{{- $tmpinitorg  := "" }}
 		{{- $tmpinitname := "alpine" }}
-		{{- $tmpinitver  := "3.17.4" }}
+		{{- $tmpinitver  := "3.18.4" }}
 		{{- if .Values.images.init.organization }}
 			{{- $tmpinitorg = .Values.images.init.organization }}
 		{{- end }}
@@ -394,6 +384,305 @@ Key: {{ b64enc $ca.Key }}
 		{{- else }}
 			{{- printf "%s:%s" $tmpinitname $tmpinitver }}
 		{{- end }}
+	{{- end }}
+{{- end }}
+
+{{-
+/*---------------------------------------------------------
+* Set PROXY environments for k2hr3 system.
+*
+* Schema separation for Base proxy environment
+*/}}
+{{- define "tmp.HttpProxyWS" -}}
+	{{- if .Values.k2hr3.env.httpProxy }}
+		{{- if contains "http://" .Values.k2hr3.env.httpProxy }}
+			{{- default "" .Values.k2hr3.env.httpProxy }}
+		{{- else if contains "https://" .Values.k2hr3.env.httpProxy }}
+			{{- default "" .Values.k2hr3.env.httpProxy }}
+		{{- else }}
+			{{- printf "http://%s" .Values.k2hr3.env.httpProxy }}
+		{{- end }}
+	{{- else }}
+		{{- default "" .Values.k2hr3.env.httpProxy }}
+	{{- end }}
+{{- end }}
+
+{{- define "tmp.HttpProxy" -}}
+	{{- if .Values.k2hr3.env.httpProxy }}
+		{{- if contains "http://" .Values.k2hr3.env.httpProxy }}
+			{{- default "" .Values.k2hr3.env.httpProxy | replace "http://" "" }}
+		{{- else if contains "https://" .Values.k2hr3.env.httpProxy }}
+			{{- default "" .Values.k2hr3.env.httpProxy | replace "https://" "" }}
+		{{- else }}
+			{{- default "" .Values.k2hr3.env.httpProxy }}
+		{{- end }}
+	{{- else }}
+		{{- default "" .Values.k2hr3.env.httpProxy }}
+	{{- end }}
+{{- end }}
+
+{{- define "tmp.HttpsProxyWS" -}}
+	{{- if .Values.k2hr3.env.httpsProxy }}
+		{{- if contains "http://" .Values.k2hr3.env.httpsProxy }}
+			{{- default "" .Values.k2hr3.env.httpsProxy }}
+		{{- else if contains "https://" .Values.k2hr3.env.httpsProxy }}
+			{{- default "" .Values.k2hr3.env.httpsProxy }}
+		{{- else }}
+			{{- printf "http://%s" .Values.k2hr3.env.httpsProxy }}
+		{{- end }}
+	{{- else }}
+		{{- default "" .Values.k2hr3.env.httpsProxy }}
+	{{- end }}
+{{- end }}
+
+{{- define "tmp.HttpsProxy" -}}
+	{{- if .Values.k2hr3.env.httpsProxy }}
+		{{- if contains "http://" .Values.k2hr3.env.httpsProxy }}
+			{{- default "" .Values.k2hr3.env.httpsProxy | replace "http://" "" }}
+		{{- else if contains "https://" .Values.k2hr3.env.httpsProxy }}
+			{{- default "" .Values.k2hr3.env.httpsProxy | replace "https://" "" }}
+		{{- else }}
+			{{- default "" .Values.k2hr3.env.httpsProxy }}
+		{{- end }}
+	{{- else }}
+		{{- default "" .Values.k2hr3.env.httpsProxy }}
+	{{- end }}
+{{- end }}
+
+{{-
+/*
+* PROXY Environment for K2HR3 APP
+*/
+-}}
+{{- define "env.app.httpProxy" -}}
+	{{- if contains "alpine" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- else if contains "debian" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "rocky" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "centos" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "fedora" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.app.httpsProxy" -}}
+	{{- if contains "alpine" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- else if contains "debian" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "rocky" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "centos" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "fedora" (include "images.k2hr3appImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.app.noProxy" -}}
+	{{- default "" .Values.k2hr3.env.noProxy }}
+{{- end }}
+
+{{-
+/*
+* PROXY Environment for K2HR3 API
+*/
+-}}
+{{- define "env.api.httpProxy" -}}
+	{{- if contains "alpine" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- else if contains "debian" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "rocky" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "centos" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "fedora" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.api.httpsProxy" -}}
+	{{- if contains "alpine" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- else if contains "debian" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "rocky" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "centos" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "fedora" (include "images.k2hr3apiImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.api.noProxy" -}}
+	{{- default "" .Values.k2hr3.env.noProxy }}
+{{- end }}
+
+{{-
+/*
+* PROXY Environment for K2HDKC
+*/
+-}}
+{{- define "env.dkc.httpProxy" -}}
+	{{- if contains "alpine" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- else if contains "debian" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "rocky" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "centos" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "fedora" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.dkc.httpsProxy" -}}
+	{{- if contains "alpine" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- else if contains "debian" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "rocky" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "centos" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "fedora" (include "images.k2hdkcImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.dkc.noProxy" -}}
+	{{- default "" .Values.k2hr3.env.noProxy }}
+{{- end }}
+
+{{-
+/*
+* PROXY Environment for CHMPX
+*/
+-}}
+{{- define "env.chmpx.httpProxy" -}}
+	{{- if contains "alpine" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- else if contains "debian" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "rocky" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "centos" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "fedora" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.chmpx.httpsProxy" -}}
+	{{- if contains "alpine" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- else if contains "debian" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "rocky" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "centos" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "fedora" (include "images.chmpxImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.chmpx.noProxy" -}}
+	{{- default "" .Values.k2hr3.env.noProxy }}
+{{- end }}
+
+{{-
+/*
+* PROXY Environment for Init
+*/
+-}}
+{{- define "env.init.httpProxy" -}}
+	{{- if contains "alpine" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- else if contains "debian" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "rocky" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "centos" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else if contains "fedora" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.init.httpsProxy" -}}
+	{{- if contains "alpine" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- else if contains "debian" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "ubuntu" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "rocky" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "centos" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else if contains "fedora" (include "images.initImage" .) }}
+		{{- printf "%s" (include "tmp.HttpsProxy" .) }}
+	{{- else }}
+		{{- printf "%s" (include "tmp.HttpsProxyWS" .) }}
+	{{- end }}
+{{- end }}
+{{- define "env.init.noProxy" -}}
+	{{- default "" .Values.k2hr3.env.noProxy }}
+{{- end }}
+
+/*---------------------------------------------------------
+* Set CHMPX ini file name for k2hr3 API system.
+*
+*/}}
+{{- define "k2hr3.r3apiIniFilename" -}}
+	{{- if contains "alpine" (include "images.k2hr3apiImage" .) }}
+		{{- printf "slave.ini" }}
+	{{- else if contains "debian" (include "images.k2hr3apiImage" .) }}
+		{{- printf "slave.ini" }}
+	{{- else if contains "ubuntu" (include "images.k2hr3apiImage" .) }}
+		{{- printf "slave.ini" }}
+	{{- else if contains "rocky" (include "images.k2hr3apiImage" .) }}
+		{{- printf "nss_slave.ini" }}
+	{{- else if contains "centos" (include "images.k2hr3apiImage" .) }}
+		{{- printf "slave.ini" }}
+	{{- else if contains "fedora" (include "images.k2hr3apiImage" .) }}
+		{{- printf "nss_slave.ini" }}
+	{{- else }}
+		{{- printf "slave.ini" }}
 	{{- end }}
 {{- end }}
 

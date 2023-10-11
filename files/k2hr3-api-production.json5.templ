@@ -22,6 +22,7 @@
 //--------------------------------------------------------------
 // Variable to be replaced( %%...%% )
 // 
+//	K2HR3_API_INI_FILENAME		ex) "slave.ini" or "nss_slave.ini"
 //	K2HR3_API_INTERNAL_HOST		ex) 192.168.0.1, svc-r3api.default.svc.cluster.local
 //	OIDC_ISSUER_URL				ex) https://..../dex
 //	OIDC_CLIENT_ID				ex) xxxxxxxxxxxxxxxxxxxx
@@ -37,7 +38,7 @@
 	},
 
 	'k2hdkc': {
-		'config':			'/etc/antpickax/slave.ini',
+		'config':			'/etc/antpickax/%%K2HR3_API_INI_FILENAME%%',
 		'port':				8022
 	},
 

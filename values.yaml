@@ -179,6 +179,8 @@ images:
     organization: ""
     imageName: ""
     version: ""
+  default:
+    organization: ""
 
 #---------------------------------------------------------
 # Mount Points

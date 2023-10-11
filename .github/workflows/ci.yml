@@ -67,6 +67,16 @@ jobs:
         id: install
 
       #
+      # Check values.yaml
+      #
+      - name: CheckValuesYaml
+        run: |
+          if grep -i 'CAUTIONS' values.yaml; then
+              echo "[ERROR] The values.yaml contains CAUTION information."
+              exit 1
+          fi
+
+      #
       # Check scripts by shellcheck
       #
       - name: ShellCheck
@@ -102,7 +112,7 @@ jobs:
         run: |
           REPONAME=$(echo "${GITHUB_REPOSITORY}" | sed -e 's#^.*/##g')
           cd "${GITHUB_WORKSPACE}"/..
-          helm template dummy "${REPONAME}" --set k2hr3.api.extHostname=localhost --set k2hr3.app.extHostname=localhost --set oidc.clientId=dummy-oidc-clientid --set oidc.clientSecret=dummy-oidc-secret --set oidc.cookieExpire=60 --set oidc.cookieName=id_token --set oidc.issuerUrl=https://localhost/dex --set oidc.usernameKey=dummy:username --set minikube=true | sed -e 's/^  default\.svc\.cluster\.local_CA\..*:.*$//g' -e 's/^# Source:.*$//g' > /tmp/test_template.result
+          helm template dummy "${REPONAME}" --set k2hr3.api.extHostname=localhost --set k2hr3.app.extHostname=localhost --set oidc.clientId=dummy-oidc-clientid --set oidc.clientSecret=dummy-oidc-secret --set oidc.cookieExpire=60 --set oidc.cookieName=id_token --set oidc.issuerUrl=https://localhost/dex --set oidc.usernameKey=dummy:username --set minikube=true | sed -e 's/^  default\.svc\.cluster\.local_CA\..*:.*$//g' -e 's/^# Source:.*$//g' -e 's#image:[[:space:]]*.*/#image: #g' > /tmp/test_template.result
           diff /tmp/test_template.result "${GITHUB_WORKSPACE}"/.github/workflows/helm_template.result
 
       #

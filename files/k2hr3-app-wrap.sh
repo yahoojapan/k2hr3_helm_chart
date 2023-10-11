@@ -29,12 +29,12 @@ SLEEP_SHORT=10
 #----------------------------------------------------------
 # Configuration files for K2HR3 APP
 #----------------------------------------------------------
-if [ -d /usr/local/lib/node_modules/k2hr3-app ]; then
-	K2HR3_APP_DIR="/usr/local/lib/node_modules/k2hr3-app"
-elif [ -d /usr/lib/node_modules/k2hr3-app ]; then
-	K2HR3_APP_DIR="/usr/lib/node_modules/k2hr3-app"
-else
-	K2HR3_APP_DIR="/usr/lib/node_modules/k2hr3_app"
+K2HR3_APP_DIR=$(find /usr -type d -name 'k2hr3-app' 2>/dev/null | grep node_modules)
+if [ -z "${K2HR3_APP_DIR}" ] || [ ! -d "${K2HR3_APP_DIR}" ]; then
+	K2HR3_APP_DIR=$(find /usr -type d -name 'k2hr3_app' 2>/dev/null | grep node_modules)
+	if [ -z "${K2HR3_APP_DIR}" ] || [ ! -d "${K2HR3_APP_DIR}" ]; then
+		exit 1
+	fi
 fi
 
 RUN_SCRIPT="${K2HR3_APP_DIR}/bin/run.sh"
@@ -123,15 +123,61 @@ fi
 K2HR3_CA_CERT_ORG_FILE="ca.crt"
 K2HR3_CA_CERT_ORG_FILE_PATH="${ANTPICKAX_ETC_DIR}/${K2HR3_CA_CERT_ORG_FILE}"
 
-SYSTEM_CA_CERT_DIR="/usr/local/share/ca-certificates"
-SYSTEM_CA_CERT_K2HR3_FILE="k2hr3-system-ca.crt"
-SYSTEM_CA_CERT_K2HR3_FILE_PATH="${SYSTEM_CA_CERT_DIR}/${SYSTEM_CA_CERT_K2HR3_FILE}"
-
 if [ -f "${K2HR3_CA_CERT_ORG_FILE_PATH}" ]; then
-	if ! cp "${K2HR3_CA_CERT_ORG_FILE_PATH}" "${SYSTEM_CA_CERT_K2HR3_FILE_PATH}"; then
+	#
+	# Get OS name
+	#
+	if [ ! -f /etc/os-release ]; then
+		echo "[ERROR] Not found /etc/os-release file."
 		exit 1
 	fi
-	if ! update-ca-certificates; then
+	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
+
+	if echo "${OS_NAME}" | grep -q -i -e "cent" -e "rocky" -e "fedora"; then
+		UPDATE_CA_CERT_BIN="update-ca-trust"
+		UPDATE_CA_CERT_PARAM="extract"
+		SYSTEM_CA_CERT_DIR="/etc/pki/ca-trust/source/anchors"
+
+		if ! command -v "${UPDATE_CA_CERT_BIN}" >/dev/null 2>&1; then
+			if echo "${OS_NAME}" | grep -q -i "cent"; then
+				if ! yum install -y ca-certificates; then
+					echo "[WARNING] Failed to install ca-certificates package."
+				fi
+			else
+				if ! dnf install -y ca-certificates; then
+					echo "[WARNING] Failed to install ca-certificates package."
+				fi
+			fi
+		fi
+	else
+		UPDATE_CA_CERT_BIN="update-ca-certificates"
+		UPDATE_CA_CERT_PARAM=""
+		SYSTEM_CA_CERT_DIR="/usr/local/share/ca-certificates"
+
+		if ! command -v "${UPDATE_CA_CERT_BIN}" >/dev/null 2>&1; then
+			if echo "${OS_NAME}" | grep -q -i "alpine"; then
+				if ! apk add --no-progress --no-cache ca-certificates; then
+					echo "[WARNING] Failed to install ca-certificates package."
+				fi
+			else
+				if ! apt-get install -y ca-certificates; then
+					echo "[WARNING] Failed to install ca-certificates package."
+				fi
+			fi
+		fi
+	fi
+	#
+	# Copy CA cert
+	#
+	if ! cp "${K2HR3_CA_CERT_ORG_FILE_PATH}" "${SYSTEM_CA_CERT_DIR}/${SYSTEM_CA_CERT_K2HR3_FILE}"; then
+		echo "[ERROR] ${PRGNAME} : Failed to copy CA certification."
+		exit 1
+	fi
+	#
+	# Update CA certs
+	#
+	if ! /bin/sh -c "${UPDATE_CA_CERT_BIN} ${UPDATE_CA_CERT_PARAM}"; then
+		echo "[ERROR] ${PRGNAME} : Failed to update CA certifications."
 		exit 1
 	fi
 fi
