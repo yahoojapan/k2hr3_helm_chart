@@ -92,11 +92,15 @@ spec:
           args: ["{{ .Values.mountPoint.configMap }}/k2hr3-k2hdkc-ini-update.sh"]
           env:
             - name: HTTP_PROXY
-              value: "{{ include "k2hr3.env.httpProxy" . }}"
+              value: "{{ include "env.init.httpProxy" . }}"
             - name: HTTPS_PROXY
-              value: "{{ include "k2hr3.env.httpsProxy" . }}"
+              value: "{{ include "env.init.httpsProxy" . }}"
             - name: NO_PROXY
-              value: "{{ include "k2hr3.env.noProxy" . }}"
+              value: "{{ include "env.init.noProxy" . }}"
+            - name: http_proxy
+              value: "{{ include "env.init.httpProxy" . }}"
+            - name: https_proxy
+              value: "{{ include "env.init.httpsProxy" . }}"
             - name: DEBIAN_FRONTEND
               value: "noninteractive"
             - name: CHMPX_INI_TEMPLATE_FILE
@@ -147,11 +151,15 @@ spec:
           image: {{ include "images.k2hdkcImage" . }}
           env:
             - name: HTTP_PROXY
-              value: "{{ include "k2hr3.env.httpProxy" . }}"
+              value: "{{ include "env.dkc.httpProxy" . }}"
             - name: HTTPS_PROXY
-              value: "{{ include "k2hr3.env.httpsProxy" . }}"
+              value: "{{ include "env.dkc.httpsProxy" . }}"
             - name: NO_PROXY
-              value: "{{ include "k2hr3.env.noProxy" . }}"
+              value: "{{ include "env.dkc.noProxy" . }}"
+            - name: http_proxy
+              value: "{{ include "env.dkc.httpProxy" . }}"
+            - name: https_proxy
+              value: "{{ include "env.dkc.httpsProxy" . }}"
             - name: DEBIAN_FRONTEND
               value: "noninteractive"
           volumeMounts:
@@ -170,11 +178,15 @@ spec:
           image: {{ include "images.chmpxImage" . }}
           env:
             - name: HTTP_PROXY
-              value: "{{ include "k2hr3.env.httpProxy" . }}"
+              value: "{{ include "env.chmpx.httpProxy" . }}"
             - name: HTTPS_PROXY
-              value: "{{ include "k2hr3.env.httpsProxy" . }}"
+              value: "{{ include "env.chmpx.httpsProxy" . }}"
             - name: NO_PROXY
-              value: "{{ include "k2hr3.env.noProxy" . }}"
+              value: "{{ include "env.chmpx.noProxy" . }}"
+            - name: http_proxy
+              value: "{{ include "env.chmpx.httpProxy" . }}"
+            - name: https_proxy
+              value: "{{ include "env.chmpx.httpsProxy" . }}"
             - name: DEBIAN_FRONTEND
               value: "noninteractive"
           volumeMounts:
