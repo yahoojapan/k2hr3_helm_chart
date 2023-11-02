@@ -46,6 +46,10 @@ file ready.
 -->
 # Change Log for K2HR3 Helm Chart
 
+## [1.0.15] - 2023-11-02
+### Changed
+- Changed the default version for Docker images
+
 ## [1.0.14] - 2023-10-11
 ### Changed
 - Updated for NSS library usage fix in CHMPX Fedora/RockyLinux
@@ -120,6 +124,7 @@ file ready.
 ### Changed
 - Initial Commit and publishing
 
+[1.0.15]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.14...v1.0.15
 [1.0.14]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.13...v1.0.14
 [1.0.13]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.11...v1.0.12
