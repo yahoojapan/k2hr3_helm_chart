@@ -46,6 +46,10 @@ file ready.
 -->
 # Change Log for K2HR3 Helm Chart
 
+## [1.0.16] - 2023-11-22
+### Changed
+- Updated the default version for Docker images
+
 ## [1.0.15] - 2023-11-02
 ### Changed
 - Changed the default version for Docker images
@@ -124,6 +128,7 @@ file ready.
 ### Changed
 - Initial Commit and publishing
 
+[1.0.16]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.15...v1.0.16
 [1.0.15]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.14...v1.0.15
 [1.0.14]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.13...v1.0.14
 [1.0.13]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.12...v1.0.13
