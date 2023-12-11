@@ -269,7 +269,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpapporg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpappname := "k2hr3-app" }}
-		{{- $tmpappver  := "1.0.31" }}
+		{{- $tmpappver  := "1.0.32" }}
 		{{- if .Values.images.app.organization }}
 			{{- $tmpapporg = .Values.images.app.organization }}
 		{{- end }}
