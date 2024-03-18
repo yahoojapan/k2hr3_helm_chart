@@ -369,7 +369,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpinitorg  := "" }}
 		{{- $tmpinitname := "alpine" }}
-		{{- $tmpinitver  := "3.18.4" }}
+		{{- $tmpinitver  := "3.19.1" }}
 		{{- if .Values.images.init.organization }}
 			{{- $tmpinitorg = .Values.images.init.organization }}
 		{{- end }}
