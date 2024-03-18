@@ -269,7 +269,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpapporg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpappname := "k2hr3-app" }}
-		{{- $tmpappver  := "1.0.33" }}
+		{{- $tmpappver  := "1.0.34" }}
 		{{- if .Values.images.app.organization }}
 			{{- $tmpapporg = .Values.images.app.organization }}
 		{{- end }}
@@ -294,7 +294,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpapiorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpapiname := "k2hr3-api" }}
-		{{- $tmpapiver  := "1.0.33" }}
+		{{- $tmpapiver  := "1.0.34" }}
 		{{- if .Values.images.api.organization }}
 			{{- $tmpapiorg = .Values.images.api.organization }}
 		{{- end }}
