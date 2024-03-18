@@ -46,6 +46,10 @@ file ready.
 -->
 # Change Log for K2HR3 Helm Chart
 
+## [1.0.20] - 2024-03-18
+### Changed
+- Updated the version of alpine image to 3.19.1
+
 ## [1.0.19] - 2024-03-18
 ### Changed
 - Updated the version of k2hr3-app/k2hr3-api to 1.0.34
@@ -140,6 +144,7 @@ file ready.
 ### Changed
 - Initial Commit and publishing
 
+[1.0.20]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.19...v1.0.20
 [1.0.19]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.18...v1.0.19
 [1.0.18]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.17...v1.0.18
 [1.0.17]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.16...v1.0.17
