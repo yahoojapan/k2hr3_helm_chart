@@ -2843,7 +2843,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3app-dummy
-          image: k2hr3-app:1.0.33
+          image: k2hr3-app:1.0.34
           env:
             - name: HTTP_PROXY
               value: ""
@@ -3160,7 +3160,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3api-dummy
-          image: k2hr3-api:1.0.33
+          image: k2hr3-api:1.0.34
           env:
             - name: HTTP_PROXY
               value: ""
