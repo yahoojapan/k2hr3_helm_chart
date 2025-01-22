@@ -269,7 +269,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpapporg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpappname := "k2hr3-app" }}
-		{{- $tmpappver  := "1.0.34" }}
+		{{- $tmpappver  := "1.0.39" }}
 		{{- if .Values.images.app.organization }}
 			{{- $tmpapporg = .Values.images.app.organization }}
 		{{- end }}
@@ -294,7 +294,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpapiorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpapiname := "k2hr3-api" }}
-		{{- $tmpapiver  := "1.0.34" }}
+		{{- $tmpapiver  := "1.0.38" }}
 		{{- if .Values.images.api.organization }}
 			{{- $tmpapiorg = .Values.images.api.organization }}
 		{{- end }}
@@ -319,7 +319,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpdkcorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpdkcname := "k2hdkc" }}
-		{{- $tmpdkcver  := "1.0.11" }}
+		{{- $tmpdkcver  := "1.0.14" }}
 		{{- if .Values.images.dkc.organization }}
 			{{- $tmpdkcorg = .Values.images.dkc.organization }}
 		{{- end }}
@@ -344,7 +344,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpchmpxorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpchmpxname := "chmpx" }}
-		{{- $tmpchmpxver  := "1.0.104" }}
+		{{- $tmpchmpxver  := "1.0.106" }}
 		{{- if .Values.images.chmpx.organization }}
 			{{- $tmpchmpxorg = .Values.images.chmpx.organization }}
 		{{- end }}
@@ -369,7 +369,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpinitorg  := "" }}
 		{{- $tmpinitname := "alpine" }}
-		{{- $tmpinitver  := "3.19.1" }}
+		{{- $tmpinitver  := "3.20" }}
 		{{- if .Values.images.init.organization }}
 			{{- $tmpinitorg = .Values.images.init.organization }}
 		{{- end }}
