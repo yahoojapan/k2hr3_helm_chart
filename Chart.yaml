@@ -22,7 +22,7 @@ name: k2hr3
 description: |-
   K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy Rules) is one of extended RBAC(Role Based Access Control) system.
 type: application
-appVersion: "1.0.21"
+appVersion: "1.0.22"
 kubeVersion: ">=v1.20"
 maintainers:
   - name: "Takeshi Nakatani"
@@ -45,7 +45,7 @@ keywords:
 home: https://k2hr3.antpick.ax/
 icon: https://antpick.ax/images/antpickax_circle_512x512.png
 deprecated: false
-version: 1.0.21
+version: 1.0.22
 annotations:
   catalog.cattle.io/display-name: "K2HR3 - RBAC System"
   artifacthub.io/changes: |
