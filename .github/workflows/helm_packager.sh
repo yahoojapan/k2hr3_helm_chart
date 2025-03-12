@@ -50,9 +50,16 @@ PRGNAME=$(basename "$0")
 SCRIPTDIR=$(dirname "$0")
 SCRIPTDIR=$(cd "${SCRIPTDIR}"/../.. || exit 1; pwd)
 
+#
+# Variables
+#
+OSS_UPSTREAM_ORG="yahoojapan"
 SCRIPT_CURRENT_DIR=$(pwd)
 WGET_BIN=$(command -v wget | tr -d '\n')
 
+#----------------------------------------------------------
+# Start
+#----------------------------------------------------------
 echo "[Info] Test Helm Chart packageing / publishing"
 echo ""
 
@@ -69,10 +76,10 @@ CHART_YAML_FILE="$1"
 CHANGELOG_MD_FILE="$2"
 
 if [ -z "${CHART_YAML_FILE}" ]; then
-	CHART_YAML_FILE="${SCRIPTDIR}"/Chart.yaml
+	CHART_YAML_FILE="${SCRIPTDIR}/Chart.yaml"
 fi
 if [ -z "${CHANGELOG_MD_FILE}" ]; then
-	CHANGELOG_MD_FILE="${SCRIPTDIR}"/CHANGELOG.md
+	CHANGELOG_MD_FILE="${SCRIPTDIR}/CHANGELOG.md"
 fi
 
 if [ ! -f "${CHART_YAML_FILE}" ]; then
@@ -91,14 +98,14 @@ fi
 #----------------------------------------------------------
 if [ -z "${GITHUB_REPOSITORY}" ]; then
 	#
-	# Call from not github actions
+	# Call from not github actions(use .git configuration)
 	#
 	if command -v git >/dev/null 2>&1; then
 		if [ -d "${SCRIPTDIR}/.git" ]; then
-			GITHUB_DOMAIN=$(git remote -v | grep fetch | awk '{print $2}' | sed -e 's/git@//g' -e 's#http[s]*://##g' -e 's/\.git//g' -e 's#[:|/]# #g' | awk '{print $1}' | tr -d '\n')
-			ORG_NAME=$(git remote -v | grep fetch | awk '{print $2}' | sed -e 's/git@//g' -e 's#http[s]*://##g' -e 's/\.git//g' -e 's#[:|/]# #g' | awk '{print $2}' | tr -d '\n')
-			REPO_NAME=$(git remote -v | grep fetch | awk '{print $2}' | sed -e 's/git@//g' -e 's#http[s]*://##g' -e 's/\.git//g' -e 's#[:|/]# #g' | awk '{print $3}' | tr -d '\n')
-			CURRENT_BRANCH=$(git branch | grep '\*' | awk '{print $2}' | tr -d '\n')
+			GITHUB_DOMAIN=$(git remote get-url origin | tr -d '\n')
+			ORG_NAME=$(git remote get-url origin | sed -e 's/git@//g' -e 's#http[s]*://##g' -e 's/\.git//g' -e 's#[:|/]# #g' | awk '{print $2}' | tr -d '\n')
+			REPO_NAME=$(git remote get-url origin | sed -e 's/git@//g' -e 's#http[s]*://##g' -e 's/\.git//g' -e 's#[:|/]# #g' | awk '{print $3}' | tr -d '\n')
+			CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD | tr -d '\n')
 		fi
 	fi
 	if [ -z "${GITHUB_DOMAIN}" ] || [ -z "${ORG_NAME}" ] || [ -z "${REPO_NAME}" ]; then
@@ -114,7 +121,7 @@ if [ -z "${GITHUB_REPOSITORY}" ]; then
 	fi
 else
 	#
-	# Call from not github actions
+	# Call from not github actions(GITHUB_REPOSITORY is owner/repo-name)
 	#
 	GITHUB_DOMAIN="github.com"
 	ORG_NAME=$(echo "${GITHUB_REPOSITORY}" | awk -F / '{print $1}')
@@ -124,13 +131,13 @@ else
 		echo "[Warning] Could not get repository path(organaization /repository name, etc)."
 	fi
 
-	if [ "${ORG_NAME}" = "yahoojapan" ] || { [ -n "${RUN_TAGGING_ORG}" ] && [ "${ORG_NAME}" = "${RUN_TAGGING_ORG}" ]; }; then
+	if [ "${ORG_NAME}" = "${OSS_UPSTREAM_ORG}" ] || { [ -n "${RUN_TAGGING_ORG}" ] && [ "${ORG_NAME}" = "${RUN_TAGGING_ORG}" ]; }; then
 		IS_RELEASE_TAG_PROCESS=1
 	else
 		IS_RELEASE_TAG_PROCESS=0
 	fi
 
-	CURRENT_BRANCH="${GITHUB_REF##*/}"
+	CURRENT_BRANCH=$(echo "${GITHUB_REF}" | awk -F '/' '{print $3}' | tr -d '\n')
 	if [ -n "${CURRENT_BRANCH}" ] && [ "${CURRENT_BRANCH}" = "master" ]; then
 		IS_MASTER_BRANCH=1
 	else
@@ -166,7 +173,7 @@ rm -rf "${BACKUP_CHART_YAML_FILE}"
 # $1:	Base version number
 # $2:	Traget version number
 #
-# $?:	return 0 if newer, other is 1
+# $?:	return 0(new), 1(same or old)
 #
 check_newer_version_number()
 {
@@ -184,33 +191,55 @@ check_newer_version_number()
 		return 0
 	fi
 
-	CMP_BASE_VERSION_POS1=$(echo "${CMP_BASE_VERSION}" | awk -F . '{ print $1 }')
-	CMP_BASE_VERSION_POS2=$(echo "${CMP_BASE_VERSION}" | awk -F . '{ print $2 }')
-	CMP_BASE_VERSION_POS3=$(echo "${CMP_BASE_VERSION}" | awk -F . '{ print $3 }')
-	CMP_TG_VERSION_POS1=$(echo "${CMP_TG_VERSION}" | awk -F . '{ print $1 }')
-	CMP_TG_VERSION_POS2=$(echo "${CMP_TG_VERSION}" | awk -F . '{ print $2 }')
-	CMP_TG_VERSION_POS3=$(echo "${CMP_TG_VERSION}" | awk -F . '{ print $3 }')
+	CMP_BASE_VERSION_MAJOR=$(echo "${CMP_BASE_VERSION}" | awk -F . '{ print $1 }')
+	CMP_BASE_VERSION_MINOR=$(echo "${CMP_BASE_VERSION}" | awk -F . '{ print $2 }')
+	CMP_BASE_VERSION_PATCH=$(echo "${CMP_BASE_VERSION}" | awk -F . '{ print $3 }')
+	CMP_TG_VERSION_MAJOR=$(echo "${CMP_TG_VERSION}" | awk -F . '{ print $1 }')
+	CMP_TG_VERSION_MINOR=$(echo "${CMP_TG_VERSION}" | awk -F . '{ print $2 }')
+	CMP_TG_VERSION_PATCH=$(echo "${CMP_TG_VERSION}" | awk -F . '{ print $3 }')
 
-	if [ -z "${CMP_BASE_VERSION_POS1}" ] || [ -z "${CMP_TG_VERSION_POS1}" ]; then
-		echo "[Warning] base version number(${CMP_BASE_VERSION}) or target(${CMP_TG_VERSION}) is wrong version number."
+	if [ -z "${CMP_BASE_VERSION_MAJOR}" ] && [ -z "${CMP_TG_VERSION_MAJOR}" ]; then
+		echo "[Warning] base version number(${CMP_BASE_VERSION}) and target(${CMP_TG_VERSION}) are wrong version number, so target version is not newer."
+		return 1
+	elif [ -z "${CMP_BASE_VERSION_MAJOR}" ]; then
+		echo "[Warning] base version number(${CMP_BASE_VERSION}) is wrong version number, so target version is newer."
+		return 0
+	elif [ -z "${CMP_TG_VERSION_MAJOR}" ]; then
+		echo "[Warning] target version number(${CMP_TG_VERSION}) is wrong version number, so target version is not newer."
 		return 1
 	fi
-	if [ "${CMP_BASE_VERSION_POS1}" -lt "${CMP_TG_VERSION_POS1}" ]; then
+	if [ "${CMP_BASE_VERSION_MAJOR}" -lt "${CMP_TG_VERSION_MAJOR}" ]; then
 		return 0
 	fi
-	if [ -z "${CMP_BASE_VERSION_POS2}" ] || [ -z "${CMP_TG_VERSION_POS2}" ]; then
-		echo "[Warning] base version number(${CMP_BASE_VERSION}) or target(${CMP_TG_VERSION}) is wrong version number."
-		return 1
-	fi
-	if [ "${CMP_BASE_VERSION_POS2}" -lt "${CMP_TG_VERSION_POS2}" ]; then
-		return 0
-	fi
-	if [ -z "${CMP_BASE_VERSION_POS3}" ] || [ -z "${CMP_TG_VERSION_POS3}" ]; then
-		echo "[Warning] base version number(${CMP_BASE_VERSION}) or target(${CMP_TG_VERSION}) is wrong version number."
-		return 1
-	fi
-	if [ "${CMP_BASE_VERSION_POS3}" -lt "${CMP_TG_VERSION_POS3}" ]; then
-		return 0
+	if [ "${CMP_BASE_VERSION_MAJOR}" -eq "${CMP_TG_VERSION_MAJOR}" ]; then
+		if [ -z "${CMP_BASE_VERSION_MINOR}" ] && [ -z "${CMP_TG_VERSION_MINOR}" ]; then
+			echo "[Warning] base version number(${CMP_BASE_VERSION}) and target(${CMP_TG_VERSION}) are wrong version number, so target version is not newer."
+			return 1
+		elif [ -z "${CMP_BASE_VERSION_MINOR}" ]; then
+			echo "[Warning] base version number(${CMP_BASE_VERSION}) is wrong version number, so target version is newer."
+			return 0
+		elif [ -z "${CMP_TG_VERSION_MINOR}" ]; then
+			echo "[Warning] target version number(${CMP_TG_VERSION}) is wrong version number, so target version is not newer."
+			return 1
+		fi
+		if [ "${CMP_BASE_VERSION_MINOR}" -lt "${CMP_TG_VERSION_MINOR}" ]; then
+			return 0
+		fi
+		if [ "${CMP_BASE_VERSION_MINOR}" -eq "${CMP_TG_VERSION_MINOR}" ]; then
+			if [ -z "${CMP_BASE_VERSION_PATCH}" ] && [ -z "${CMP_TG_VERSION_PATCH}" ]; then
+				echo "[Warning] base version number(${CMP_BASE_VERSION}) or target(${CMP_TG_VERSION}) are wrong version number, so target version is not newer."
+				return 1
+			elif [ -z "${CMP_BASE_VERSION_PATCH}" ]; then
+				echo "[Warning] base version number(${CMP_BASE_VERSION}) is wrong version number, so target version is newer."
+				return 0
+			elif [ -z "${CMP_TG_VERSION_PATCH}" ]; then
+				echo "[Warning] target version number(${CMP_TG_VERSION}) is wrong version number, so target version is not newer."
+				return 1
+			fi
+			if [ "${CMP_BASE_VERSION_PATCH}" -lt "${CMP_TG_VERSION_PATCH}" ]; then
+				return 0
+			fi
+		fi
 	fi
 	return 1
 }
@@ -222,14 +251,14 @@ check_newer_version_number()
 # $?:	Return 0 if found, other is 1
 #
 # Set found version to LASTEST_CHANGELOG_VERSION variables
-# Set IS_INITIAL_VERSION(1) if there is no version other
+# Set IS_INITIAL_VERSION(yes) if there is no version other
 # than the detected version
 #
 get_latest_version_in_changelog()
 {
 	_CHANGELOG_FILE="$1"
 	LASTEST_CHANGELOG_VERSION=""
-	IS_INITIAL_VERSION=0
+	IS_INITIAL_VERSION="no"
 
 	if [ ! -f "${_CHANGELOG_FILE}" ]; then
 		echo "[Error] Not found CHANGELOG.md file(${_CHANGELOG_FILE})."
@@ -242,17 +271,15 @@ get_latest_version_in_changelog()
 		# Check version line(Level 2)
 		#
 		if [ "${_IN_COMMENT}" -eq 0 ]; then
-			_FOUND_VERSION_STR=$(echo "${LINE}" | grep "^## \[[0-9]\+\.[0-9]\+\.[0-9]\+\].*$" | sed -e 's/^## \[//g' -e 's/\].*$//g')
-			# shellcheck disable=SC2181
-			if [ $? -eq 0 ] && [ -n "${_FOUND_VERSION_STR}" ]; then
+			if _FOUND_VERSION_STR=$(echo "${LINE}" | grep "^## \[[0-9]\+\.[0-9]\+\.[0-9]\+\].*$" | sed -e 's/^## \[//g' -e 's/\].*$//g') && [ -n "${_FOUND_VERSION_STR}" ]; then
 				if [ -z "${LASTEST_CHANGELOG_VERSION}" ]; then
 					LASTEST_CHANGELOG_VERSION="${_FOUND_VERSION_STR}"
-					IS_INITIAL_VERSION=1
+					IS_INITIAL_VERSION="yes"
 				else
 					if check_newer_version_number "${LASTEST_CHANGELOG_VERSION}" "${_FOUND_VERSION_STR}"; then
 						LASTEST_CHANGELOG_VERSION="${_FOUND_VERSION_STR}"
 					fi
-					IS_INITIAL_VERSION=0
+					IS_INITIAL_VERSION="no"
 				fi
 			elif echo "${LINE}" | grep -q "^.*<\!--.*$"; then
 				_IN_COMMENT=1
@@ -431,7 +458,7 @@ replace_keyword_file()
 #
 # Chart name
 #
-if ! CHART_NAME=$(grep '^[n|N]ame:' "${CHART_YAML_FILE}" | sed -e 's/[n|N]ame:[[:space:]]*//g' | tr -d '\n'); then
+if ! CHART_NAME=$(grep -i '^name:' "${CHART_YAML_FILE}" | sed -e 's/name:[[:space:]]*//gi' | tr -d '\n'); then
 	echo "[Error] Not found \"name:\" keyword in Chart yaml file(${CHART_YAML_FILE})."
 	exit 1
 fi
@@ -471,7 +498,7 @@ echo ""
 #
 # Get latest version number from Git tag
 #
-if ! LATEST_TAG_VERSION=$(git tag | grep '^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}'| sed 's/^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}//' | grep -o '[0-9]\+\([\.]\([0-9]\)\+\)\+\(.\)*$' | sed 's/-\(.\)*$//' | sort -t . -n -k 1,1 -k 2,2 -k 3,3 -k 4,4 | uniq | tail -1 | tr -d '\n'); then
+if ! LATEST_TAG_VERSION=$(git tag | grep -i '^v\(er\(sion\)\{0,1\}\)\{0,1\}' | sed -e 's/^v\(er\(sion\)\{0,1\}\)\{0,1\}//' | grep -o '[0-9]\+\([\.]\([0-9]\)\+\)\+\(.\)*$' | sed -e 's/-\(.\)*$//' | sort -t . -n -k 1,1 -k 2,2 -k 3,3 -k 4,4 | uniq | tail -1 | tr -d '\n'); then
 	echo "[Warning] Not found git tag for version(ex. \"v1.0.0\")."
 	LATEST_TAG_VERSION="0.0.0"
 fi
@@ -517,7 +544,7 @@ echo "[Info] Get changes from CHANGELOG.md"
 # Extract change contents for chart version in CHANGELOG.md
 #
 if ! extract_changelog_content "${CHART_VERSION}" "${CHANGELOG_MD_FILE}" "${TMP_CHANGELOG_CONTENT_FILE}"; then
-	echo "[Error] Something error occurred in extracting contents from CHANGELOG.md."
+	echo "[Error] Something error occurred in extracting contents from ${CHANGELOG_MD_FILE}."
 	exit 1
 fi
 echo "       => Succeed"
@@ -531,7 +558,7 @@ if ! cp -p "${CHART_YAML_FILE}" "${BACKUP_CHART_YAML_FILE}"; then
 	exit 1
 fi
 if ! replace_keyword_file "FROM_CHANGELOGMD_CONTENT" "${TMP_CHANGELOG_CONTENT_FILE}" "${CHART_YAML_FILE}"; then
-	echo "[Error] Something error occurred in replacing Chart.yaml contents from CHANGELOG.md."
+	echo "[Error] Something error occurred in replacing ${CHART_YAML_FILE} contents from ${CHANGELOG_MD_FILE}."
 	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
 fi
@@ -541,7 +568,7 @@ echo "       => Succeed"
 # Replace "version" and "appVersion" in Chart.yaml
 #
 echo "[Info] Set version/appVersion in Chart.yaml"
-if ! sed -i -e "s/version:.*$/version: ${CHART_VERSION}/g" -e "s/appVersion:.*$/appVersion: \"${CHART_VERSION}\"/g" "${CHART_YAML_FILE}"; then
+if ! sed -i -e "s/version:.*$/version: ${CHART_VERSION}/gi" -e "s/appVersion:.*$/appVersion: \"${CHART_VERSION}\"/gi" "${CHART_YAML_FILE}"; then
 	echo "[Error] Something error occurred in replacing version in Chart.yaml"
 	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
@@ -560,19 +587,30 @@ echo ""
 #
 echo "[Info] Get all asset files(pakages)"
 
-if RELEASED_TAG_LIST=$(git tag -l | grep '^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}'); then
+if RELEASED_TAG_LIST=$(git tag -l | grep -i '^v\(er\(sion\)\{0,1\}\)\{0,1\}'); then
 	cd "${TMP_GHPAGES_DIR}" || exit 1
 
 	for VERSION_TAG in ${RELEASED_TAG_LIST}; do
-		VERSION_NUMBER=$(echo "${VERSION_TAG}" | sed 's/^[v|V]\([e|E][r|R]\([s|S][i|I][o|O][n|N]\)\{0,1\}\)\{0,1\}//')
+		VERSION_NUMBER=$(echo "${VERSION_TAG}" | sed -e 's/^v\(er\(sion\)\{0,1\}\)\{0,1\}//gi')
 
 		mkdir -p "${TMP_GHPAGES_DIR}/${VERSION_TAG}"
 		cd "${TMP_GHPAGES_DIR}/${VERSION_TAG}" || exit 1
 
 		if ! "${WGET_BIN}" --quiet "https://${GITHUB_DOMAIN}/${ORG_NAME}/${REPO_NAME}/releases/download/${VERSION_TAG}/${CHART_NAME}-${VERSION_NUMBER}.tgz"; then
-			echo "[Error] Could not get Asset file(https://${GITHUB_DOMAIN}/${ORG_NAME}/${REPO_NAME}/releases/download/${VERSION_TAG}/${CHART_NAME}-${VERSION_NUMBER}.tgz) for ${VERSION_TAG} tag."
-			cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
-			exit 1
+			if [ "${ORG_NAME}" != "${OSS_UPSTREAM_ORG}" ]; then
+				#
+				# This repository is forked from yahoojapan, so retry to get from yahoojapan organaization.
+				#
+				if ! "${WGET_BIN}" --quiet "https://${GITHUB_DOMAIN}/${OSS_UPSTREAM_ORG}/${REPO_NAME}/releases/download/${VERSION_TAG}/${CHART_NAME}-${VERSION_NUMBER}.tgz"; then
+					echo "[Error] Could not get Asset file(https://${GITHUB_DOMAIN}/${OSS_UPSTREAM_ORG}/${REPO_NAME}/releases/download/${VERSION_TAG}/${CHART_NAME}-${VERSION_NUMBER}.tgz) for ${VERSION_TAG} tag."
+					cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
+					exit 1
+				fi
+			else
+				echo "[Error] Could not get Asset file(https://${GITHUB_DOMAIN}/${ORG_NAME}/${REPO_NAME}/releases/download/${VERSION_TAG}/${CHART_NAME}-${VERSION_NUMBER}.tgz) for ${VERSION_TAG} tag."
+				cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
+				exit 1
+			fi
 		fi
 	done
 	cd "${SCRIPT_CURRENT_DIR}" || exit 1
@@ -668,7 +706,7 @@ _RELEASE_NOTES_TMP_FILE="/tmp/${PRGNAME}.notes.$$"
 	echo "## Release Version ${CHART_VERSION}"
 	echo ""
 
-	if [ "${IS_INITIAL_VERSION}" -eq 1 ]; then
+	if [ "${IS_INITIAL_VERSION}" = "yes" ]; then
 		echo "### First release version"
 	else
 		echo "### Updates from ${LATEST_TAG_VERSION} to ${CHART_VERSION}"

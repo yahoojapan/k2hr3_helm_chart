@@ -269,7 +269,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpapporg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpappname := "k2hr3-app" }}
-		{{- $tmpappver  := "1.0.39" }}
+		{{- $tmpappver  := "1.0.40" }}
 		{{- if .Values.images.app.organization }}
 			{{- $tmpapporg = .Values.images.app.organization }}
 		{{- end }}
@@ -294,7 +294,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpapiorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpapiname := "k2hr3-api" }}
-		{{- $tmpapiver  := "1.0.38" }}
+		{{- $tmpapiver  := "1.0.41" }}
 		{{- if .Values.images.api.organization }}
 			{{- $tmpapiorg = .Values.images.api.organization }}
 		{{- end }}
@@ -319,7 +319,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpdkcorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpdkcname := "k2hdkc" }}
-		{{- $tmpdkcver  := "1.0.14" }}
+		{{- $tmpdkcver  := "1.0.15" }}
 		{{- if .Values.images.dkc.organization }}
 			{{- $tmpdkcorg = .Values.images.dkc.organization }}
 		{{- end }}
@@ -344,7 +344,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpchmpxorg  := default "antpickax" .Values.images.default.organization }}
 		{{- $tmpchmpxname := "chmpx" }}
-		{{- $tmpchmpxver  := "1.0.106" }}
+		{{- $tmpchmpxver  := "1.0.108" }}
 		{{- if .Values.images.chmpx.organization }}
 			{{- $tmpchmpxorg = .Values.images.chmpx.organization }}
 		{{- end }}
@@ -369,7 +369,7 @@ Key: {{ b64enc $ca.Key }}
 	{{- else }}
 		{{- $tmpinitorg  := "" }}
 		{{- $tmpinitname := "alpine" }}
-		{{- $tmpinitver  := "3.20" }}
+		{{- $tmpinitver  := "3.21" }}
 		{{- if .Values.images.init.organization }}
 			{{- $tmpinitorg = .Values.images.init.organization }}
 		{{- end }}
@@ -669,21 +669,7 @@ Key: {{ b64enc $ca.Key }}
 *
 */}}
 {{- define "k2hr3.r3apiIniFilename" -}}
-	{{- if contains "alpine" (include "images.k2hr3apiImage" .) }}
-		{{- printf "slave.ini" }}
-	{{- else if contains "debian" (include "images.k2hr3apiImage" .) }}
-		{{- printf "slave.ini" }}
-	{{- else if contains "ubuntu" (include "images.k2hr3apiImage" .) }}
-		{{- printf "slave.ini" }}
-	{{- else if contains "rocky" (include "images.k2hr3apiImage" .) }}
-		{{- printf "nss_slave.ini" }}
-	{{- else if contains "centos" (include "images.k2hr3apiImage" .) }}
-		{{- printf "slave.ini" }}
-	{{- else if contains "fedora" (include "images.k2hr3apiImage" .) }}
-		{{- printf "nss_slave.ini" }}
-	{{- else }}
-		{{- printf "slave.ini" }}
-	{{- end }}
+	{{- printf "slave.ini" }}
 {{- end }}
 
 {{-

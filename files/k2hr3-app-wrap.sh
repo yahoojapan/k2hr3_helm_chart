@@ -118,53 +118,102 @@ elif [ -f "${CONFIGMAP_LOCAL5_FILE}" ]; then
 fi
 
 #----------------------------------------------------------
+# Setup OS_NAME
+#----------------------------------------------------------
+if [ ! -f /etc/os-release ]; then
+	echo "[ERROR] Not found /etc/os-release file."
+	exit 1
+fi
+OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
+
+if echo "${OS_NAME}" | grep -q -i "centos"; then
+	echo "[ERROR] Not support ${OS_NAME}."
+	exit 1
+fi
+
+#----------------------------------------------------------
+# Utility for ubuntu
+#----------------------------------------------------------
+IS_SETUP_APT_ENV=0
+
+setup_apt_envirnment()
+{
+	if [ "${IS_SETUP_APT_ENV}" -eq 1 ]; then
+		return 0
+	fi
+	if [ -n "${HTTP_PROXY}" ] || [ -n "${http_proxy}" ] || [ -n "${HTTPS_PROXY}" ] || [ -n "${https_proxy}" ]; then
+		if [ ! -f /etc/apt/apt.conf.d/00-aptproxy.conf ] || ! grep -q -e 'Acquire::http::Proxy' -e 'Acquire::https::Proxy' /etc/apt/apt.conf.d/00-aptproxy.conf; then
+			_FOUND_HTTP_PROXY=$(if [ -n "${HTTP_PROXY}" ]; then echo "${HTTP_PROXY}"; elif [ -n "${http_proxy}" ]; then echo "${http_proxy}"; else echo ''; fi)
+			_FOUND_HTTPS_PROXY=$(if [ -n "${HTTPS_PROXY}" ]; then echo "${HTTPS_PROXY}"; elif [ -n "${https_proxy}" ]; then echo "${https_proxy}"; else echo ''; fi)
+
+			if [ -n "${_FOUND_HTTP_PROXY}" ] && echo "${_FOUND_HTTP_PROXY}" | grep -q -v '://'; then
+				_FOUND_HTTP_PROXY="http://${_FOUND_HTTP_PROXY}"
+			fi
+			if [ -n "${_FOUND_HTTPS_PROXY}" ] && echo "${_FOUND_HTTPS_PROXY}" | grep -q -v '://'; then
+				_FOUND_HTTPS_PROXY="http://${_FOUND_HTTPS_PROXY}"
+			fi
+			if [ ! -d /etc/apt/apt.conf.d ]; then
+				mkdir -p /etc/apt/apt.conf.d
+			fi
+			{
+				if [ -n "${_FOUND_HTTP_PROXY}" ]; then
+					echo "Acquire::http::Proxy \"${_FOUND_HTTP_PROXY}\";"
+				fi
+				if [ -n "${_FOUND_HTTPS_PROXY}" ]; then
+					echo "Acquire::https::Proxy \"${_FOUND_HTTPS_PROXY}\";"
+				fi
+			} >> /etc/apt/apt.conf.d/00-aptproxy.conf
+		fi
+	fi
+	DEBIAN_FRONTEND=noninteractive
+	export DEBIAN_FRONTEND
+
+	IS_SETUP_APT_ENV=1
+
+	return 0
+}
+
+#----------------------------------------------------------
 # Certificate files for K2HR3 APP
 #----------------------------------------------------------
 K2HR3_CA_CERT_ORG_FILE="ca.crt"
 K2HR3_CA_CERT_ORG_FILE_PATH="${ANTPICKAX_ETC_DIR}/${K2HR3_CA_CERT_ORG_FILE}"
 
 if [ -f "${K2HR3_CA_CERT_ORG_FILE_PATH}" ]; then
-	#
-	# Get OS name
-	#
-	if [ ! -f /etc/os-release ]; then
-		echo "[ERROR] Not found /etc/os-release file."
-		exit 1
-	fi
-	OS_NAME=$(grep '^ID[[:space:]]*=[[:space:]]*' /etc/os-release | sed -e 's|^ID[[:space:]]*=[[:space:]]*||g' -e 's|^[[:space:]]*||g' -e 's|[[:space:]]*$||g' -e 's|"||g')
-
-	if echo "${OS_NAME}" | grep -q -i -e "cent" -e "rocky" -e "fedora"; then
-		UPDATE_CA_CERT_BIN="update-ca-trust"
-		UPDATE_CA_CERT_PARAM="extract"
-		SYSTEM_CA_CERT_DIR="/etc/pki/ca-trust/source/anchors"
-
-		if ! command -v "${UPDATE_CA_CERT_BIN}" >/dev/null 2>&1; then
-			if echo "${OS_NAME}" | grep -q -i "cent"; then
-				if ! yum install -y ca-certificates; then
-					echo "[WARNING] Failed to install ca-certificates package."
-				fi
-			else
-				if ! dnf install -y ca-certificates; then
-					echo "[WARNING] Failed to install ca-certificates package."
-				fi
-			fi
-		fi
-	else
+	if echo "${OS_NAME}" | grep -q -i -e "ubuntu" -e "debian"; then
 		UPDATE_CA_CERT_BIN="update-ca-certificates"
 		UPDATE_CA_CERT_PARAM=""
 		SYSTEM_CA_CERT_DIR="/usr/local/share/ca-certificates"
 
 		if ! command -v "${UPDATE_CA_CERT_BIN}" >/dev/null 2>&1; then
-			if echo "${OS_NAME}" | grep -q -i "alpine"; then
-				if ! apk add --no-progress --no-cache ca-certificates; then
-					echo "[WARNING] Failed to install ca-certificates package."
-				fi
-			else
-				if ! apt-get install -y ca-certificates; then
-					echo "[WARNING] Failed to install ca-certificates package."
-				fi
+			setup_apt_envirnment
+			if ! apk-get update -q --no-progress >/dev/null 2>&1 || ! apt-get install -y -q ca-certificates >/dev/null 2>&1; then
+				echo "[WARNING] Failed to install ca-certificates package."
 			fi
 		fi
+	elif echo "${OS_NAME}" | grep -q -i -e "rocky" -e "fedora"; then
+		UPDATE_CA_CERT_BIN="update-ca-trust"
+		UPDATE_CA_CERT_PARAM="extract"
+		SYSTEM_CA_CERT_DIR="/etc/pki/ca-trust/source/anchors"
+
+		if ! command -v "${UPDATE_CA_CERT_BIN}" >/dev/null 2>&1; then
+			if ! dnf update -y --nobest --skip-broken -q >/dev/null 2>&1 || ! dnf install -y -q ca-certificates >/dev/null 2>&1; then
+				echo "[WARNING] Failed to install ca-certificates package."
+			fi
+		fi
+	elif echo "${OS_NAME}" | grep -q -i "alpine"; then
+		UPDATE_CA_CERT_BIN="update-ca-certificates"
+		UPDATE_CA_CERT_PARAM=""
+		SYSTEM_CA_CERT_DIR="/usr/local/share/ca-certificates"
+
+		if ! command -v "${UPDATE_CA_CERT_BIN}" >/dev/null 2>&1; then
+			if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache ca-certificates >/dev/null 2>&1; then
+				echo "[WARNING] Failed to install ca-certificates package."
+			fi
+		fi
+	else
+		echo "[ERROR] Not support ${OS_NAME}."
+		exit 1
 	fi
 	#
 	# Copy CA cert
@@ -185,24 +234,32 @@ fi
 #----------------------------------------------------------
 # Check curl command and install
 #----------------------------------------------------------
-if command -v curl >/dev/null 2>&1; then
-	CURL_COMMAND=$(command -v curl 2>/dev/null)
-else
-	if ! command -v apk >/dev/null 2>&1; then
-		echo "[ERROR] ${PRGNAME} : This container it not ALPINE, It does not support installations other than ALPINE, so exit."
+if ! CURL_COMMAND=$(command -v curl 2>/dev/null); then
+	if echo "${OS_NAME}" | grep -q -i -e "ubuntu" -e "debian"; then
+		setup_apt_envirnment
+		if ! apt-get update -y -q -q >/dev/null 2>&1 || ! apt-get install -y -q curl >/dev/null 2>&1; then
+			echo "[ERROR] ${PRGNAME} : Failed to install curl for ${OS_NAME}."
+			exit 1
+		fi
+	elif echo "${OS_NAME}" | grep -q -i -e "rocky" -e "fedora"; then
+		if ! dnf update -y --nobest --skip-broken -q >/dev/null 2>&1 || ! dnf install -y -q curl >/dev/null 2>&1; then
+			echo "[ERROR] ${PRGNAME} : Failed to install curl for ${OS_NAME}."
+			exit 1
+		fi
+	elif echo "${OS_NAME}" | grep -q -i "alpine"; then
+		if ! apk update -q --no-progress >/dev/null 2>&1 || ! apk add -q --no-progress --no-cache curl >/dev/null 2>&1; then
+			echo "[ERROR] ${PRGNAME} : Failed to install curl for ${OS_NAME}."
+			exit 1
+		fi
+	else
+		echo "[ERROR] Not support ${OS_NAME}."
 		exit 1
 	fi
-	APK_COMMAND=$(command -v apk 2>/dev/null)
 
-	if ! "${APK_COMMAND}" add -q --no-progress --no-cache curl; then
-		echo "[ERROR] ${PRGNAME} : Failed to install curl by apk(ALPINE)."
+	if ! CURL_COMMAND=$(command -v curl 2>/dev/null); then
+		echo "[ERROR] ${PRGNAME} : Could not install curl for ${OS_NAME}."
 		exit 1
 	fi
-	if ! command -v curl >/dev/null 2>&1; then
-		echo "[ERROR] ${PRGNAME} : Could not install curl by apk(ALPINE)."
-		exit 1
-	fi
-	CURL_COMMAND=$(command -v curl 2>/dev/null)
 fi
 
 #----------------------------------------------------------

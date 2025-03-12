@@ -28,7 +28,7 @@ maintainers:
   - name: "Takeshi Nakatani"
     email: ggtakec@gmail.com
   - name: "Hirotaka Wakabayashi"
-    email: hiwakaba@yahoo-corp.jp
+    email: hiwakaba@lycorp.co.jp
 sources:
   - https://github.com/yahoojapan/k2hr3_helm_chart
 keywords:
