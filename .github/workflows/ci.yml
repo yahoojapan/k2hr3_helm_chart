@@ -37,7 +37,7 @@ on:
     - cron: '0 15 * * 0'
 
 #
-# Environments for azure/setup-helm@v3
+# Environments for azure/setup-helm@v4
 #
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
