@@ -23,7 +23,7 @@ description: |-
   K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy Rules) is one of extended RBAC(Role Based Access Control) system.
 type: application
 appVersion: "1.0.22"
-kubeVersion: ">=v1.20"
+kubeVersion: ">=1.26.0"
 maintainers:
   - name: "Takeshi Nakatani"
     email: ggtakec@gmail.com
