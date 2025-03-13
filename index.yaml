@@ -3,14 +3,14 @@ entries:
   k2hr3:
   - annotations:
       artifacthub.io/changes: |
-        - Updated Chart.yaml for changing kubeVersion value
+        - Fixed a bug in helm_packager.sh
       catalog.cattle.io/display-name: K2HR3 - RBAC System
-    apiVersion: 1.0.23
-    appVersion: 1.0.23
-    created: "2025-03-13T04:57:21.633006215Z"
+    apiVersion: v2
+    appVersion: 1.0.24
+    created: "2025-03-13T08:32:21.484369867Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
-    digest: 7d88f706f0be97d25556a67314c31a14e94826a7180cc464494d380c9478aa24
+    digest: 0f796256c85abae154ac853e943109b139230635654cc2acc62647ef073d56fd
     home: https://k2hr3.antpick.ax/
     icon: https://antpick.ax/images/antpickax_circle_512x512.png
     keywords:
@@ -24,7 +24,43 @@ entries:
     - NOSQL
     - KVS
     - CHMPX
-    kubeVersion: 1.0.23
+    kubeVersion: '>=1.26.0'
+    maintainers:
+    - email: ggtakec@gmail.com
+      name: Takeshi Nakatani
+    - email: hiwakaba@lycorp.co.jp
+      name: Hirotaka Wakabayashi
+    name: k2hr3
+    sources:
+    - https://github.com/yahoojapan/k2hr3_helm_chart
+    type: application
+    urls:
+    - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.24/k2hr3-1.0.24.tgz
+    version: 1.0.24
+  - annotations:
+      artifacthub.io/changes: |
+        - Updated Chart.yaml for changing kubeVersion value
+      catalog.cattle.io/display-name: K2HR3 - RBAC System
+    apiVersion: v2
+    appVersion: 1.0.23
+    created: "2025-03-13T08:32:21.483234827Z"
+    description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
+      Rules) is one of extended RBAC(Role Based Access Control) system.
+    digest: f9bbeb0dacbbd252abf91e26a49f5e507eec010c5390403fb1518c74d0c35fca
+    home: https://k2hr3.antpick.ax/
+    icon: https://antpick.ax/images/antpickax_circle_512x512.png
+    keywords:
+    - K2HR3
+    - RBAC
+    - K2HDKC DBaaS
+    - AntPickax
+    - Helm
+    - kubernetes
+    - K2HASH
+    - NOSQL
+    - KVS
+    - CHMPX
+    kubeVersion: '>=1.26.0'
     maintainers:
     - email: ggtakec@gmail.com
       name: Takeshi Nakatani
@@ -41,12 +77,12 @@ entries:
       artifacthub.io/changes: |
         - Updated version of docker images and fixed scripts
       catalog.cattle.io/display-name: K2HR3 - RBAC System
-    apiVersion: 1.0.22
+    apiVersion: v2
     appVersion: 1.0.22
-    created: "2025-03-13T04:57:21.631844179Z"
+    created: "2025-03-13T08:32:21.48208503Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
-    digest: 3424530a76d2f687af8462a3b21c19f6af300c7b14b0020ba2a090195897b22a
+    digest: db745590ba68fe158de6e417575fd521b5b7a29c5c6a0f3f2bebb882106d72eb
     home: https://k2hr3.antpick.ax/
     icon: https://antpick.ax/images/antpickax_circle_512x512.png
     keywords:
@@ -60,7 +96,7 @@ entries:
     - NOSQL
     - KVS
     - CHMPX
-    kubeVersion: 1.0.22
+    kubeVersion: '>=1.26.0'
     maintainers:
     - email: ggtakec@gmail.com
       name: Takeshi Nakatani
@@ -79,7 +115,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.21
-    created: "2025-03-13T04:57:21.630616801Z"
+    created: "2025-03-13T08:32:21.480514864Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: eb087a3fd00c5946ea6fb665238e814e875fa847b53dabedf193bb74480ea773
@@ -115,7 +151,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.20
-    created: "2025-03-13T04:57:21.628506378Z"
+    created: "2025-03-13T08:32:21.478864111Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 96a5a08350548706ae3835032e5a18587fd1c2f911c2e6cddebe2cfdb0aa9486
@@ -151,7 +187,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.19
-    created: "2025-03-13T04:57:21.626353996Z"
+    created: "2025-03-13T08:32:21.476715719Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: e2dd8b3ef983db5b4f5e593f1900ad4ae0d1aae53e8df7f7dc5d91ba08b91a7f
@@ -187,7 +223,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.18
-    created: "2025-03-13T04:57:21.625145764Z"
+    created: "2025-03-13T08:32:21.475502794Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 88f83bf0affff49ebe304fdb6dd1c9134271832ad20f3b09cedf2090d01062dd
@@ -223,7 +259,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.17
-    created: "2025-03-13T04:57:21.6231853Z"
+    created: "2025-03-13T08:32:21.473391386Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 5f3b8ac9c3c2dd7f2b7833b83425ffb224660ace3e7b727d653b82673b80a85f
@@ -259,7 +295,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.16
-    created: "2025-03-13T04:57:21.622005501Z"
+    created: "2025-03-13T08:32:21.472201153Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 61131e39ac1aecf2aa0567de58d0f2148acdfc94868ca41a1483d1f8fadba88f
@@ -295,7 +331,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.15
-    created: "2025-03-13T04:57:21.620787861Z"
+    created: "2025-03-13T08:32:21.470996703Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: fb0c29ffcf738955b7c3f7703604b04519343ae7284c849807d4c2937fcf3cd1
@@ -331,7 +367,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.14
-    created: "2025-03-13T04:57:21.619256477Z"
+    created: "2025-03-13T08:32:21.469716613Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 369f8abcce3088451bed5aff20c7e939a126d017ef778c16e429f0a2004688d3
@@ -367,7 +403,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.13
-    created: "2025-03-13T04:57:21.617136518Z"
+    created: "2025-03-13T08:32:21.467753066Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: b9c8ffb0bedc6a0f3081934f14328c230ade9dc0e339d229539ab809af8825d5
@@ -403,7 +439,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.12
-    created: "2025-03-13T04:57:21.616020117Z"
+    created: "2025-03-13T08:32:21.466649896Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: aa23acfebc90c3c245c7c5949ed71e34b512dab1e27a22dbcddb153614b23244
@@ -439,7 +475,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.11
-    created: "2025-03-13T04:57:21.61486801Z"
+    created: "2025-03-13T08:32:21.465514206Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 659cbb2e3a3081927cf8845299aca9a32c014550f86c0bcf09826f8c1db2ce32
@@ -477,7 +513,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.10
-    created: "2025-03-13T04:57:21.61353738Z"
+    created: "2025-03-13T08:32:21.464361092Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: b781d509c6d3158a47a2d770c834cdacbe196d32a31973366d12cd17a7e862aa
@@ -513,7 +549,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.9
-    created: "2025-03-13T04:57:21.641470707Z"
+    created: "2025-03-13T08:32:21.493388708Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 126f40172756c38cc2647bd6986ede2545a5ca50c1924deeee952cae803df3ee
@@ -549,7 +585,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.8
-    created: "2025-03-13T04:57:21.640382328Z"
+    created: "2025-03-13T08:32:21.491553897Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: c4717923b158993e0b9871df0e0ca3433044e55d0a99b69dd0dc531d84d58a56
@@ -585,7 +621,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.7
-    created: "2025-03-13T04:57:21.639264164Z"
+    created: "2025-03-13T08:32:21.490426572Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: dd4e36f46ff8e9d1ff44e27156a7976c48f97749bd87726d148b029d7358dc05
@@ -621,7 +657,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.6
-    created: "2025-03-13T04:57:21.638184101Z"
+    created: "2025-03-13T08:32:21.489355762Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: f515f1ed06666116bb6410ef04836d012bc0662598c4ba37521c6c1314b0d323
@@ -657,7 +693,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.5
-    created: "2025-03-13T04:57:21.637081336Z"
+    created: "2025-03-13T08:32:21.488300181Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 247b3a0c73434497840e41da453c26964d14cef02ccd027f5df9fc3ebb68a360
@@ -693,7 +729,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.4
-    created: "2025-03-13T04:57:21.635373127Z"
+    created: "2025-03-13T08:32:21.487220915Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 4f1f5b472f9ddc0d1b82a7e7c0a2f94be9d16665fe12da62755bf23db174de46
@@ -741,7 +777,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.3
-    created: "2025-03-13T04:57:21.634093501Z"
+    created: "2025-03-13T08:32:21.485451416Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: cdd79371946ff579d84602ae3223718c94f5e7d0426c1e4c6a49f6551b44d22f
@@ -777,7 +813,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-03-13T04:57:21.627330767Z"
+    created: "2025-03-13T08:32:21.477694728Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: bbae5d89f94d4473a92377f96dee3c9018c0f67ac615e26d22489584da7b1c7b
@@ -813,7 +849,7 @@ entries:
       catalog.cattle.io/display-name: K2HR3 - RBAC System
     apiVersion: v2
     appVersion: 1.0.1
-    created: "2025-03-13T04:57:21.611948619Z"
+    created: "2025-03-13T08:32:21.462433738Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: 7ceca5fccb49be14784216538006a80d570700dd7a87a53c9c9285c1e47b0121
@@ -848,7 +884,7 @@ entries:
         - Initial Commit and publishing
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-03-13T04:57:21.609476949Z"
+    created: "2025-03-13T08:32:21.461013987Z"
     description: K2HR3 Helm Chart - K2HR3(K2Hdkc based Resource and Roles and policy
       Rules) is one of extended RBAC(Role Based Access Control) system.
     digest: b135439c222d58c97a8e179417aacadd15dc072a55ad72520b72db2daf8052f7
@@ -878,4 +914,4 @@ entries:
     urls:
     - https://github.com/yahoojapan/k2hr3_helm_chart/releases/download/v1.0.0/k2hr3-1.0.0.tgz
     version: 1.0.0
-generated: "2025-03-13T04:57:21.607867219Z"
+generated: "2025-03-13T08:32:21.4595165Z"
