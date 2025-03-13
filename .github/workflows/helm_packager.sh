@@ -568,7 +568,7 @@ echo "       => Succeed"
 # Replace "version" and "appVersion" in Chart.yaml
 #
 echo "[Info] Set version/appVersion in Chart.yaml"
-if ! sed -i -e "s/version:.*$/version: ${CHART_VERSION}/gi" -e "s/appVersion:.*$/appVersion: \"${CHART_VERSION}\"/gi" "${CHART_YAML_FILE}"; then
+if ! sed -i -e "s/^version:.*$/version: ${CHART_VERSION}/gi" -e "s/^appVersion:.*$/appVersion: \"${CHART_VERSION}\"/gi" "${CHART_YAML_FILE}"; then
 	echo "[Error] Something error occurred in replacing version in Chart.yaml"
 	cp -p "${BACKUP_CHART_YAML_FILE}" "${CHART_YAML_FILE}"
 	exit 1
