@@ -46,6 +46,10 @@ file ready.
 -->
 # Change Log for K2HR3 Helm Chart
 
+## [1.0.23] - 2025-03-13
+### Changed
+- Updated Chart.yaml for changing kubeVersion value
+
 ## [1.0.22] - 2025-03-12
 ### Changed
 - Updated version of docker images and fixed scripts
@@ -152,6 +156,7 @@ file ready.
 ### Changed
 - Initial Commit and publishing
 
+[1.0.23]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.22...v1.0.23
 [1.0.22]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.21...v1.0.22
 [1.0.21]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.20...v1.0.21
 [1.0.20]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.19...v1.0.20
