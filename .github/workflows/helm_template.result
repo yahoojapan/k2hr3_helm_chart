@@ -2678,7 +2678,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3app-dummy
-          image: k2hr3-app:1.0.40
+          image: k2hr3-app:1.0.41
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2827,7 +2827,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3dkc-dummy
-          image: k2hdkc:1.0.15
+          image: k2hdkc:1.0.16
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2854,7 +2854,7 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-serverproc-wrap.sh", "server"]
         - name: sidecar-r3dkc-dummy
-          image: chmpx:1.0.108
+          image: chmpx:1.0.109
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2995,7 +2995,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3api-dummy
-          image: k2hr3-api:1.0.41
+          image: k2hr3-api:1.0.42
           env:
             - name: HTTP_PROXY
               value: ""
@@ -3024,7 +3024,7 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-api-wrap.sh"]
         - name: sidecar-r3api-dummy
-          image: chmpx:1.0.108
+          image: chmpx:1.0.109
           env:
             - name: HTTP_PROXY
               value: ""
