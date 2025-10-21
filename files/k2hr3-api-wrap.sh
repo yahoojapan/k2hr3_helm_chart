@@ -201,7 +201,7 @@ ALL_HOST_NAMES=$(grep 'NAME[[:space:]]*=' "${INI_FILE_PATH}" 2>/dev/null | sed '
 # Sleep time ajusting
 #
 for _ONE_NAME in $(echo "${ALL_HOST_NAMES}" | sort); do
-	if echo "${_ONE_NAME}" | grep -q "$(hostname)"; then
+	if echo "${_ONE_NAME}" | grep -q "$(hostname -f)"; then
 		break
 	fi
 	SLEEP_GAP=$((SLEEP_GAP + 2))

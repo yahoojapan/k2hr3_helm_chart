@@ -382,7 +382,7 @@ data:
     # Sleep time ajusting
     #
     for _ONE_NAME in $(echo "${ALL_HOST_NAMES}" | sort); do
-    	if echo "${_ONE_NAME}" | grep -q "$(hostname)"; then
+    	if echo "${_ONE_NAME}" | grep -q "$(hostname -f)"; then
     		break
     	fi
     	SLEEP_GAP=$((SLEEP_GAP + 2))
@@ -960,7 +960,7 @@ data:
     # Sleep time ajusting
     #
     for _ONE_NAME in $(echo "${ALL_HOST_NAMES}" | sort); do
-    	if echo "${_ONE_NAME}" | grep -q "$(hostname)"; then
+    	if echo "${_ONE_NAME}" | grep -q "$(hostname -f)"; then
     		break
     	fi
     	SLEEP_GAP=$((SLEEP_GAP + 2))
@@ -2641,7 +2641,7 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-r3app-dummy
-          image: alpine:3.21
+          image: alpine:3.22
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-app-init.sh"]
           env:
@@ -2766,7 +2766,7 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-r3dkc-dummy
-          image: alpine:3.21
+          image: alpine:3.22
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-ini-update.sh"]
           env:
@@ -2827,7 +2827,7 @@ spec:
               readOnly: true
       containers:
         - name: container-r3dkc-dummy
-          image: k2hdkc:1.0.16
+          image: k2hdkc:1.0.17
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2854,7 +2854,7 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-serverproc-wrap.sh", "server"]
         - name: sidecar-r3dkc-dummy
-          image: chmpx:1.0.109
+          image: chmpx:1.0.110
           env:
             - name: HTTP_PROXY
               value: ""
@@ -2930,7 +2930,7 @@ spec:
       shareProcessNamespace: true
       initContainers:
         - name: init-r3api-dummy
-          image: alpine:3.21
+          image: alpine:3.22
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-k2hdkc-ini-update.sh"]
           env:
@@ -3024,7 +3024,7 @@ spec:
           command: ["/bin/sh"]
           args: ["/configmap/k2hr3-api-wrap.sh"]
         - name: sidecar-r3api-dummy
-          image: chmpx:1.0.109
+          image: chmpx:1.0.110
           env:
             - name: HTTP_PROXY
               value: ""
@@ -3068,7 +3068,7 @@ spec:
             path: k2hr3-check.sh
   containers:
     - name: checker
-      image: alpine:3.21
+      image: alpine:3.22
       env:
       - name: K2HR3_NAMESPACE
         valueFrom:
