@@ -46,6 +46,10 @@ file ready.
 -->
 # Change Log for K2HR3 Helm Chart
 
+## [1.0.26] - 2025-10-21
+### Changed
+- Changed base images(OS version) and Updated mail addresses
+
 ## [1.0.25] - 2025-03-27
 ### Changed
 - Updated dependency packages and fixed the issue
@@ -164,6 +168,7 @@ file ready.
 ### Changed
 - Initial Commit and publishing
 
+[1.0.26]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.25...v1.0.26
 [1.0.25]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.24...v1.0.25
 [1.0.24]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.23...v1.0.24
 [1.0.23]: https://github.com/yahoojapan/k2hr3_helm_chart/compare/v1.0.22...v1.0.23
